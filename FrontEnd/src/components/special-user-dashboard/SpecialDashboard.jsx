@@ -5,7 +5,7 @@ import RecentLetters from '../common-dashboard/RecentLetters';
 import Notifications from '../common-dashboard/Notifications';
 import NewLetterModal from '../common-dashboard/NewLetterModal';
 import Footer from '../common-dashboard/Footer';
-import Sidebar from './Sidebar'; // Specific sidebar for special dashboard
+import Sidebar from './Sidebar';
 import '../../styles/common-dashboard/Dashboard.css';
 import '../../styles/common-dashboard/ProgressTracker.css';
 import '../../styles/common-dashboard/RecentLetters.css';
@@ -48,37 +48,49 @@ const MessageModal = ({ show, title, message, onConfirm, onCancel }) => {
   );
 };
 
-const stages = [
-  "Submitted",
-  "Checked by Staff",
-  "Lecturer Approval",
-  "HOD",
-  "Dean",
-  "VC"
+// --- APPROVAL STAGE DEFINITIONS (MUST BE CONSISTENT ACROSS ALL RELEVANT FILES) ---
+const approvalStages = [
+  { name: "Submitted", approverRole: null },
+  { name: "Pending Staff Approval", approverRole: "Staff" },
+  { name: "Pending Lecturer Approval", approverRole: "Lecturer" },
+  { name: "Pending HOD Approval", approverRole: "HOD" },
+  { name: "Pending Dean Approval", approverRole: "Dean" },
+  { name: "Pending VC Approval", approverRole: "VC" },
+  { name: "Approved", approverRole: null },
+  { name: "Rejected", approverRole: null }
 ];
 
+// Maps submitter roles to the initial stage index for a new letter.
+const submitterRoleToInitialStageIndex = {
+  "Student": 0,
+  "Staff": 2,      // <--- FIXED: Staff submits, skips "Submitted" and "Pending Staff Approval", starts at "Pending Lecturer Approval" (index 2)
+  "Lecturer": 3,
+  "HOD": 4,
+  "Dean": 5,
+  "VC": 6
+};
+// --- END APPROVAL STAGE DEFINITIONS ---
+
+
 function SpecialDashboard() {
-  const { user } = useContext(AuthContext); // AuthContext එකෙන් user object එක ලබා ගන්න
+  const { user } = useContext(AuthContext);
 
   const [currentStage, setCurrentStage] = useState(0);
   const [letters, setLetters] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
 
-  // State for general message modal
   const [messageModal, setMessageModal] = useState({ show: false, title: '', message: '' });
 
-  // Function to close the message modal
   const closeMessageModal = () => {
     setMessageModal({ show: false, title: '', message: '' });
   };
 
-  // Fetch letters for the current user from Node.js backend
   const fetchLetters = async () => {
-    if (!user || !user._id) return; // <-- user._id භාවිත කරන්න
+    if (!user || !user._id) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/letters/byUser/${user._id}`); // <-- user._id භාවිත කරන්න
+      const response = await fetch(`http://localhost:5000/api/letters/byUser/${user._id}`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -89,7 +101,7 @@ function SpecialDashboard() {
         const latestLetter = data.reduce((prev, current) => 
           (prev.currentStageIndex > current.currentStageIndex) ? prev : current
         );
-        setCurrentStage(Math.min(latestLetter.currentStageIndex || 0, stages.length - 1));
+        setCurrentStage(Math.min(latestLetter.currentStageIndex || 0, approvalStages.length - 1));
       } else {
         setCurrentStage(0);
       }
@@ -100,12 +112,11 @@ function SpecialDashboard() {
     }
   };
 
-  // Fetch notifications for the current user from Node.js backend
   const fetchNotifications = async () => {
-    if (!user || !user._id) return; // <-- user._id භාවිත කරන්න
+    if (!user || !user._id) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/notifications/byUser/${user._id}`); // <-- user._id භාවිත කරන්න
+      const response = await fetch(`http://localhost:5000/api/notifications/byUser/${user._id}`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -118,26 +129,31 @@ function SpecialDashboard() {
   };
 
   useEffect(() => {
-    if (user && user._id) { // <-- user._id භාවිත කරන්න
+    if (user && user._id) {
       fetchLetters();
       fetchNotifications();
     }
   }, [user]);
 
-  // Handle new letter submit
   const addLetter = async (newLetterData) => {
-    if (!user || !user._id || !user.name) { // <-- user._id භාවිත කරන්න
-      setMessageModal({ show: true, title: 'Error', message: 'User not authenticated. Please log in again.', onConfirm: closeMessageModal });
+    if (!user || !user._id || !user.name || !user.role) {
+      setMessageModal({ show: true, title: 'Error', message: 'User not authenticated or role missing. Please log in again.', onConfirm: closeMessageModal });
       return;
     }
+
+    const initialStageIndex = submitterRoleToInitialStageIndex[user.role] !== undefined
+                               ? submitterRoleToInitialStageIndex[user.role]
+                               : 0;
+    const initialStatus = approvalStages[initialStageIndex].name;
 
     try {
       const letterToSend = {
         ...newLetterData,
-        studentId: user._id, // <-- user._id භාවිත කරන්න
+        studentId: user._id,
         student: user.name,
-        status: 'Submitted',
-        currentStageIndex: 0,
+        submitterRole: user.role, // <--- Send submitter's role to backend
+        status: initialStatus,
+        currentStageIndex: initialStageIndex,
         submittedDate: new Date().toISOString().slice(0, 10)
       };
 
@@ -162,8 +178,8 @@ function SpecialDashboard() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          userId: user._id, // <-- user._id භාවිත කරන්න
-          message: `New letter request submitted: ${newLetterData.type}`,
+          userId: user._id,
+          message: `New letter request submitted: ${newLetterData.type} and sent for ${approvalStages[initialStageIndex + 1]?.name || 'final approval'}.`,
           type: 'info',
           timestamp: new Date().toISOString()
         }),
@@ -189,7 +205,7 @@ function SpecialDashboard() {
       <Sidebar />
       <main className="main-content">
         <section className="top-widgets">
-          <ProgressTracker stages={stages} currentStage={currentStage} />
+          {/* <ProgressTracker stages={approvalStages.map(s => s.name)} currentStage={currentStage} /> */}
           <Notifications notifications={notifications} />
         </section>
 

@@ -36,6 +36,29 @@ const MessageModal = ({ show, title, message, onConfirm, onCancel }) => {
   );
 };
 
+// --- NEW STAGE DEFINITIONS FOR SEQUENTIAL APPROVAL ---
+const approvalStages = [
+  { name: "Submitted", approverRole: null },              // Index 0 (Initial state when submitted by a student)
+  { name: "Pending Staff Approval", approverRole: "Staff" },      // Index 1 (Next stage after student submission, or initial for Staff submitter if they approve their own?)
+  { name: "Pending Lecturer Approval", approverRole: "Lecturer" }, // Index 2
+  { name: "Pending HOD Approval", approverRole: "HOD" },    // Index 3
+  { name: "Pending Dean Approval", approverRole: "Dean" },    // Index 4
+  { name: "Pending VC Approval", approverRole: "VC" },      // Index 5
+  { name: "Approved", approverRole: null },               // Index 6 (Final Approved state)
+  { name: "Rejected", approverRole: null }                // Index 7 (Final Rejected state)
+];
+
+// අනුමත කරන්නෙකුගේ role එක අනුව, ඔහුට පෙනිය යුතු ලිපි වල තත්වය (status) තීරණය කරයි.
+const approverRoleToStageIndex = {
+    "Staff": 1,
+    "Lecturer": 2,
+    "HOD": 3,
+    "Dean": 4,
+    "VC": 5
+};
+// --- END NEW STAGE DEFINITIONS ---
+
+
 function PendingApprovals() {
   const { user } = useContext(AuthContext);
 
@@ -52,21 +75,22 @@ function PendingApprovals() {
     setMessageModal({ show: false, title: '', message: '' });
   };
 
-  const stages = [
-    "Submitted",
-    "Checked by Staff",
-    "Lecturer Approval",
-    "HOD",
-    "Dean",
-    "VC"
-  ];
-
   // Fetch letters for approval from Node.js backend
   const fetchPendingRequests = async () => {
     if (!user || !user.role) return;
 
+    // Determine which stage this user's role is responsible for
+    const targetStageIndex = approverRoleToStageIndex[user.role];
+    if (targetStageIndex === undefined) {
+      // If user's role doesn't have an approval stage, they shouldn't see anything here.
+      setRequests([]);
+      return;
+    }
+    const targetStatusName = approvalStages[targetStageIndex].name;
+
     try {
-      const response = await fetch(`http://localhost:5000/api/letters/pendingApprovals/${user.role}`);
+      // Backend API should filter by status (which maps to the stage name)
+      const response = await fetch(`http://localhost:5000/api/letters/pendingApprovals/${targetStatusName}`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -99,16 +123,17 @@ function PendingApprovals() {
         return;
       }
 
-      let newStatus = currentRequest.status;
-      let nextStageIndex = currentRequest.currentStageIndex || 0;
+      let newStatus;
+      let nextStageIndex;
 
       if (action === 'approve') {
-        nextStageIndex++;
-        if (nextStageIndex < stages.length) {
-          newStatus = stages[nextStageIndex];
+        nextStageIndex = currentRequest.currentStageIndex + 1;
+        if (nextStageIndex < approvalStages.length - 2) { // -2 because last two are 'Approved' and 'Rejected'
+          newStatus = approvalStages[nextStageIndex].name;
           setMessageModal({ show: true, title: 'Success', message: `Request for ${currentRequest.student} approved. Moving to "${newStatus}" stage.`, onConfirm: closeMessageModal });
         } else {
-          newStatus = 'Approved';
+          newStatus = approvalStages[approvalStages.findIndex(s => s.name === "Approved")].name; // Final Approved state
+          nextStageIndex = approvalStages.findIndex(s => s.name === "Approved");
           setMessageModal({ show: true, title: 'Success', message: `Request for ${currentRequest.student} finally approved.`, onConfirm: closeMessageModal });
         }
       } else if (action === 'reject') {
@@ -116,7 +141,8 @@ function PendingApprovals() {
           setMessageModal({ show: true, title: 'Input Required', message: 'Please provide a reason for rejection.', onConfirm: closeMessageModal });
           return;
         }
-        newStatus = 'Rejected';
+        newStatus = approvalStages[approvalStages.findIndex(s => s.name === "Rejected")].name; // Final Rejected state
+        nextStageIndex = approvalStages.findIndex(s => s.name === "Rejected");
         setMessageModal({ show: true, title: 'Rejection', message: `Request for ${currentRequest.student} rejected. Reason: ${reason}`, onConfirm: closeMessageModal });
       }
 
@@ -124,6 +150,7 @@ function PendingApprovals() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          // 'Authorization': `Bearer ${user.token}` // If letters API is protected
         },
         body: JSON.stringify({
           status: newStatus,
@@ -152,7 +179,6 @@ function PendingApprovals() {
     }
   };
 
-  // Open confirmation modal
   const confirmAndHandle = (req, action) => {
     setSelectedRequest(req);
     setConfirmAction(action);
@@ -160,6 +186,11 @@ function PendingApprovals() {
 
   if (!user) {
     return <p>Loading user data...</p>;
+  }
+
+  const isApproverRole = Object.keys(approverRoleToStageIndex).includes(user.role); // Check if user's role is in the approver map
+  if (!isApproverRole && user.role !== "Admin") { // Allow Admin to see all, or restrict to specific approver stages
+    return <p style={{textAlign: 'center', marginTop: '50px', fontSize: '1.5rem', color: 'red'}}>Access Denied! You do not have permission to view pending approvals.</p>;
   }
 
   return (
@@ -198,8 +229,10 @@ function PendingApprovals() {
                       </span>
                     </td>
                     <td>
-                      {/* Check if the current user's role matches the current stage for approval */}
-                      {(request.status === stages[request.currentStageIndex] && request.status !== 'Approved' && request.status !== 'Rejected' && stages[request.currentStageIndex].includes(user.role)) ? (
+                      {/* Show buttons ONLY if the letter's status is the one current user's role is responsible for */}
+                      {request.status === approvalStages[approverRoleToStageIndex[user.role]]?.name &&
+                       request.status !== approvalStages[approvalStages.findIndex(s => s.name === "Approved")]?.name &&
+                       request.status !== approvalStages[approvalStages.findIndex(s => s.name === "Rejected")]?.name ? (
                            <>
                              <button onClick={() => confirmAndHandle(request, 'approve')} className="approve-btn">Approve</button>
                              <button onClick={() => confirmAndHandle(request, 'reject')} className="reject-btn">Reject</button>

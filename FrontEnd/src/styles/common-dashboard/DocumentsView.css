@@ -1,0 +1,98 @@
+.documents-view {
+  padding: 20px;
+  max-width: 1200px; /* Adjust max-width as needed */
+  margin: 0 auto;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+}
+
+.documents-view h1, .documents-view h3 {
+  color: #1a3e72; /* Dark blue heading */
+  margin-bottom: 20px;
+}
+
+.document-container {
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+}
+
+.document-info p {
+  margin-bottom: 10px;
+  line-height: 1.6;
+}
+
+.document-info strong {
+  color: #1a3e72;
+}
+
+.progress-section {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.history-section {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.history-table {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.history-header, .history-row {
+  display: grid;
+  grid-template-columns: 0.5fr 1.5fr 1fr 1fr 2fr; /* Adjusted for history details */
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+  align-items: center;
+}
+
+.history-header {
+  background-color: #d8e5f8;
+  color: #1a3e72;
+  font-weight: 600;
+}
+
+.history-row:last-child {
+  border-bottom: none;
+}
+
+.error-message {
+  color: red;
+  font-weight: bold;
+}
+
+/* Add some padding to the header and footer if they are sticky */
+body {
+  margin: 0;
+  padding: 0;
+}
+.header, .footer {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Optional: Make .documents-view responsive */
+@media (max-width: 768px) {
+  .documents-view {
+    padding: 15px;
+  }
+  .document-container {
+    padding: 20px;
+  }
+  .history-header, .history-row {
+    grid-template-columns: 1fr; /* Stack columns on small screens */
+    gap: 5px;
+  }
+  .history-header div, .history-row div {
+    padding: 5px 0;
+  }
+}
