@@ -1,0 +1,30 @@
+.notifications-panel {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    flex: 1;
+    box-shadow: 0 0 6px rgb(0 0 0 / 0.1);
+    max-height: 280px;
+    overflow-y: auto;
+    min-width: 260px;
+  }
+  
+  .notifications-panel h2 {
+    margin-bottom: 15px;
+    color: #1a3e72;
+  }
+  
+  .notifications-panel ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .notification-item {
+    padding: 12px 15px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  

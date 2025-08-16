@@ -1,0 +1,63 @@
+.admin-dashboard {
+  padding: 20px;
+}
+
+.admin-dashboard section {
+  margin-bottom: 30px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 10px;
+}
+
+table th, table td {
+  padding: 10px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+button {
+  margin-right: 8px;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:first-of-type {
+  background-color: #4caf50;
+  color: white;
+}
+
+button:nth-of-type(2) {
+  background-color: #f44336;
+  color: white;
+}
+
+.modal-backdrop {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  padding: 20px 30px;
+  border-radius: 8px;
+  width: 400px;
+  max-width: 90%;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  text-align: center;
+}
+
+.modal-buttons {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-around;
+}

@@ -1,0 +1,42 @@
+.recent-letters {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    flex: 2;
+    box-shadow: 0 0 6px rgb(0 0 0 / 0.1);
+    overflow-x: auto;
+    min-width: 320px;
+  }
+  
+  .recent-letters h2 {
+    margin-bottom: 15px;
+    color: #1a3e72;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  th, td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #e0e0e0;
+    text-align: left;
+    font-weight: 500;
+  }
+  
+  th {
+    background-color: #d8e5f8;
+    color: #1a3e72;
+    font-weight: 700;
+  }
+  
+  .status-badge {
+    padding: 5px 12px;
+    border-radius: 20px;
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: inline-block;
+  }
+  

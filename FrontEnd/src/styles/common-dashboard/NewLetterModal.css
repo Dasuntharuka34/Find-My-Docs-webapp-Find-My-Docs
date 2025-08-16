@@ -1,0 +1,90 @@
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(30, 30, 30, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .modal {
+    background-color: #fff;
+    border-radius: 8px;
+    width: 400px;
+    max-width: 90%;
+    padding: 20px;
+    box-shadow: 0 0 12px rgb(0 0 0 / 0.3);
+    font-size: 1rem;
+    color: #1a3e72;
+  }
+  
+  .modal h2 {
+    margin-bottom: 20px;
+    font-weight: 700;
+  }
+  
+  .modal label {
+    display: block;
+    margin-bottom: 15px;
+    font-weight: 600;
+  }
+  
+  .modal select,
+  .modal input[type="date"],
+  .modal textarea,
+  .modal input[type="file"] {
+    width: 100%;
+    padding: 7px 10px;
+    margin-top: 5px;
+    border-radius: 5px;
+    border: 1.5px solid #aac4f8;
+    font-size: 1rem;
+    color: #333;
+    resize: vertical;
+    font-family: inherit;
+  }
+  
+  .modal textarea {
+    font-family: inherit;
+  }
+  
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+  
+  .submit-btn {
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 6px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .submit-btn:hover {
+    background-color: #3a9d3a;
+  }
+  
+  .cancel-btn {
+    background-color: #d9534f;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 6px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .cancel-btn:hover {
+    background-color: #b93636;
+  }
+  

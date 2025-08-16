@@ -1,0 +1,85 @@
+.progress-tracker {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 6px rgb(0 0 0 / 0.1);
+  flex: 1;
+  min-width: 320px;
+  overflow-x: auto;
+}
+
+.progress-tracker h2 {
+  margin-bottom: 15px;
+  color: #1a3e72;
+}
+
+.steps-container {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  position: relative;
+  gap: 20px;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  flex: 1;
+  min-width: 100px;
+  z-index: 1;
+}
+
+.step-circle {
+  height: 32px;
+  width: 32px;
+  border-radius: 50%;
+  background-color: #c5d1f0;
+  color: #5a73b7;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+  z-index: 2;
+}
+
+.step-label {
+  margin-top: 10px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #1748cf;
+  word-wrap: break-word;
+  max-width: 100px;
+}
+
+.step-line {
+  position: absolute;
+  height: 4px;
+  background-color: #bcc4dc;
+  top: 16px;
+  left: 50%;
+  width: 100%;
+  z-index: 0;
+}
+
+.step:last-child .step-line {
+  display: none;
+}
+
+.step.completed .step-circle,
+.step.active .step-circle {
+  background-color: #279c4c; /* green */
+  color: white;
+}
+
+.step.completed .step-line {
+  background-color: #4caf50;
+}
+
+.step.active .step-label {
+  font-weight: 700;
+  color: #2e7d32;
+}

@@ -1,0 +1,21 @@
+.footer {
+    background-color: #d8e5f8;
+    padding: 12px 15px;
+    color: #1a3e72;
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  
+  .footer-link {
+    color: #1a3e72;
+    text-decoration: none;
+  }
+  
+  .footer-link:hover {
+    text-decoration: underline;
+  }
+  
