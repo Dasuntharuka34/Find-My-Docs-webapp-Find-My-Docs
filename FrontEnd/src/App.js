@@ -6,9 +6,10 @@ import SpecialDashboard from './components/special-user-dashboard/SpecialDashboa
 import ExcuseRequestForm from './components/ExcuseRequestForm';
 import PendingApprovals from './components/approvel-page/PendingApprovals';
 import LoginPage from './components/auth/LoginPage';
-import DocumentsView from './components/common-dashboard/DocumentsView'; // <-- DocumentsView import කරන්න
-import MyLettersPage from './components/common-dashboard/MyLettersPage'; 
-// import RegisterPage from './components/auth/RegisterPage';
+import RegisterPage from './components/auth/RegisterPage';
+import DocumentsView from './components/common-dashboard/DocumentsView';
+import MyLettersPage from './components/common-dashboard/MyLettersPage';
+import ProfilePage from './components/common-dashboard/ProfilePage'; // <-- ProfilePage import කරන්න
 import { AuthContext } from './context/AuthContext';
 
 // PrivateRoute component
@@ -41,70 +42,59 @@ function App() {
       <Routes>
         {/* Public Routes */}
         <Route path="/login" element={isLoggedIn ? <Navigate to={user?.role === 'Admin' ? "/admin-dashboard" : "/dashboard"} /> : <LoginPage />} />
-        {/* <Route path="/register" element={<RegisterPage />} /> */}
+        
+        <Route path="/register" element={isLoggedIn ? <Navigate to={user?.role === 'Admin' ? "/admin-dashboard" : "/dashboard"} /> : <RegisterPage />} />
+        
         <Route path="/" element={isLoggedIn ? <Navigate to={user?.role === 'Admin' ? "/admin-dashboard" : "/dashboard"} /> : <Navigate to="/login" />} />
 
 
         {/* Private Routes (Login වී සිටින අයට පමණයි) */}
-        {/* Student Dashboard */}
         <Route path="/dashboard" element={
           <PrivateRoute allowedRoles={['Student','Lecturer', 'HOD', 'Dean', 'VC', 'Staff']}>
             <SpecialDashboard />
           </PrivateRoute>
         } />
 
-        {/* Admin Dashboard */}
         <Route path="/admin-dashboard" element={
           <PrivateRoute allowedRoles={['Admin']}>
             <AdminDashboard />
           </PrivateRoute>
         } />
 
-        {/* Pending Approvals (Lecturer, HOD, Dean, VC, Staff) */}
         <Route path="/pending-approvals" element={
           <PrivateRoute allowedRoles={['Lecturer', 'HOD', 'Dean', 'VC', 'Staff']}>
             <PendingApprovals />
           </PrivateRoute>
         } />
 
-        {/* Excuse Request Form (Student) */}
         <Route path="/excuse-request" element={
           <PrivateRoute allowedRoles={['Student','Lecturer', 'HOD', 'Dean', 'VC', 'Staff']}>
             <ExcuseRequestForm />
           </PrivateRoute>
         } />
 
-
-
-        {/* My Letters - (This is where students can view their submitted letters) */}
-        {/* This path will render a list of letters, each clickable to DocumentsView */}
         <Route path="/my-letters" element={
           <PrivateRoute allowedRoles={['Student','Lecturer', 'HOD', 'Dean', 'VC', 'Staff']}>
-            {/* You'll need a component here that lists letters and provides links to DocumentsView */}
-            {/* <p style={{textAlign: 'center', marginTop: '50px', fontSize: '1.5rem'}}>My Letters List Page Under Construction</p> */}
-            {/* For demonstration, you might temporarily navigate directly to a document: */}
-            {/* <DocumentsView /> */}
+            <MyLettersPage />
           </PrivateRoute>
         } />
 
-        {/* Document View (for a specific letter by ID) */}
         <Route path="/documents/:id" element={
           <PrivateRoute allowedRoles={['Student', 'Lecturer', 'HOD', 'Dean', 'VC', 'Staff', 'Admin']}>
             <DocumentsView />
           </PrivateRoute>
         } />
 
-        {/* Notifications */}
         <Route path="/notifications" element={
           <PrivateRoute allowedRoles={['Student', 'Lecturer', 'HOD', 'Dean', 'VC', 'Staff', 'Admin']}>
              <p style={{textAlign: 'center', marginTop: '50px', fontSize: '1.5rem'}}>Notifications Page Under Construction</p>
           </PrivateRoute>
         } />
 
-        {/* Profile */}
+        {/* Profile Page */}
         <Route path="/profile" element={
           <PrivateRoute allowedRoles={['Student', 'Lecturer', 'HOD', 'Dean', 'VC', 'Staff', 'Admin']}>
-             <p style={{textAlign: 'center', marginTop: '50px', fontSize: '1.5rem'}}>Profile Page Under Construction</p>
+            <ProfilePage />
           </PrivateRoute>
         } />
 

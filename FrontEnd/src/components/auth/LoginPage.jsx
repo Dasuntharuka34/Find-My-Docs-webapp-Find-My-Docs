@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext'; // AuthContext import කරන්න
-import '../../styles/auth/Login.css'; // Login page සඳහා CSS
+import '../../styles/auth/LoginPage.css'; // Login page සඳහා CSS
 
 // Custom Message Modal Component (අපි කලින් හදාගත් එකම)
 const MessageModal = ({ show, title, message, onClose }) => { // onClose එකතු කළා

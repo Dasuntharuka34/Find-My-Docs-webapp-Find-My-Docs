@@ -9,29 +9,31 @@ const userSchema = mongoose.Schema(
     email: {
       type: String,
       required: true,
-      unique: true,
+      unique: true, // Ensures each email is unique in the database
     },
-    password: { // We will hash this later
+    password: {
       type: String,
       required: true,
     },
     role: {
       type: String,
       required: true,
-      enum: ['Student', 'Staff', 'Lecturer', 'HOD', 'Dean', 'VC', 'Admin'],
-    },
-    // Optional fields based on role
-    indexNumber: {
-      type: String,
-      unique: true,
-      sparse: true, // Allows null values
+      default: 'Student', // Default role for new users if not specified
+      // Add more roles as needed: 'Student', 'Staff', 'Lecturer', 'HOD', 'Dean', 'VC', 'Admin'
     },
     department: {
       type: String,
+      // Required for staff, lecturers, HODs, Deans, VCs, Admins
+      // Not required for students
+    },
+    indexNumber: {
+      type: String,
+      // Required for students
+      // Not required for other roles
     },
   },
   {
-    timestamps: true,
+    timestamps: true, // Automatically adds `createdAt` and `updatedAt` fields
   }
 );
 

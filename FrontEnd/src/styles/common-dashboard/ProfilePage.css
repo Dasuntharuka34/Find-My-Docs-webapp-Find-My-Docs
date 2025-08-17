@@ -1,0 +1,108 @@
+/* Overall container for the profile page */
+.profile-container {
+  display: flex;
+  flex-direction:column;
+  min-height: 100vh;
+  background-color: #f8f9fa; /* Light background */
+  width:150vh;
+}
+
+/* Layout for sidebar and main content */
+.profile-layout {
+  display: flex;
+  flex: 1; /* Allows it to take up remaining vertical space */
+}
+
+/* Main content area for the profile details */
+.profile-content {
+  flex: 1; /* Takes up available space */
+  padding: 30px;
+  display: flex;
+  justify-content: center; /* Center the profile card horizontally */
+  align-items: flex-start; /* Align card to the top */
+}
+
+/* Styling for the profile information card */
+.profile-card {
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+  max-width: 600px; /* Max width for the card */
+  width: 100%;
+  text-align: left;
+}
+
+.profile-card h2 {
+  color: #1a3e72;
+  margin-bottom: 30px;
+  font-size: 2.2rem;
+  text-align: center;
+}
+
+.profile-info-group {
+  display: flex;
+  justify-content: space-between; /* Space out strong and span */
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #eee;
+  font-size: 1.1rem;
+}
+
+.profile-info-group:last-child {
+  border-bottom: none; /* No border for the last item */
+}
+
+.profile-info-group strong {
+  color: #1a3e72;
+  flex: 1; /* Takes up proportional space */
+  margin-right: 20px;
+}
+
+.profile-info-group span {
+  flex: 2; /* Takes up more space for the value */
+  color: #555;
+  text-align: right;
+}
+
+.edit-profile-btn {
+  margin-top: 30px;
+  padding: 12px 25px;
+  background-color: #6c9ef8;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  display: block; /* Make it a block element to center with margin auto */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.edit-profile-btn:hover {
+  background-color: #5a8be0;
+  transform: translateY(-2px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .profile-content {
+    padding: 20px;
+  }
+  .profile-card {
+    padding: 25px;
+  }
+  .profile-info-group {
+    flex-direction: column; /* Stack strong and span vertically */
+    align-items: flex-start;
+  }
+  .profile-info-group strong {
+    margin-right: 0;
+    margin-bottom: 5px;
+  }
+  .profile-info-group span {
+    text-align: left;
+  }
+}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import Header from './Header';
 import Sidebar from './Sidebar';
-import ProgressTracker from './ProgressTracker';
+// import ProgressTracker from './ProgressTracker';
 import RecentLetters from './RecentLetters';
 import Notifications from './Notifications';
 import NewLetterModal from './NewLetterModal';
