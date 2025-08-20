@@ -1,155 +1,122 @@
-body {
+/* RegistrationForm.css */
+
+body, html, #root {
+  height: 100%;
   margin: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f0f2f5; /* Light grey background */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
+  font-family: Arial, sans-serif;
+  font-size: 13px;
 }
 
-.register-container {
+.registration-page {
+  height: 100;
+  background: url('../../assets/UOJ_login.jpg') no-repeat center center;
+  background-size: cover;
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  width: 100%;
   padding: 20px;
+}
+
+.registration-container {
+  background-color: #f2f2f2;
+  border-radius: 10px;
+  width: 520px;
+  padding: 30px 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   box-sizing: border-box;
 }
 
-.register-form {
-  background-color: #ffffff;
-  padding: 40px;
-  border-radius: 10px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+.registration-container h2,
+.registration-container h3 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-weight: bold;
+  color: #003366;
+}
+
+.registration-container h3 {
+  font-weight: 600;
+  color: #666;
+}
+
+.registration-input,
+.registration-select {
   width: 100%;
-  max-width: 450px; /* Adjust max-width as needed */
+  border-radius: 10px;
+  padding: 8px 5px;
+  margin-bottom: 10px;
+  font-size: 16px;
+  background: transparent;
+  color: #333;
+  box-sizing: border-box;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+
+}
+
+.registration-input::placeholder {
+  color: #aaa;
+}
+
+.registration-input:focus,
+.registration-select:focus {
+  outline: none;
+  border-bottom-color: #4a6cf7;
+}
+
+.registration-button {
+  width: 33.33%;
+  padding: 6px 20px;
+  background: linear-gradient(90deg, #4a6cf7 0%, #7b4ddf 100%);
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+  display: block;
+  margin: 30px auto;
+}
+
+.registration-button:hover {
+  opacity: 0.9;
+}
+
+.registration-error {
+  color: #e3342f;
+  font-weight: 600;
+  margin-bottom: 15px;
   text-align: center;
 }
 
-.register-form h2 {
-  margin-bottom: 25px;
-  color: #1a3e72; /* Dark blue heading */
-  font-size: 2rem;
+.form-row {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.form-column {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.registration-title {
+  text-align: center;
+  font-size: 1.5rem;
   font-weight: 700;
+  margin-bottom: 1rem;
+  color: #003366;
 }
 
-.form-group {
-  margin-bottom: 20px;
-  text-align: left;
-}
-
-.form-group label {
+.registration-logo {
   display: block;
-  margin-bottom: 8px;
-  font-weight: 600;
-  color: #333;
+  margin: 0 auto 1.5rem auto;
+  width: 80px;
+  height: auto;
 }
-
-.form-group input[type="text"],
-.form-group input[type="email"],
-.form-group input[type="password"],
-.form-group select {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 1rem;
-  box-sizing: border-box; /* Include padding in width */
-  transition: border-color 0.3s ease;
+.footer-wrapper {
+  padding-top: 20px;
 }
-
-.form-group input[type="text"]:focus,
-.form-group input[type="email"]:focus,
-.form-group input[type="password"]:focus,
-.form-group select:focus {
-  border-color: #6c9ef8; /* Highlight on focus */
-  outline: none;
-}
-
-.register-button {
-  width: 100%;
-  padding: 12px;
-  background-color: #6c9ef8; /* Blue button */
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-  margin-top: 15px;
-}
-
-.register-button:hover {
-  background-color: #5a8be0;
-  transform: translateY(-2px);
-}
-
-.login-link {
-  margin-top: 25px;
-  font-size: 0.95rem;
-  color: #555;
-}
-
-.login-link a {
-  color: #6c9ef8;
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.login-link a:hover {
-  text-decoration: underline;
-}
-
-/* Modal styles - consistent with other modals */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-.modal {
-    background-color: #fff;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-    text-align: center;
-    max-width: 400px;
-    width: 90%;
-}
-
-.modal h3 {
-    color: #1a3e72;
-    margin-bottom: 15px;
-}
-
-.modal p {
-    color: #555;
-    margin-bottom: 25px;
-}
-
-.modal-actions button {
-    background-color: #6c9ef8;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: 600;
-    transition: background-color 0.3s ease;
-}
-
-.modal-actions button:hover {
-    background-color: #5a8be0;
-}
-

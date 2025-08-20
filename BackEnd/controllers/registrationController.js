@@ -18,7 +18,7 @@ const getPendingRegistrations = async (req, res) => {
 // @route   POST /api/registrations
 // @access  Public
 const createRegistration = async (req, res) => {
-  const { name, email, password, role, indexNumber, department } = req.body;
+  const { name, email, nic, password, role, indexNumber, department } = req.body;
 
   try {
     const registrationExists = await Registration.findOne({ email });
@@ -29,6 +29,7 @@ const createRegistration = async (req, res) => {
     const registration = await Registration.create({
       name,
       email,
+      nic,
       password, // Hash this!
       role,
       indexNumber: role === 'Student' ? indexNumber : undefined,
@@ -40,7 +41,9 @@ const createRegistration = async (req, res) => {
         _id: registration._id,
         name: registration.name,
         email: registration.email,
+        nic: registration.nic,
         role: registration.role,
+        department:registration.department,
         message: 'Registration submitted successfully. Awaiting admin approval.',
       });
     } else {

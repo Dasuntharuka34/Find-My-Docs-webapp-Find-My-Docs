@@ -1,12 +1,11 @@
 import User from '../models/User.js';
-import Registration from '../models/Registration.js'; // Import Registration model
-import bcrypt from 'bcryptjs'; // For password hashing and comparison
-import jwt from 'jsonwebtoken'; // For generating JSON Web Tokens
+import Registration from '../models/Registration.js';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
-// Function to generate a JWT token
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: '1h', // Token expires in 1 hour
+    expiresIn: '1h',
   });
 };
 
@@ -14,28 +13,36 @@ const generateToken = (id) => {
 // @route   POST /api/users/register
 // @access  Public
 const registerUser = async (req, res) => {
-  const { name, email, password, role, department, indexNumber } = req.body;
+  const { name, email, nic, password, role, department, indexNumber } = req.body; // Added nic
 
   try {
-    // Check if a user with the provided email already exists in User collection
-    const userExists = await User.findOne({ email });
-    // Check if a registration request with this email is already pending
-    const registrationPending = await Registration.findOne({ email, status: 'pending' });
+    // Check if user/registration exists by email or NIC
+    const userExistsByEmail = await User.findOne({ email });
+    const userExistsByNic = await User.findOne({ nic });
+    const registrationPendingByEmail = await Registration.findOne({ email, status: 'pending' });
+    const registrationPendingByNic = await Registration.findOne({ nic, status: 'pending' });
 
-    if (userExists) {
+    if (userExistsByEmail) {
       return res.status(400).json({ message: 'User with this email is already registered.' });
     }
-    if (registrationPending) {
+    if (userExistsByNic) {
+      return res.status(400).json({ message: 'User with this NIC is already registered.' });
+    }
+    if (registrationPendingByEmail) {
       return res.status(400).json({ message: 'A registration request with this email is already pending admin approval.' });
+    }
+    if (registrationPendingByNic) {
+      return res.status(400).json({ message: 'A registration request with this NIC is already pending admin approval.' });
     }
 
     // Create a new registration request in the Registration collection
     const registration = await Registration.create({
       name,
       email,
+      nic, // Pass NIC to registration
       password, // Password will be hashed by the pre-save hook in Registration model
       role,
-      department: role !== 'Student' ? department : undefined,
+      department: department, // Department is now always saved if provided
       indexNumber: role === 'Student' ? indexNumber : undefined,
       status: 'pending', // Set status to pending
     });
@@ -64,13 +71,13 @@ const authUser = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-      return res.status(401).json({ message: 'Invalid email or password.' });
+      return res.status(401).json({ message: 'Invalid email or password' });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid email or password.' });
+      return res.status(401).json({ message: 'Invalid email or password' });
     }
 
     const token = generateToken(user._id);
@@ -80,8 +87,9 @@ const authUser = async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
+        nic: user.nic, // Include NIC in the returned user object
         role: user.role,
-        department: user.department,
+        department: user.department, // Include department
         indexNumber: user.indexNumber,
       },
       token,
@@ -110,12 +118,16 @@ const getUsers = async (req, res) => {
 // @route   POST /api/users
 // @access  Private/Admin
 const createUser = async (req, res) => {
-  const { name, email, password, role, indexNumber, department } = req.body;
+  const { name, email, nic, password, role, indexNumber, department } = req.body; // Added nic
 
   try {
-    const userExists = await User.findOne({ email });
-    if (userExists) {
+    const userExistsByEmail = await User.findOne({ email });
+    const userExistsByNic = await User.findOne({ nic });
+    if (userExistsByEmail) {
       return res.status(400).json({ message: 'User with this email already exists' });
+    }
+    if (userExistsByNic) {
+        return res.status(400).json({ message: 'User with this NIC already exists' });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -124,10 +136,11 @@ const createUser = async (req, res) => {
     const user = await User.create({
       name,
       email,
+      nic: nic, // Store NIC
       password: hashedPassword,
       role,
       indexNumber: role === 'Student' ? indexNumber : undefined,
-      department,
+      department: department, // Department is always saved if provided
     });
 
     if (user) {
@@ -135,6 +148,7 @@ const createUser = async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
+        nic: user.nic, // Return NIC
         role: user.role,
         message: 'User created successfully by admin',
       });
@@ -164,7 +178,7 @@ const getPendingRegistrations = async (req, res) => {
 // @route   POST /api/users/registrations/:id/approve
 // @access  Private/Admin
 const approveRegistration = async (req, res) => {
-  const { id } = req.params; // This ID is for the Registration document
+  const { id } = req.params;
 
   try {
     const registration = await Registration.findById(id);
@@ -176,26 +190,33 @@ const approveRegistration = async (req, res) => {
       return res.status(400).json({ message: 'Registration is not in pending status.' });
     }
 
-    // 1. Create a new user from the approved registration data
+    // Check for duplicates in User collection before creating
+    const userExistsByEmail = await User.findOne({ email: registration.email });
+    const userExistsByNic = await User.findOne({ nic: registration.nic }); // Check by NIC too
+    if (userExistsByEmail) {
+      return res.status(400).json({ message: 'A user with this email already exists. Cannot approve duplicate.' });
+    }
+    if (userExistsByNic) {
+        return res.status(400).json({ message: 'A user with this NIC already exists. Cannot approve duplicate.' });
+    }
+
+
     const newUser = await User.create({
       name: registration.name,
       email: registration.email,
-      password: registration.password, // This is already hashed by Registration model's pre-save hook
+      nic: registration.nic, // Pass NIC from registration to user
+      password: registration.password, // Already hashed
       role: registration.role,
-      department: registration.department,
+      department: registration.department, // Department is always saved
       indexNumber: registration.indexNumber,
     });
 
-    // 2. Delete the registration request after converting to a user
     await Registration.findByIdAndDelete(id);
 
     res.status(200).json({ message: `User ${newUser.email} approved and created successfully.` });
 
   } catch (error) {
     console.error('Error approving registration:', error);
-    if (error.code === 11000) { // MongoDB duplicate key error (if a user with this email already exists)
-      return res.status(400).json({ message: 'A user with this email already exists. Cannot approve duplicate.' });
-    }
     res.status(500).json({ message: 'Server error during registration approval.', error: error.message });
   }
 };
@@ -204,7 +225,7 @@ const approveRegistration = async (req, res) => {
 // @route   DELETE /api/users/registrations/:id/reject
 // @access  Private/Admin
 const rejectRegistration = async (req, res) => {
-  const { id } = req.params; // This ID is for the Registration document
+  const { id } = req.params;
 
   try {
     const registration = await Registration.findById(id);
@@ -216,7 +237,6 @@ const rejectRegistration = async (req, res) => {
       return res.status(400).json({ message: 'Registration is not in pending status.' });
     }
 
-    // Directly delete the pending registration request
     await Registration.findByIdAndDelete(id);
 
     res.status(200).json({ message: `Registration request for ${registration.email} rejected and removed.` });
@@ -232,7 +252,7 @@ const rejectRegistration = async (req, res) => {
 // @access  Private/Admin
 const updateUser = async (req, res) => {
   const { id } = req.params;
-  const { name, email, role, indexNumber, department } = req.body;
+  const { name, email, nic, role, indexNumber, department } = req.body; // Added nic
 
   try {
     const user = await User.findById(id);
@@ -240,8 +260,9 @@ const updateUser = async (req, res) => {
     if (user) {
       user.name = name || user.name;
       user.email = email || user.email;
+      user.nic = nic || user.nic; // Update NIC
       user.role = role || user.role;
-      user.department = department || user.department;
+      user.department = department || user.department; // Update department
 
       if (user.role === 'Student') {
         user.indexNumber = indexNumber || user.indexNumber;
@@ -254,7 +275,8 @@ const updateUser = async (req, res) => {
     } else {
       res.status(404).json({ message: 'User not found' });
     }
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Error updating user:', error);
     res.status(500).json({ message: 'Error updating user', error: error.message });
   }

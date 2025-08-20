@@ -11,6 +11,11 @@ const userSchema = mongoose.Schema(
       required: true,
       unique: true, // Ensures each email is unique in the database
     },
+    nic: { // Added NIC field
+      type: String,
+      required: true,
+      unique: true, // NIC should also be unique for registered users
+    },
     password: {
       type: String,
       required: true,

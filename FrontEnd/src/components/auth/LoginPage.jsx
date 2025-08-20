@@ -1,6 +1,9 @@
 import React, { useState, useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext'; // AuthContext import කරන්න
 import '../../styles/auth/LoginPage.css'; // Login page සඳහා CSS
+import Footer from '../common-dashboard/Footer';
+import universityLogo from '../../assets/uni-logo.png'; // Make sure this path is correct
+
 
 // Custom Message Modal Component (අපි කලින් හදාගත් එකම)
 const MessageModal = ({ show, title, message, onClose }) => { // onClose එකතු කළා
@@ -46,10 +49,32 @@ function LoginPage() {
     }
   };
 
+  const [error, setError] = useState("");
+  // State for the Forgot Password modal
+  const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false); 
+  // const [messageModal, setMessageModal] = useState({ show: false, title: '', message: '' });
+
+  // Function to open the Forgot Password modal
+  const openForgotPasswordModal = (e) => {
+    e.preventDefault(); // Prevent default link behavior
+    setShowForgotPasswordModal(true);
+  };
+
+  // Function to close the Forgot Password modal
+  const closeForgotPasswordModal = () => {
+    setShowForgotPasswordModal(false);
+  };
+
   return (
-    <div className="login-container">
+    <div className='login-page'>
+      <div className="login-container">
       <div className="login-box">
-        <h2>Login</h2>
+        <h2>University Of Jaffna</h2>
+        <img
+            src={universityLogo}
+            alt="University of Jaffna Logo"
+            className="login-logo"
+          />
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="email">Email</label>
@@ -73,9 +98,13 @@ function LoginPage() {
           </div>
           <button type="submit" className="login-btn">Login</button>
         </form>
+          <p>
+            Forgot <a href="#" onClick={openForgotPasswordModal}>Password?</a>
+          </p>
         <p className="register-link">
           Don't have an account? <a href="/register">Register</a> {/* Register link එක ඔබට අවශ්‍ය නම් */}
         </p>
+        <Footer/>
       </div>
 
       <MessageModal
@@ -84,6 +113,15 @@ function LoginPage() {
         message={messageModal.message}
         onClose={closeMessageModal}
       />
+      {showForgotPasswordModal && (
+        <div className="modal-overlay" onClick={closeForgotPasswordModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <p>Please contact system administrator to reset your password. Thank you !</p>
+            <button className="modal-close-button" onClick={closeForgotPasswordModal}>Close</button>
+          </div>
+        </div>
+      )}
+    </div>
     </div>
   );
 }

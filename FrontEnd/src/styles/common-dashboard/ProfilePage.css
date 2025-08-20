@@ -1,16 +1,17 @@
 /* Overall container for the profile page */
 .profile-container {
   display: flex;
-  flex-direction:column;
+  flex-direction: column;
   min-height: 100vh;
   background-color: #f8f9fa; /* Light background */
-  width:150vh;
 }
 
 /* Layout for sidebar and main content */
 .profile-layout {
   display: flex;
   flex: 1; /* Allows it to take up remaining vertical space */
+  /* Ensure sidebar and content take full available height */
+  min-height: calc(100vh - var(--header-height, 80px) - var(--footer-height, 60px)); /* Adjust header/footer height as per your actual CSS */
 }
 
 /* Main content area for the profile details */
@@ -20,6 +21,8 @@
   display: flex;
   justify-content: center; /* Center the profile card horizontally */
   align-items: flex-start; /* Align card to the top */
+  overflow-y: auto; /* Enable scrolling if content overflows */
+  height: 100%; /* Ensure it takes full height within flex container */
 }
 
 /* Styling for the profile information card */

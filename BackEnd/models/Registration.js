@@ -12,6 +12,11 @@ const registrationSchema = mongoose.Schema(
       required: true,
       unique: true, // Ensure uniqueness for pending registrations too
     },
+    nic: { // Added NIC field
+      type: String,
+      required: true,
+      unique: true, // NIC should also be unique
+    },
     password: {
       type: String,
       required: true,

@@ -278,13 +278,10 @@ export default function AdminDashboard() {
             <h3>Registration Request Details</h3>
             <p><strong>Name:</strong> {viewingRegistration.name}</p>
             <p><strong>Email:</strong> {viewingRegistration.email}</p>
+            <p><strong>NIC:</strong> {viewingRegistration.nic}</p>
             <p><strong>Role:</strong> {viewingRegistration.role}</p>
-            {viewingRegistration.role === 'Student' && (
-              <p><strong>Index Number:</strong> {viewingRegistration.indexNumber || 'N/A'}</p>
-            )}
-            {viewingRegistration.role !== 'Student' && (
-              <p><strong>Department:</strong> {viewingRegistration.department || 'N/A'}</p>
-            )}
+            <p><strong>Index Number:</strong> {viewingRegistration.indexNumber || 'N/A'}</p>
+            <p><strong>Department:</strong> {viewingRegistration.department || 'N/A'}</p>
             <p><strong>Submitted At:</strong> {new Date(viewingRegistration.submittedAt).toLocaleString()}</p>
             <div className="modal-buttons">
               <button onClick={() => openConfirmationModal(viewingRegistration, 'approve')} className="approve-btn">Approve</button>
