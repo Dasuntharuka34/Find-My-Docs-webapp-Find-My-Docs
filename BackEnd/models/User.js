@@ -9,12 +9,12 @@ const userSchema = mongoose.Schema(
     email: {
       type: String,
       required: true,
-      unique: true, // Ensures each email is unique in the database
+      unique: true,
     },
-    nic: { // Added NIC field
+    nic: {
       type: String,
       required: true,
-      unique: true, // NIC should also be unique for registered users
+      unique: true,
     },
     password: {
       type: String,
@@ -23,22 +23,21 @@ const userSchema = mongoose.Schema(
     role: {
       type: String,
       required: true,
-      default: 'Student', // Default role for new users if not specified
-      // Add more roles as needed: 'Student', 'Staff', 'Lecturer', 'HOD', 'Dean', 'VC', 'Admin'
+      default: 'Student',
     },
     department: {
       type: String,
-      // Required for staff, lecturers, HODs, Deans, VCs, Admins
-      // Not required for students
     },
     indexNumber: {
       type: String,
-      // Required for students
-      // Not required for other roles
+    },
+    profilePicture: { // Added profilePicture field
+      type: String,
+      default: null, // Default to null, or a path to a default image
     },
   },
   {
-    timestamps: true, // Automatically adds `createdAt` and `updatedAt` fields
+    timestamps: true,
   }
 );
 

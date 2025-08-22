@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import Header from './Header';
 import Footer from './Footer';
 import Sidebar from './Sidebar';
-import '../../styles/common-dashboard/RecentLetters.css'; // Reusing some CSS
+import '../../styles/common-dashboard/MyLettersPage.css'; // Make sure this CSS file is created and imported
 import { AuthContext } from '../../context/AuthContext';
 
 // Custom Message Modal Component (same as used in other dashboards)
@@ -37,8 +37,8 @@ const MessageModal = ({ show, title, message, onConfirm, onCancel }) => {
   );
 };
 
+// Status colors consistent with RecentLetters component
 const statusColors = {
-  // Define colors consistent with your RecentLetters and DocumentsView CSS
   Submitted: '#808080',
   "Pending Staff Approval": '#5bc0de',
   "Pending Lecturer Approval": '#5bc0de',
@@ -69,7 +69,7 @@ function MyLettersPage() {
 
       try {
         // Fetch letters specific to the logged-in user
-        const response = await fetch(`http://localhost:5000/api/letters/byUser/${user._id}`);
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/letters/byUser/${user._id}`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -84,23 +84,28 @@ function MyLettersPage() {
     };
 
     fetchMyLetters();
-  }, [user]);
+  }, [user]); // Re-fetch when user object changes (e.g., after login)
 
   if (loading) {
     return <p style={{textAlign: 'center', marginTop: '50px', fontSize: '1.5rem'}}>Loading your letters...</p>;
   }
 
   return (
-    <div className="dashboard-container"> {/* Using dashboard-container for overall layout */}
+    <div className="dashboard-container"> {/* Using dashboard-container for overall layout from Dashboard.css */}
       <Header user={user} />
-      <div className="approvals-layout"> {/* Reusing layout for sidebar + content */}
+      <div className="approvals-layout"> {/* Reusing layout for sidebar + content from PendingApprovals.css or Dashboard.css */}
         <Sidebar />
-        <main className="main-content"> {/* Reusing main-content for styling */}
-          <h2>My Submitted Letters</h2>
+        <main className="letter-content"> {/* Reusing main-content for styling */}
+          <div className="letter-contenter">
+          
           {letters.length === 0 ? (
+            <div>
+              <h2>My Submitted Letters</h2>
             <p>You have not submitted any letters yet.</p>
+            </div>
           ) : (
             <div className="recent-letters"> {/* Reusing RecentLetters styling */}
+            <h2>My Submitted Letters</h2>
               <table>
                 <thead>
                   <tr>
@@ -124,17 +129,9 @@ function MyLettersPage() {
                         </span>
                       </td>
                       <td>
-                        <Link to={`/documents/${letter._id}`} className="view-details-btn" style={{
-                            backgroundColor: '#007bff', /* Example blue */
-                            color: 'white',
-                            padding: '6px 12px',
-                            border: 'none',
-                            borderRadius: '5px',
-                            textDecoration: 'none',
-                            cursor: 'pointer',
-                            transition: 'background-color 0.3s ease'
-                        }}>
-                            View Details
+                        {/* Link to a detailed view of the document/letter */}
+                        <Link to={`/documents/${letter._id}`} className="view-details-btn">
+                          View Details
                         </Link>
                       </td>
                     </tr>
@@ -143,6 +140,7 @@ function MyLettersPage() {
               </table>
             </div>
           )}
+          </div>
         </main>
       </div>
       <Footer />

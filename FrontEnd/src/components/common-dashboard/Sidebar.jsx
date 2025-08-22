@@ -5,9 +5,8 @@ import { AuthContext } from '../../context/AuthContext'; // AuthContext import �
 
 function Sidebar() {
   const { user } = useContext(AuthContext);
-  const navigate = useNavigate(); // useNavigate hook එක ගන්නවා
+  const navigate = useNavigate();
 
-  // user.role මත පදනම්ව Dashboard path එක තීරණය කරන්න
   const getDashboardPath = () => {
     if (user && user.role === 'Admin') {
       return '/admin-dashboard';
@@ -17,18 +16,10 @@ function Sidebar() {
   };
 
   const handleNewLetterClick = () => {
-    // New Letter Request modal එක Dashboard/SpecialDashboard තුළම handle කරන නිසා,
-    // මෙතනින් කෙලින්ම page එකට navigate කරමු.
-    // ඔබට මෙය වෙනම page එකක් ලෙස handle කිරීමට අවශ්‍ය නම්, වෙනස් කරන්න.
     if (user && user.role === 'Student') {
-      // ඔබට Dashboard component එකේ `setModalOpen(true)` call කිරීමට ක්‍රමයක් අවශ්‍ය වේ
-      // දැනට, අපි සරලව Dashboard එකට Navigate කරමු, එහිදී modal button එක ක්ලික් කළ හැක
-      navigate('/dashboard'); 
-      // ඔබට programmatic ලෙස modal එක open කිරීමට අවශ්‍ය නම්,
-      // Shared state management (Redux/Zustand) හෝ Context API භාවිතා කළ හැකියි.
+      navigate('/dashboard'); // Student dashboard එකට navigate කරමු
     } else {
-      // අනෙකුත් users ට new letter request කිරීමට අවසර නැතැයි උපකල්පනය කරමු
-      navigate(getDashboardPath());
+      navigate(getDashboardPath()); // වෙනත් users සඳහා default dashboard
     }
   };
 
@@ -41,9 +32,15 @@ function Sidebar() {
         <li className="sidebar-item">
           <Link to="/my-letters" className="sidebar-link">My Letters</Link>
         </li>
-        <li className="sidebar-item" onClick={handleNewLetterClick}> {/* New letter can be a modal on dashboard */}
+        <li className="sidebar-item" onClick={handleNewLetterClick}>
           <span className="sidebar-link">New Letter Request</span>
         </li>
+        {/* Pending Approvals link එක role මත පදනම්ව පෙන්විය හැක */}
+        {user && (user.role === 'Lecturer' || user.role === 'HOD' || user.role === 'Dean' || user.role === 'VC' || user.role === 'Staff') && (
+          <li className="sidebar-item">
+            <Link to="/pending-approvals" className="sidebar-link">Pending Approvals</Link>
+          </li>
+        )}
         <li className="sidebar-item">
           <Link to="/notifications" className="sidebar-link">Notifications</Link>
         </li>

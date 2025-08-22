@@ -57,7 +57,7 @@ export default function AdminDashboard() {
   const fetchPendingRegistrations = async () => {
     try {
       // Backend API to get pending registrations
-      const response = await fetch('http://localhost:5000/api/users/registrations/pending');
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users/registrations/pending`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -72,7 +72,7 @@ export default function AdminDashboard() {
   const fetchApprovedUsers = async () => { // Renamed from fetchUsers for clarity
     try {
       // Backend API to get all approved users
-      const response = await fetch('http://localhost:5000/api/users');
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -95,7 +95,7 @@ export default function AdminDashboard() {
     try {
       let response;
       if (action === 'approve') {
-        response = await fetch(`http://localhost:5000/api/users/registrations/${registrationId}/approve`, {
+        response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users/registrations/${registrationId}/approve`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
         });
@@ -104,7 +104,7 @@ export default function AdminDashboard() {
           setMessageModal({ show: true, title: 'Input Required', message: 'Please provide a reason for rejection.', onConfirm: closeMessageModal });
           return;
         }
-        response = await fetch(`http://localhost:5000/api/users/registrations/${registrationId}/reject`, {
+        response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users/registrations/${registrationId}/reject`, {
           method: 'DELETE',
         });
       } else {
@@ -138,7 +138,7 @@ export default function AdminDashboard() {
     const newName = prompt(`Edit name for ${userToEdit.name}:`, userToEdit.name);
     if (newName !== null && newName.trim() !== '') {
       try {
-        const response = await fetch(`http://localhost:5000/api/users/${userToEdit._id}`, {
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users/${userToEdit._id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name: newName.trim() }),
@@ -163,7 +163,7 @@ export default function AdminDashboard() {
       message: `Are you sure you want to delete user ${userName}?`,
       onConfirm: async () => {
         try {
-          const response = await fetch(`http://localhost:5000/api/users/${userIdToDelete}`, {
+          const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users/${userIdToDelete}`, {
             method: 'DELETE',
           });
           if (!response.ok) {

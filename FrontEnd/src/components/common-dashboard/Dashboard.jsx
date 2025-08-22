@@ -6,6 +6,7 @@ import RecentLetters from './RecentLetters';
 import Notifications from './Notifications';
 import NewLetterModal from './NewLetterModal';
 import Footer from './Footer';
+import ExcuseRequestForm from '../forms/ExcuseRequestForm'; // Import ExcuseRequestForm
 import '../../styles/common-dashboard/Dashboard.css';
 import '../../styles/common-dashboard/ProgressTracker.css';
 import '../../styles/common-dashboard/RecentLetters.css';
@@ -48,10 +49,9 @@ const MessageModal = ({ show, title, message, onConfirm, onCancel }) => {
   );
 };
 
-// --- APPROVAL STAGE DEFINITIONS (MUST BE CONSISTENT ACROSS ALL RELEVANT FILES) ---
+// --- NEW STAGE DEFINITIONS FOR SEQUENTIAL APPROVAL ---
 const approvalStages = [
   { name: "Submitted", approverRole: null },
-  { name: "Pending Staff Approval", approverRole: "Staff" },
   { name: "Pending Lecturer Approval", approverRole: "Lecturer" },
   { name: "Pending HOD Approval", approverRole: "HOD" },
   { name: "Pending Dean Approval", approverRole: "Dean" },
@@ -60,16 +60,14 @@ const approvalStages = [
   { name: "Rejected", approverRole: null }
 ];
 
-// Maps submitter roles to the initial stage index for a new letter.
 const submitterRoleToInitialStageIndex = {
   "Student": 0,
-  "Staff": 2,      // <--- FIXED: Staff submits, skips "Submitted" and "Pending Staff Approval", starts at "Pending Lecturer Approval" (index 2)
-  "Lecturer": 3,
-  "HOD": 4,
-  "Dean": 5,
-  "VC": 6
+  "Lecturer": 1,
+  "HOD": 2,
+  "Dean": 3,
+  "VC": 4
 };
-// --- END APPROVAL STAGE DEFINITIONS ---
+// --- END NEW STAGE DEFINITIONS ---
 
 
 function Dashboard() {
@@ -78,7 +76,8 @@ function Dashboard() {
   const [currentStage, setCurrentStage] = useState(0);
   const [letters, setLetters] = useState([]);
   const [notifications, setNotifications] = useState([]);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false); // For NewLetterModal
+  const [showExcuseRequestModal, setShowExcuseRequestModal] = useState(false); // For ExcuseRequestForm
 
   const [messageModal, setMessageModal] = useState({ show: false, title: '', message: '' });
 
@@ -135,34 +134,36 @@ function Dashboard() {
     }
   }, [user]);
 
+  // Handle new letter submit (for non-Medical Certificate letters)
   const addLetter = async (newLetterData) => {
     if (!user || !user._id || !user.name || !user.role) {
       setMessageModal({ show: true, title: 'Error', message: 'User not authenticated or role missing. Please log in again.', onConfirm: closeMessageModal });
       return;
     }
 
-    const initialStageIndex = submitterRoleToInitialStageIndex[user.role] !== undefined
-                               ? submitterRoleToInitialStageIndex[user.role]
-                               : 0;
+    // Determine initial stage based on submitter's role
+    const initialStageIndex = submitterRoleToInitialStageIndex[user.role] || 0;
     const initialStatus = approvalStages[initialStageIndex].name;
 
     try {
-      const letterToSend = {
-        ...newLetterData,
-        studentId: user._id,
-        student: user.name,
-        submitterRole: user.role, // <--- Send submitter's role to backend
-        status: initialStatus,
-        currentStageIndex: initialStageIndex,
-        submittedDate: new Date().toISOString().slice(0, 10)
-      };
+      const formData = new FormData();
+      formData.append('type', newLetterData.type);
+      formData.append('reason', newLetterData.reason);
+      formData.append('date', newLetterData.date);
+      formData.append('studentId', user._id);
+      formData.append('student', user.name);
+      formData.append('submitterRole', user.role);
+      formData.append('status', initialStatus);
+      formData.append('currentStageIndex', initialStageIndex);
+      formData.append('submittedDate', new Date().toISOString().slice(0, 10));
+
+      if (newLetterData.attachments) {
+        formData.append('attachments', newLetterData.attachments);
+      }
 
       const response = await fetch('http://localhost:5000/api/letters', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(letterToSend),
+        body: formData,
       });
 
       if (!response.ok) {
@@ -195,6 +196,18 @@ function Dashboard() {
     }
   };
 
+  // Function to open Excuse Request Modal
+  const openExcuseRequestFormModal = () => {
+    setShowExcuseRequestModal(true);
+  };
+
+  // Function to close Excuse Request Modal (and refresh data if needed)
+  const closeExcuseRequestFormModal = () => {
+    setShowExcuseRequestModal(false);
+    fetchLetters(); // Refresh letters, as excuse requests are now "documents" that might appear
+  };
+
+
   if (!user) {
     return <p>Loading user data...</p>;
   }
@@ -222,7 +235,8 @@ function Dashboard() {
           </div>
         </section>
       </main>
-      {modalOpen && <NewLetterModal onClose={() => setModalOpen(false)} onSubmit={addLetter} />}
+      {modalOpen && <NewLetterModal onClose={() => setModalOpen(false)} onSubmit={addLetter} onOpenExcuseRequestForm={openExcuseRequestFormModal} />}
+      {showExcuseRequestModal && <ExcuseRequestForm onClose={closeExcuseRequestFormModal} />}
       <Footer />
 
       <MessageModal

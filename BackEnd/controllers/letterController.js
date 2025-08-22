@@ -2,37 +2,35 @@ import Letter from '../models/Letter.js';
 
 // --- APPROVAL STAGE DEFINITIONS (MUST BE CONSISTENT WITH FRONTEND) ---
 const approvalStages = [
-  { name: "Submitted", approverRole: null },
-  { name: "Pending Staff Approval", approverRole: "Staff" },
-  { name: "Pending Lecturer Approval", approverRole: "Lecturer" },
-  { name: "Pending HOD Approval", approverRole: "HOD" },
-  { name: "Pending Dean Approval", approverRole: "Dean" },
-  { name: "Pending VC Approval", approverRole: "VC" },
-  { name: "Approved", approverRole: null },
-  { name: "Rejected", approverRole: null }
+    { name: "Submitted", approverRole: null },
+//   { name: "Pending Staff Approval", approverRole: "Staff" },      // Index 1 (Next stage after student submission, or initial for Staff submitter if they approve their own?)
+  { name: "Pending Lecturer Approval", approverRole: "Lecturer" }, // Index 2
+  { name: "Pending HOD Approval", approverRole: "HOD" },    // Index 3
+  { name: "Pending Dean Approval", approverRole: "Dean" },    // Index 4
+  { name: "Pending VC Approval", approverRole: "VC" },      // Index 5
+  { name: "Approved", approverRole: null },               // Index 6 (Final Approved state)
+  { name: "Rejected", approverRole: null }                // Index 7 (Final Rejected state)
 ];
 
+// Maps submitter roles to the initial stage index for a new letter.
 const submitterRoleToInitialStageIndex = {
-  "Student": 1,
-  "Staff": 2,
-  "Lecturer": 3,
-  "HOD": 4,
-  "Dean": 5,
-  "VC": 6
+  "Student": 1,    // Student submits, starts at "Submitted" (needs Staff Approval next, which is index 1)
+//   "Staff": 2,      // FIXED: Staff submits, skips "Submitted" and "Pending Staff Approval", starts at "Pending Lecturer Approval" (index 2)
+  "Lecturer": 2,   // Lecturer submits, skips Staff, Lecturer, starts at "Pending HOD Approval" (index 3)
+  "HOD": 3,        // HOD submits, skips Staff, Lecturer, HOD, starts at "Pending Dean Approval" (index 4)
+  "Dean": 4,       // Dean submits, skips Staff, Lecturer, HOD, Dean, starts at "Pending VC Approval" (index 5)
+  "VC": 5         // VC submits, directly goes to "Approved" (index 6)
 };
 
-const approverRoleToStageIndex = {
-    "Staff": 1,
-    "Lecturer": 2,
-    "HOD": 3,
-    "Dean": 4,
-    "VC": 5
-};
-// --- END APPROVAL STAGE DEFINITIONS ---
 
-
+// @desc    Create a new letter
+// @route   POST /api/letters
+// @access  Private (e.g., Student, Staff, Lecturer, HOD, Dean, VC)
 const createLetter = async (req, res) => {
-    const { type, reason, date, studentId, student, submitterRole, attachments } = req.body;
+    // req.body මගින් form fields ලබාගන්න
+    const { type, reason, date, studentId, student, submitterRole } = req.body;
+    // req.file මගින් uploaded file එකේ තොරතුරු ලබාගන්න
+    const attachmentsPath = req.file ? req.file.path : null; // ගොනුවේ path එක ලබාගන්න
 
     const initialStageIndex = submitterRoleToInitialStageIndex[submitterRole] !== undefined
                                ? submitterRoleToInitialStageIndex[submitterRole]
@@ -49,7 +47,7 @@ const createLetter = async (req, res) => {
             status: initialStatus,
             currentStageIndex: initialStageIndex,
             submittedDate: new Date(),
-            attachments
+            attachments: attachmentsPath // ගොනුවේ path එක save කරන්න
         });
         res.status(201).json(letter);
     } catch (error) {
@@ -58,6 +56,9 @@ const createLetter = async (req, res) => {
     }
 };
 
+// @desc    Get letters submitted by a specific user
+// @route   GET /api/letters/byUser/:userId
+// @access  Private (Student only)
 const getLettersByUserId = async (req, res) => {
     const { userId } = req.params;
     try {
@@ -75,23 +76,22 @@ const getLettersByUserId = async (req, res) => {
 const getLetterById = async (req, res) => {
     const { id } = req.params;
     try {
-        // Use findById() to search by MongoDB's _id
         const letter = await Letter.findById(id);
         if (letter) {
-            res.json(letter); // Found the letter
+            res.json(letter);
         } else {
-            // Letter not found with this ID
             res.status(404).json({ message: 'Letter not found' });
         }
     } catch (error) {
-        // Log the actual database error
         console.error("Error fetching single letter by ID:", error);
-        // Respond with a 500 if there's a server/database issue
         res.status(500).json({ message: 'Server error fetching letter by ID', error: error.message });
     }
 };
 
 
+// @desc    Get pending approvals for a specific status/role
+// @route   GET /api/letters/pendingApprovals/:statusName
+// @access  Private (Staff, Lecturer, HOD, Dean, VC)
 const getPendingApprovals = async (req, res) => {
     const { statusName } = req.params;
 
@@ -110,6 +110,9 @@ const getPendingApprovals = async (req, res) => {
 };
 
 
+// @desc    Update letter status (Approve/Reject)
+// @route   PUT /api/letters/:id/status
+// @access  Private (Staff, Lecturer, HOD, Dean, VC)
 const updateLetterStatus = async (req, res) => {
     const { id } = req.params;
     const { status, currentStageIndex, rejectionReason, approver, approverRole } = req.body;

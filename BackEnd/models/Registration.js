@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import bcrypt from 'bcryptjs'; // For pre-saving password hashing
+import bcrypt from 'bcryptjs';
 
 const registrationSchema = mongoose.Schema(
   {
@@ -10,12 +10,12 @@ const registrationSchema = mongoose.Schema(
     email: {
       type: String,
       required: true,
-      unique: true, // Ensure uniqueness for pending registrations too
+      unique: true,
     },
-    nic: { // Added NIC field
+    nic: {
       type: String,
       required: true,
-      unique: true, // NIC should also be unique
+      unique: true,
     },
     password: {
       type: String,
@@ -32,11 +32,15 @@ const registrationSchema = mongoose.Schema(
     indexNumber: {
       type: String,
     },
+    profilePicture: { // Added profilePicture field
+      type: String,
+      default: null, // Default to null, or a path to a default image
+    },
     status: {
       type: String,
       required: true,
-      default: 'pending', // Default status for new registrations
-      enum: ['pending', 'approved', 'rejected'], // Possible statuses
+      default: 'pending',
+      enum: ['pending', 'approved', 'rejected'],
     },
     submittedAt: {
       type: Date,
@@ -44,14 +48,13 @@ const registrationSchema = mongoose.Schema(
     },
   },
   {
-    timestamps: true, // Adds createdAt and updatedAt automatically
+    timestamps: true,
   }
 );
 
-// Pre-save hook to hash password before saving the registration request
 registrationSchema.pre('save', async function(next) {
   if (!this.isModified('password')) {
-    next(); // Only hash if password field is modified
+    next();
   }
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);

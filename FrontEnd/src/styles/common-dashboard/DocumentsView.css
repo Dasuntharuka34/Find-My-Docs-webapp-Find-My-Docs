@@ -1,10 +1,34 @@
-.documents-view {
+/* Overall container for the documents view, similar to Dashboard.css's dashboard-container */
+.documents-view-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Ensures it takes full viewport height */
+  background-color: #f0f2f5; /* Light grey background for the whole page */
+}
+
+/* Layout for sidebar and main content */
+.documents-layout {
+  display: flex;
+  flex: 1; /* Allows it to take remaining vertical space */
+  width: 100%;
+}
+
+/* Main content area for documents details */
+.documents-main-content {
+  flex: 1; /* Allows main content to grow */
   padding: 20px;
-  max-width: 1200px; /* Adjust max-width as needed */
-  margin: 0 auto;
+  max-width: calc(100% - 250px); /* Adjust max-width considering sidebar width (e.g., 250px) */
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: #333;
+  box-sizing: border-box; /* Include padding in element's total width */
+  transition: margin-left 0.3s ease; /* Smooth transition for sidebar toggle */
 }
+
+/* If sidebar is collapsible, adjust margin-left based on sidebar state */
+/* .documents-layout.sidebar-collapsed .documents-main-content {
+  margin-left: 60px; // Example for collapsed sidebar width
+} */
+
 
 .documents-view h1, .documents-view h3 {
   color: #1a3e72; /* Dark blue heading */
@@ -17,7 +41,42 @@
   border-radius: 10px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   margin-bottom: 30px;
+  width: 100%; /* Ensure it takes full width of its parent */
+  box-sizing: border-box; /* Include padding in width */
 }
+
+/* New style for header and back button alignment */
+.document-header-row {
+  display: flex;
+  justify-content: space-between; /* Puts h1 and button on opposite ends */
+  align-items: center; /* Vertically centers them */
+  margin-bottom: 20px; /* Space below this row */
+  flex-wrap: wrap; /* Allow wrapping on smaller screens */
+  gap: 10px; /* Space between items if they wrap */
+}
+
+.document-header-row h1 {
+  margin-bottom: 0; /* Remove default h1 margin if it conflicts */
+}
+
+/* Style for the Go Back button */
+.go-back-btn {
+  background-color: #6c757d; /* Grey button */
+  color: white;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  white-space: nowrap; /* Prevent text from wrapping */
+}
+
+.go-back-btn:hover {
+  background-color: #5a6268; /* Darker grey on hover */
+  transform: translateY(-1px);
+}
+
 
 .document-info p {
   margin-bottom: 10px;
@@ -44,6 +103,8 @@
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   overflow: hidden;
+  width: 100%; /* Ensure table takes full width of its container */
+  box-sizing: border-box;
 }
 
 .history-header, .history-row {
@@ -80,11 +141,26 @@ body {
   box-sizing: border-box;
 }
 
-/* Optional: Make .documents-view responsive */
+/* Responsive adjustments */
 @media (max-width: 768px) {
-  .documents-view {
-    padding: 15px;
+  .documents-layout {
+    flex-direction: column; /* Stack sidebar and main content vertically */
   }
+
+  .documents-main-content {
+    margin-left: 0; /* Remove sidebar offset */
+    max-width: 100%; /* Take full width */
+    padding: 15px; /* Adjust padding for smaller screens */
+  }
+
+  /* Adjust sidebar if it collapses or becomes a toggleable menu */
+  /* This assumes your Sidebar component itself handles its responsiveness */
+  .sidebar {
+    width: 100%; /* Full width when stacked */
+    height: auto; /* Height adapts to content */
+    position: relative; /* Not fixed */
+  }
+
   .document-container {
     padding: 20px;
   }

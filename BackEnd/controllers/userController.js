@@ -13,7 +13,7 @@ const generateToken = (id) => {
 // @route   POST /api/users/register
 // @access  Public
 const registerUser = async (req, res) => {
-  const { name, email, nic, password, role, department, indexNumber } = req.body; // Added nic
+  const { name, email, nic, password, role, department, indexNumber } = req.body;
 
   try {
     // Check if user/registration exists by email or NIC
@@ -39,12 +39,13 @@ const registerUser = async (req, res) => {
     const registration = await Registration.create({
       name,
       email,
-      nic, // Pass NIC to registration
+      nic,
       password, // Password will be hashed by the pre-save hook in Registration model
       role,
-      department: department, // Department is now always saved if provided
+      department: department,
       indexNumber: role === 'Student' ? indexNumber : undefined,
-      status: 'pending', // Set status to pending
+      profilePicture: null, // Default profile picture for new registrations
+      status: 'pending',
     });
 
     if (registration) {
@@ -87,10 +88,11 @@ const authUser = async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
-        nic: user.nic, // Include NIC in the returned user object
+        nic: user.nic,
         role: user.role,
-        department: user.department, // Include department
+        department: user.department,
         indexNumber: user.indexNumber,
+        profilePicture: user.profilePicture, // Include profilePicture in the returned user object
       },
       token,
       message: 'Login successful',
@@ -118,7 +120,7 @@ const getUsers = async (req, res) => {
 // @route   POST /api/users
 // @access  Private/Admin
 const createUser = async (req, res) => {
-  const { name, email, nic, password, role, indexNumber, department } = req.body; // Added nic
+  const { name, email, nic, password, role, indexNumber, department } = req.body;
 
   try {
     const userExistsByEmail = await User.findOne({ email });
@@ -136,11 +138,12 @@ const createUser = async (req, res) => {
     const user = await User.create({
       name,
       email,
-      nic: nic, // Store NIC
+      nic: nic,
       password: hashedPassword,
       role,
       indexNumber: role === 'Student' ? indexNumber : undefined,
-      department: department, // Department is always saved if provided
+      department: department,
+      profilePicture: null, // Default profile picture for newly created users
     });
 
     if (user) {
@@ -148,8 +151,9 @@ const createUser = async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
-        nic: user.nic, // Return NIC
+        nic: user.nic,
         role: user.role,
+        profilePicture: user.profilePicture,
         message: 'User created successfully by admin',
       });
     } else {
@@ -192,7 +196,7 @@ const approveRegistration = async (req, res) => {
 
     // Check for duplicates in User collection before creating
     const userExistsByEmail = await User.findOne({ email: registration.email });
-    const userExistsByNic = await User.findOne({ nic: registration.nic }); // Check by NIC too
+    const userExistsByNic = await User.findOne({ nic: registration.nic });
     if (userExistsByEmail) {
       return res.status(400).json({ message: 'A user with this email already exists. Cannot approve duplicate.' });
     }
@@ -204,11 +208,12 @@ const approveRegistration = async (req, res) => {
     const newUser = await User.create({
       name: registration.name,
       email: registration.email,
-      nic: registration.nic, // Pass NIC from registration to user
+      nic: registration.nic,
       password: registration.password, // Already hashed
       role: registration.role,
-      department: registration.department, // Department is always saved
+      department: registration.department,
       indexNumber: registration.indexNumber,
+      profilePicture: registration.profilePicture,
     });
 
     await Registration.findByIdAndDelete(id);
@@ -247,38 +252,88 @@ const rejectRegistration = async (req, res) => {
   }
 };
 
-// @desc    Update a user (existing, approved user)
+// @desc    Update a user profile
 // @route   PUT /api/users/:id
-// @access  Private/Admin
+// @access  Private/User (Protected by auth middleware)
 const updateUser = async (req, res) => {
+  // --- DEBUGGING LOGS ---
+  console.log('--- Inside updateUser controller ---');
+  console.log('req.body:', req.body);
+  console.log('req.file:', req.file);
+  console.log('req.params.id:', req.params.id);
+  // --- END DEBUGGING LOGS ---
+
   const { id } = req.params;
-  const { name, email, nic, role, indexNumber, department } = req.body; // Added nic
+  // Make sure to access req.body properties safely, as they might be undefined if FormData is empty
+  const name = req.body.name;
+  const email = req.body.email;
+  const nic = req.body.nic;
+  const department = req.body.department;
+  const indexNumber = req.body.indexNumber;
+  const role = req.body.role; // Get role from req.body as it's sent from frontend edit form
+
+  const profilePicturePath = req.file ? `/uploads/profile_pictures/${req.file.filename}` : null;
 
   try {
     const user = await User.findById(id);
 
-    if (user) {
-      user.name = name || user.name;
-      user.email = email || user.email;
-      user.nic = nic || user.nic; // Update NIC
-      user.role = role || user.role;
-      user.department = department || user.department; // Update department
-
-      if (user.role === 'Student') {
-        user.indexNumber = indexNumber || user.indexNumber;
-      } else {
-        user.indexNumber = undefined;
-      }
-
-      const updatedUser = await user.save();
-      res.json(updatedUser);
-    } else {
-      res.status(404).json({ message: 'User not found' });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
     }
-  }
-  catch (error) {
-    console.error('Error updating user:', error);
-    res.status(500).json({ message: 'Error updating user', error: error.message });
+
+    // Check if new email/NIC already exists for another user (excluding current user)
+    if (email && email !== user.email) {
+      const emailExists = await User.findOne({ email });
+      if (emailExists && emailExists._id.toString() !== user._id.toString()) { // Ensure it's not the current user's own email
+        return res.status(400).json({ message: 'Email already in use by another account.' });
+      }
+    }
+    if (nic && nic !== user.nic) {
+      const nicExists = await User.findOne({ nic });
+      if (nicExists && nicExists._id.toString() !== user._id.toString()) { // Ensure it's not the current user's own NIC
+        return res.status(400).json({ message: 'NIC already in use by another account.' });
+      }
+    }
+
+    user.name = name || user.name;
+    user.email = email || user.email;
+    user.nic = nic || user.nic;
+    user.department = department || user.department;
+    // Role should not be updated by user, only admin can change roles
+    // user.role = role || user.role; // Keep original role, or only admin updates this
+
+    // Update indexNumber only if the user's role is Student based on original role
+    // Or based on the role submitted from the form if the role field is meant to be sent (but it's disabled in frontend)
+    if (user.role === 'Student') { // Use user.role from DB for this logic, not necessarily req.body.role
+      user.indexNumber = indexNumber || user.indexNumber;
+    } else {
+      user.indexNumber = undefined;
+    }
+
+    // Update profile picture only if a new file was uploaded
+    if (profilePicturePath) {
+      user.profilePicture = profilePicturePath;
+    } else if (req.body.removeProfilePicture === 'true') { // Example for removing
+      user.profilePicture = null;
+    }
+
+
+    const updatedUser = await user.save();
+
+    res.json({
+      _id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      nic: updatedUser.nic,
+      role: updatedUser.role,
+      department: updatedUser.department,
+      indexNumber: updatedUser.indexNumber,
+      profilePicture: updatedUser.profilePicture,
+      message: 'Profile updated successfully',
+    });
+  } catch (error) {
+    console.error('Error updating user profile:', error);
+    res.status(500).json({ message: 'Server error updating profile', error: error.message });
   }
 };
 
@@ -302,5 +357,4 @@ const deleteUser = async (req, res) => {
   }
 };
 
-// Export all controller functions for use in routes
 export { registerUser, authUser, getUsers, createUser, getPendingRegistrations, approveRegistration, rejectRegistration, updateUser, deleteUser };

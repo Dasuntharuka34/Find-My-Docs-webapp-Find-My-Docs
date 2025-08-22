@@ -1,19 +1,6 @@
 import React from 'react';
 import '../../styles/common-dashboard/ProgressTracker.css';
 
-// --- NEW STAGE DEFINITIONS FOR SEQUENTIAL APPROVAL ---
-// This needs to be consistent across Dashboard, SpecialDashboard, PendingApprovals too.
-const approvalStages = [
-  { name: "Submitted", approverRole: null },
-  { name: "Pending Staff Approval", approverRole: "Staff" },
-  { name: "Pending Lecturer Approval", approverRole: "Lecturer" },
-  { name: "Pending HOD Approval", approverRole: "HOD" },
-  { name: "Pending Dean Approval", approverRole: "Dean" },
-  { name: "Pending VC Approval", approverRole: "VC" },
-  { name: "Approved", approverRole: null },
-  { name: "Rejected", approverRole: null }
-];
-// --- END NEW STAGE DEFINITIONS ---
 
 function ProgressTracker({ stages, currentStage }) { // stages prop now receives array of names
   return (

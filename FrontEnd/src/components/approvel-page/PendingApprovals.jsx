@@ -4,6 +4,7 @@ import Footer from '../common-dashboard/Footer';
 import Sidebar from '../common-dashboard/Sidebar';
 import '../../styles/approvel-page/PendingApprovals.css';
 import { AuthContext } from '../../context/AuthContext';
+import { Link } from 'react-router-dom'; // <-- Link component එක import කරන්න
 
 // Custom Message Modal Component
 const MessageModal = ({ show, title, message, onConfirm, onCancel }) => {
@@ -39,7 +40,7 @@ const MessageModal = ({ show, title, message, onConfirm, onCancel }) => {
 // --- NEW STAGE DEFINITIONS FOR SEQUENTIAL APPROVAL ---
 const approvalStages = [
   { name: "Submitted", approverRole: null },              // Index 0 (Initial state when submitted by a student)
-  { name: "Pending Staff Approval", approverRole: "Staff" },      // Index 1 (Next stage after student submission, or initial for Staff submitter if they approve their own?)
+  // { name: "Pending Staff Approval", approverRole: "Staff" },      // Index 1 (Next stage after student submission, or initial for Staff submitter if they approve their own?)
   { name: "Pending Lecturer Approval", approverRole: "Lecturer" }, // Index 2
   { name: "Pending HOD Approval", approverRole: "HOD" },    // Index 3
   { name: "Pending Dean Approval", approverRole: "Dean" },    // Index 4
@@ -50,11 +51,11 @@ const approvalStages = [
 
 // අනුමත කරන්නෙකුගේ role එක අනුව, ඔහුට පෙනිය යුතු ලිපි වල තත්වය (status) තීරණය කරයි.
 const approverRoleToStageIndex = {
-    "Staff": 1,
-    "Lecturer": 2,
-    "HOD": 3,
-    "Dean": 4,
-    "VC": 5
+    // "Staff": 1,
+    "Lecturer": 1,
+    "HOD": 2,
+    "Dean": 3,
+    "VC": 4
 };
 // --- END NEW STAGE DEFINITIONS ---
 
@@ -214,6 +215,7 @@ function PendingApprovals() {
                   <th>Submitted On</th>
                   <th>Status</th>
                   <th>Action</th>
+                  <th>View Details</th> {/* <-- New table header */}
                 </tr>
               </thead>
               <tbody>
@@ -227,6 +229,14 @@ function PendingApprovals() {
                       <span className={`status-badge ${request.status ? request.status.toLowerCase().replace(/\s/g, '-') : ''}`}>
                         {request.status}
                       </span>
+                    </td>
+                    <td> {/* <-- New table data cell for the View Details button */}
+                      <Link
+                        to={`/documents/${request._id}`}
+                        className="view-details-btn" // Reusing styling from DocumentsView.css
+                      >
+                        View Details
+                      </Link>
                     </td>
                     <td>
                       {/* Show buttons ONLY if the letter's status is the one current user's role is responsible for */}

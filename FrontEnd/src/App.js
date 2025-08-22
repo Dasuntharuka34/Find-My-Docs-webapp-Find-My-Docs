@@ -2,8 +2,8 @@ import React, { useContext, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import Dashboard from './components/common-dashboard/Dashboard';
 import AdminDashboard from './components/admin-dashboard/AdminDashboard';
-import SpecialDashboard from './components/special-user-dashboard/SpecialDashboard';
-import ExcuseRequestForm from './components/ExcuseRequestForm';
+// import SpecialDashboard from './components/special-user-dashboard/SpecialDashboard';
+import ExcuseRequestForm from './components/forms/ExcuseRequestForm';
 import PendingApprovals from './components/approvel-page/PendingApprovals';
 import LoginPage from './components/auth/LoginPage';
 import RegisterPage from './components/auth/RegisterPage';
@@ -50,8 +50,8 @@ function App() {
 
         {/* Private Routes (Login වී සිටින අයට පමණයි) */}
         <Route path="/dashboard" element={
-          <PrivateRoute allowedRoles={['Student','Lecturer', 'HOD', 'Dean', 'VC', 'Staff']}>
-            <SpecialDashboard />
+          <PrivateRoute allowedRoles={['Student','Lecturer', 'HOD', 'Dean', 'VC']}>
+            <Dashboard />
           </PrivateRoute>
         } />
 
@@ -62,38 +62,38 @@ function App() {
         } />
 
         <Route path="/pending-approvals" element={
-          <PrivateRoute allowedRoles={['Lecturer', 'HOD', 'Dean', 'VC', 'Staff']}>
+          <PrivateRoute allowedRoles={['Lecturer', 'HOD', 'Dean', 'VC']}>
             <PendingApprovals />
           </PrivateRoute>
         } />
 
         <Route path="/excuse-request" element={
-          <PrivateRoute allowedRoles={['Student','Lecturer', 'HOD', 'Dean', 'VC', 'Staff']}>
+          <PrivateRoute allowedRoles={['Student','Lecturer', 'HOD', 'Dean', 'VC']}>
             <ExcuseRequestForm />
           </PrivateRoute>
         } />
 
         <Route path="/my-letters" element={
-          <PrivateRoute allowedRoles={['Student','Lecturer', 'HOD', 'Dean', 'VC', 'Staff']}>
+          <PrivateRoute allowedRoles={['Student','Lecturer', 'HOD', 'Dean', 'VC']}>
             <MyLettersPage />
           </PrivateRoute>
         } />
 
         <Route path="/documents/:id" element={
-          <PrivateRoute allowedRoles={['Student', 'Lecturer', 'HOD', 'Dean', 'VC', 'Staff', 'Admin']}>
+          <PrivateRoute allowedRoles={['Student', 'Lecturer', 'HOD', 'Dean', 'VC', 'Admin']}>
             <DocumentsView />
           </PrivateRoute>
         } />
 
         <Route path="/notifications" element={
-          <PrivateRoute allowedRoles={['Student', 'Lecturer', 'HOD', 'Dean', 'VC', 'Staff', 'Admin']}>
+          <PrivateRoute allowedRoles={['Student', 'Lecturer', 'HOD', 'Dean', 'VC', 'Admin']}>
              <p style={{textAlign: 'center', marginTop: '50px', fontSize: '1.5rem'}}>Notifications Page Under Construction</p>
           </PrivateRoute>
         } />
 
         {/* Profile Page */}
         <Route path="/profile" element={
-          <PrivateRoute allowedRoles={['Student', 'Lecturer', 'HOD', 'Dean', 'VC', 'Staff', 'Admin']}>
+          <PrivateRoute allowedRoles={['Student', 'Lecturer', 'HOD', 'Dean', 'VC', 'Admin']}>
             <ProfilePage />
           </PrivateRoute>
         } />

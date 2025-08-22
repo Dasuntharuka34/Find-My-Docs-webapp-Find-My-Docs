@@ -1,0 +1,188 @@
+/* Import common styles if MyLettersPage.css is the only one loaded */
+/* If this CSS is concatenated or imported after main dashboard CSS, these imports might not be strictly necessary */
+@import url('./Dashboard.css'); /* For .dashboard-container, .main-content, etc. */
+@import url('./RecentLetters.css'); /* For .recent-letters, .status-badge table styling */
+
+/* Specific styles for MyLettersPage table and buttons */
+.recent-letters table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+.letter-contenter{
+    padding: 10px;
+    width: 170vh;
+    
+}
+.recent-letters th,
+.recent-letters td {
+  border: 1px solid #e0e0e0;
+  padding: 12px 15px;
+  text-align: left;
+}
+
+.recent-letters th {
+  background-color: #d8e5f8;
+  color: #1a3e72;
+  font-weight: 600;
+}
+
+.recent-letters tbody tr:nth-child(even) {
+  background-color: #f8f8f8;
+}
+
+.recent-letters tbody tr:hover {
+  background-color: #eef7ff;
+}
+
+/* Style for the "View Details" button */
+.view-details-btn {
+  background-color: #007bff; /* Primary blue */
+  color: white;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 5px;
+  text-decoration: none; /* Remove underline for links */
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  font-size: 0.9rem;
+  display: inline-block; /* Allows padding and margin to work correctly */
+  text-align: center;
+}
+
+.view-details-btn:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+  transform: translateY(-1px); /* Slight lift effect */
+}
+
+/* Ensure modal styles are picked up if not already global */
+/* (Usually, these would be in a common modal CSS file) */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(30, 30, 30, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background-color: #fff;
+  border-radius: 8px;
+  width: 400px;
+  max-width: 90%;
+  padding: 20px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
+  font-size: 1rem;
+  color: #1a3e72;
+  text-align: center;
+}
+
+.modal h3 {
+  margin-bottom: 20px;
+  font-weight: 700;
+  font-size: 1.5rem;
+}
+
+.modal p {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.modal-actions button {
+  padding: 10px 20px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.modal-actions .submit-btn {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.modal-actions .submit-btn:hover {
+  background-color: #45a049;
+}
+
+.modal-actions .cancel-btn {
+  background-color: #f44336;
+  color: white;
+}
+
+.modal-actions .cancel-btn:hover {
+  background-color: #da190b;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .recent-letters th,
+  .recent-letters td {
+    padding: 8px 10px;
+    font-size: 0.9rem;
+  }
+  .view-details-btn {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .recent-letters table,
+  .recent-letters thead,
+  .recent-letters tbody,
+  .recent-letters th,
+  .recent-letters td,
+  .recent-letters tr {
+    display: block;
+  }
+
+  .recent-letters thead tr {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+
+  .recent-letters tr {
+    border: 1px solid #e0e0e0;
+    margin-bottom: 10px;
+  }
+
+  .recent-letters td {
+    border: none;
+    border-bottom: 1px solid #e0e0e0;
+    position: relative;
+    padding-left: 50%;
+    text-align: right;
+  }
+
+  .recent-letters td:before {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    width: 45%;
+    padding-right: 10px;
+    white-space: nowrap;
+    text-align: left;
+    font-weight: 600;
+    color: #1a3e72;
+  }
+
+  .recent-letters td:nth-of-type(1):before { content: "Type:"; }
+  .recent-letters td:nth-of-type(2):before { content: "Submitted Date:"; }
+  .recent-letters td:nth-of-type(3):before { content: "Status:"; }
+  .recent-letters td:nth-of-type(4):before { content: "Action:"; }
+}

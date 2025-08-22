@@ -1,15 +1,54 @@
 import express from 'express';
+import multer from 'multer'; // multer import කරන්න
+import path from 'path'; // path module import කරන්න
+import fs from 'fs'; // fs (file system) module import කරන්න
+
 const router = express.Router();
 import {
   createLetter,
   getLettersByUserId,
   updateLetterStatus,
   getPendingApprovals,
-  getLetterById // Ensure this is correctly imported
+  getLetterById
 } from '../controllers/letterController.js';
 
+// uploads directory එක තිබේදැයි තහවුරු කරන්න
+const uploadsDir = 'uploads/';
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir);
+}
+
+// Multer storage configuration for letter attachments
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadsDir); // uploads/ directory එකට save කරන්න
+  },
+  filename: (req, file, cb) => {
+    // Unique filename එකක් සාදන්න
+    cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
+  },
+});
+
+// Multer upload middleware
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 1024 * 1024 * 10 }, // 10MB file size limit
+  fileFilter: (req, file, cb) => {
+    const filetypes = /jpeg|jpg|png|pdf|doc|docx/;
+    const mimetype = filetypes.test(file.mimetype);
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+
+    if (mimetype && extname) {
+      return cb(null, true);
+    }
+    cb(new Error('Only .pdf, .jpg, .jpeg, .png, .doc, .docx formats are allowed for attachments!'));
+  }
+});
+
+
 // Route to create a new letter
-router.post('/', createLetter);
+// upload.single('attachments') middleware එක මෙහිදී file upload එක හසුරුවයි
+router.post('/', upload.single('attachments'), createLetter);
 
 // Route to get letters by a specific user ID
 router.get('/byUser/:userId', getLettersByUserId);
@@ -21,8 +60,6 @@ router.get('/pendingApprovals/:statusName', getPendingApprovals);
 router.put('/:id/status', updateLetterStatus);
 
 // IMPORTANT: Route to get a single letter by its ID.
-// This route should come *after* specific routes like /byUser and /pendingApprovals
-// but *before* any generic routes that might capture the ID as a different parameter
-router.get('/:id', getLetterById); // This is the route for DocumentsView
+router.get('/:id', getLetterById);
 
 export default router;

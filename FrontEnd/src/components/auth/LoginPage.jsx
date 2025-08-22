@@ -1,12 +1,12 @@
-import React, { useState, useContext } from 'react';
-import { AuthContext } from '../../context/AuthContext'; // AuthContext import කරන්න
-import '../../styles/auth/LoginPage.css'; // Login page සඳහා CSS
-import Footer from '../common-dashboard/Footer';
+import React, { useState, useContext } from "react";
+import { Link, useNavigate } from "react-router-dom"; // useNavigate import කරන්න
 import universityLogo from '../../assets/uni-logo.png'; // Make sure this path is correct
+import Footer from '../common-dashboard/Footer'; // Make sure this path is correct
+import '../../styles/auth/LoginPage.css'; // You'll need to create or update this CSS file
+import { AuthContext } from '../../context/AuthContext'; // AuthContext for login functionality
 
-
-// Custom Message Modal Component (අපි කලින් හදාගත් එකම)
-const MessageModal = ({ show, title, message, onClose }) => { // onClose එකතු කළා
+// Custom Message Modal Component
+const MessageModal = ({ show, title, message, onConfirm }) => {
   if (!show) return null;
 
   return (
@@ -15,7 +15,7 @@ const MessageModal = ({ show, title, message, onClose }) => { // onClose එක�
         <h3>{title}</h3>
         <p>{message}</p>
         <div className="modal-actions">
-          <button onClick={onClose} className="submit-btn">
+          <button onClick={onConfirm} className="modal-button">
             Okay
           </button>
         </div>
@@ -24,12 +24,23 @@ const MessageModal = ({ show, title, message, onClose }) => { // onClose එක�
   );
 };
 
-function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+export default function LoginPage() {
+  const [formData, setFormData] = useState({ // formData state එක භාවිතා කරන්න
+    email: "",
+    password: "",
+  });
+
+  const [error, setError] = useState("");
+  const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
+  const [messageModal, setMessageModal] = useState({ show: false, title: '', message: '' });
+
+  const navigate = useNavigate();
   const { login } = useContext(AuthContext); // AuthContext එකෙන් login function එක ගන්නවා
 
-  const [messageModal, setMessageModal] = useState({ show: false, title: '', message: '' });
+  const handleChange = (e) => { // formData හැසිරවීමට
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setError(""); // Clear error on input change
+  };
 
   const closeMessageModal = () => {
     setMessageModal({ show: false, title: '', message: '' });
@@ -37,82 +48,122 @@ function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (formData.email.trim() === "") { // formData.email භාවිතා කරන්න
+      setError("Email cannot be empty");
+      return;
+    }
+    if (formData.password.trim() === "") { // formData.password භාවිතා කරන්න
+      setError("Password cannot be empty");
+      return;
+    }
+
     try {
-      // AuthContext එකේ login function එක call කරනවා
-      await login(email, password);
-      // Login සාර්ථක නම්, AuthContext එක මගින් user state manage කරනු ඇත.
-      // ඔබට මෙතනට login සාර්ථක වූ පසු redirect වීමට logic add කළ හැක.
-      // e.g., navigate('/dashboard'); (if using react-router-dom)
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData), // formData object එක යවන්න
+      });
+
+      const data = await response.json();
+
+      // --- DEBUGGING LOGS (ප්‍රයෝජනවත්) ---
+      console.log('Backend response data:', data);
+      console.log('Type of data.user:', typeof data.user);
+      // --- END DEBUGGING LOGS ---
+
+      if (response.ok) {
+        // Backend එකෙන් ලැබෙන token සහ user object එක AuthContext.login වෙත යවන්න
+        login(data.token, data.user); 
+        setMessageModal({ show: true, title: 'Success', message: 'Login successful!' });
+        
+        // Navigation සඳහා user data වලංගු දැයි තහවුරු කරන්න
+        if (typeof data.user === 'object' && data.user !== null && data.user.role) {
+            if (data.user.role === 'Admin') {
+                navigate('/admin-dashboard');
+            } else {
+                navigate('/dashboard');
+            }
+        } else {
+            console.error("Login successful, but received invalid user object for navigation:", data.user);
+            setMessageModal({ show: true, title: 'Error', message: 'Login successful, but user data invalid for navigation. Please contact support.', onConfirm: closeMessageModal });
+        }
+      } else {
+        setMessageModal({ show: true, title: 'Login Failed', message: data.message || 'Invalid email or password.' });
+        setError(data.message || 'Login failed.');
+      }
     } catch (error) {
-      console.error('Login failed:', error);
-      setMessageModal({ show: true, title: 'Login Failed', message: error.message, onClose: closeMessageModal });
+      console.error('Login fetch or AuthContext error:', error);
+      setMessageModal({ show: true, title: 'Error', message: 'Network error or server unavailable.' });
+      setError('Network error. Please try again.');
     }
   };
 
-  const [error, setError] = useState("");
-  // State for the Forgot Password modal
-  const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false); 
-  // const [messageModal, setMessageModal] = useState({ show: false, title: '', message: '' });
-
-  // Function to open the Forgot Password modal
   const openForgotPasswordModal = (e) => {
-    e.preventDefault(); // Prevent default link behavior
+    e.preventDefault();
     setShowForgotPasswordModal(true);
   };
 
-  // Function to close the Forgot Password modal
   const closeForgotPasswordModal = () => {
     setShowForgotPasswordModal(false);
   };
 
   return (
-    <div className='login-page'>
+    <div className="login-page">
       <div className="login-container">
-      <div className="login-box">
+        <div className="login-box">
         <h2>University Of Jaffna</h2>
-        <img
+        <div className="flex justify-center mb-6">
+          <img
             src={universityLogo}
             alt="University of Jaffna Logo"
             className="login-logo"
           />
+        </div>
+        <h2>Login</h2>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+          <input
+            className="login-input"
+            type="email"
+            name="email" // name attribute එක එකතු කරන්න
+            placeholder="Email"
+            value={formData.email} // formData.email භාවිතා කරන්න
+            onChange={handleChange}
+            required
+          />
           </div>
           <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+          <input
+            className="login-input"
+            type="password"
+            name="password" // name attribute එක එකතු කරන්න
+            placeholder="Password"
+            value={formData.password} // formData.password භාවිතා කරන්න
+            onChange={handleChange}
+            required
+          />
           </div>
-          <button type="submit" className="login-btn">Login</button>
+          {error && <p className="text-red-600 font-medium">{error}</p>}
+          <button type="submit" className="login-btn">
+            Login
+          </button>
         </form>
+        <div className="login-links">
           <p>
             Forgot <a href="#" onClick={openForgotPasswordModal}>Password?</a>
           </p>
-        <p className="register-link">
-          Don't have an account? <a href="/register">Register</a> {/* Register link එක ඔබට අවශ්‍ය නම් */}
-        </p>
-        <Footer/>
+          <p>
+            Don't have an account? <Link to="/register">Sign up</Link>
+          </p>
+        </div>
+        <div className="footer-wrapper">
+          <Footer />
+          </div>
+        </div>
       </div>
 
-      <MessageModal
-        show={messageModal.show}
-        title={messageModal.title}
-        message={messageModal.message}
-        onClose={closeMessageModal}
-      />
       {showForgotPasswordModal && (
         <div className="modal-overlay" onClick={closeForgotPasswordModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -121,9 +172,12 @@ function LoginPage() {
           </div>
         </div>
       )}
-    </div>
+      <MessageModal
+        show={messageModal.show}
+        title={messageModal.title}
+        message={messageModal.message}
+        onConfirm={closeMessageModal} // onClose වෙනුවට onConfirm භාවිතා කරන්න
+      />
     </div>
   );
 }
-
-export default LoginPage;
