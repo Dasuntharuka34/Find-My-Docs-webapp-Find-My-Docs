@@ -1,15 +1,15 @@
 import React, { useContext, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import Dashboard from './components/common-dashboard/Dashboard';
+import Dashboard from './components/pages/Dashboard';
 import AdminDashboard from './components/admin-dashboard/AdminDashboard';
 // import SpecialDashboard from './components/special-user-dashboard/SpecialDashboard';
 import ExcuseRequestForm from './components/forms/ExcuseRequestForm';
 import PendingApprovals from './components/approvel-page/PendingApprovals';
 import LoginPage from './components/auth/LoginPage';
 import RegisterPage from './components/auth/RegisterPage';
-import DocumentsView from './components/common-dashboard/DocumentsView';
-import MyLettersPage from './components/common-dashboard/MyLettersPage';
-import ProfilePage from './components/common-dashboard/ProfilePage'; // <-- ProfilePage import කරන්න
+import DocumentsView from './components/pages/DocumentsView';
+import MyLettersPage from './components/pages/MyLettersPage';
+import ProfilePage from './components/pages/ProfilePage'; 
 import { AuthContext } from './context/AuthContext';
 
 // PrivateRoute component
@@ -47,8 +47,6 @@ function App() {
         
         <Route path="/" element={isLoggedIn ? <Navigate to={user?.role === 'Admin' ? "/admin-dashboard" : "/dashboard"} /> : <Navigate to="/login" />} />
 
-
-        {/* Private Routes (Login වී සිටින අයට පමණයි) */}
         <Route path="/dashboard" element={
           <PrivateRoute allowedRoles={['Student','Lecturer', 'HOD', 'Dean', 'VC']}>
             <Dashboard />

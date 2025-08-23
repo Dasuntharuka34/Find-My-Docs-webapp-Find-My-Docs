@@ -1,7 +1,7 @@
 import React, { useState, useContext } from "react";
-import { Link, useNavigate } from "react-router-dom"; // useNavigate import කරන්න
+import { Link, useNavigate } from "react-router-dom"; 
 import universityLogo from '../../assets/uni-logo.png'; // Make sure this path is correct
-import Footer from '../common-dashboard/Footer'; // Make sure this path is correct
+import Footer from '../pages/Footer'; // Make sure this path is correct
 import '../../styles/auth/LoginPage.css'; // You'll need to create or update this CSS file
 import { AuthContext } from '../../context/AuthContext'; // AuthContext for login functionality
 
@@ -25,19 +25,20 @@ const MessageModal = ({ show, title, message, onConfirm }) => {
 };
 
 export default function LoginPage() {
-  const [formData, setFormData] = useState({ // formData state එක භාවිතා කරන්න
+  const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
 
   const [error, setError] = useState("");
+   const [showPassword, setShowPassword] = useState(false); // New state for password visibility
   const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
   const [messageModal, setMessageModal] = useState({ show: false, title: '', message: '' });
 
   const navigate = useNavigate();
-  const { login } = useContext(AuthContext); // AuthContext එකෙන් login function එක ගන්නවා
+  const { login } = useContext(AuthContext);
 
-  const handleChange = (e) => { // formData හැසිරවීමට
+  const handleChange = (e) => { 
     setFormData({ ...formData, [e.target.name]: e.target.value });
     setError(""); // Clear error on input change
   };
@@ -48,37 +49,35 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (formData.email.trim() === "") { // formData.email භාවිතා කරන්න
+    if (formData.email.trim() === "") { 
       setError("Email cannot be empty");
       return;
     }
-    if (formData.password.trim() === "") { // formData.password භාවිතා කරන්න
+    if (formData.password.trim() === "") { 
       setError("Password cannot be empty");
       return;
     }
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users/login`, {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/users/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData), // formData object එක යවන්න
+        body: JSON.stringify(formData), 
       });
 
       const data = await response.json();
 
-      // --- DEBUGGING LOGS (ප්‍රයෝජනවත්) ---
+      // --- DEBUGGING LOGS ---
       console.log('Backend response data:', data);
       console.log('Type of data.user:', typeof data.user);
       // --- END DEBUGGING LOGS ---
 
       if (response.ok) {
-        // Backend එකෙන් ලැබෙන token සහ user object එක AuthContext.login වෙත යවන්න
         login(data.token, data.user); 
         setMessageModal({ show: true, title: 'Success', message: 'Login successful!' });
         
-        // Navigation සඳහා user data වලංගු දැයි තහවුරු කරන්න
         if (typeof data.user === 'object' && data.user !== null && data.user.role) {
             if (data.user.role === 'Admin') {
                 navigate('/admin-dashboard');
@@ -108,6 +107,10 @@ export default function LoginPage() {
   const closeForgotPasswordModal = () => {
     setShowForgotPasswordModal(false);
   };
+   // Function to toggle password visibility
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
 
   return (
     <div className="login-page">
@@ -127,23 +130,34 @@ export default function LoginPage() {
           <input
             className="login-input"
             type="email"
-            name="email" // name attribute එක එකතු කරන්න
+            name="email"
             placeholder="Email"
-            value={formData.email} // formData.email භාවිතා කරන්න
+            value={formData.email} 
             onChange={handleChange}
             required
           />
           </div>
           <div className="form-group">
+          <div className="password-input-container"> {/* Container for password input and toggle */}
+
           <input
             className="login-input"
-            type="password"
-            name="password" // name attribute එක එකතු කරන්න
+            type={showPassword ? 'text' : 'password'}
+            name="password" 
             placeholder="Password"
-            value={formData.password} // formData.password භාවිතා කරන්න
+            value={formData.password} 
             onChange={handleChange}
             required
           />
+          <button
+              type="button"
+              onClick={togglePasswordVisibility}
+              className="password-toggle-btn"
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+            >
+              {showPassword ? '🔓' : '🔒'} {/* icon for show/hide */}
+            </button>
+          </div>
           </div>
           {error && <p className="text-red-600 font-medium">{error}</p>}
           <button type="submit" className="login-btn">
@@ -176,7 +190,7 @@ export default function LoginPage() {
         show={messageModal.show}
         title={messageModal.title}
         message={messageModal.message}
-        onConfirm={closeMessageModal} // onClose වෙනුවට onConfirm භාවිතා කරන්න
+        onConfirm={closeMessageModal} 
       />
     </div>
   );

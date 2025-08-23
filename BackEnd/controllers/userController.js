@@ -356,5 +356,35 @@ const deleteUser = async (req, res) => {
     res.status(500).json({ message: 'Error deleting user', error: error.message });
   }
 };
+// @desc    Reset a user's password to a default value
+// @route   PUT /api/users/:id/reset-password
+// @access  Private/Admin
+const resetUserPassword = async (req, res) => {
+  const { id } = req.params; // User ID
+  const defaultPassword = 'password123'; // Define your default password here
 
-export { registerUser, authUser, getUsers, createUser, getPendingRegistrations, approveRegistration, rejectRegistration, updateUser, deleteUser };
+  try {
+    const user = await User.findById(id);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Hash the default password
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(defaultPassword, salt);
+
+    await user.save(); // Save the updated user with the new hashed password
+
+    res.status(200).json({ message: `Password for user ${user.email} has been reset to default.` });
+
+  } catch (error) {
+    console.error('Error resetting user password:', error);
+    res.status(500).json({ message: 'Server error resetting password', error: error.message });
+  }
+};
+
+
+// Export all controller functions for use in routes
+export { registerUser, authUser, getUsers, createUser, getPendingRegistrations, approveRegistration, rejectRegistration, updateUser, deleteUser, resetUserPassword };
+

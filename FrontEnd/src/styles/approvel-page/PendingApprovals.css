@@ -1,7 +1,6 @@
 .pending-approvals-container {
   width: 100%;
   height: 100%;
-  
 }
 
 .approvals-table {
@@ -21,6 +20,7 @@
   border-radius: 5px;
   font-weight: bold;
   color: white;
+  background-color: #787b7e;
 }
 
 .status-badge.pending {
@@ -82,6 +82,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1000;
 }
 
 .modal {
@@ -97,26 +98,56 @@
   margin-top: 20px;
   display: flex;
   justify-content: space-around;
+  gap: 10px; /* Add gap between buttons */
 }
 
-.modal-buttons button {
+/* Styles for the modal confirmation buttons */
+.modal-buttons .confirm-yes-btn {
+  background-color: #4CAF50; /* Green color for 'Yes' / Confirm */
+  color: white;
   padding: 8px 16px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  background-color: #4caf50;
-  color: white;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
 }
 
-.approve-btn {
-  background-color: #4caf50;
-  color: white;
+.modal-buttons .confirm-yes-btn:hover {
+  background-color: #45a049;
 }
 
-.reject-btn {
-  background-color: #f44336;
+.modal-buttons .no-btn {
+  background-color: #f44336; /* Red color for 'No' / Cancel */
   color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
 }
+
+.modal-buttons .no-btn:hover {
+  background-color: #da190b;
+}
+
+.modal-buttons .okey-btn {
+  background-color: #007bff; /* Blue color for 'Okay' (general purpose) */
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.modal-buttons .okey-btn:hover {
+  background-color: #0056b3;
+}
+
+
 /* Wrap sidebar and content */
 .approvals-layout {
   display: flex;

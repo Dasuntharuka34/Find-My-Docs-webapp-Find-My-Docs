@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
-import Header from '../common-dashboard/Header';
-import Footer from '../common-dashboard/Footer';
+import Header from '../pages/Header';
+import Footer from '../pages/Footer';
 import '../../styles/admin-dashboard/AdminDashboard.css';
 import { AuthContext } from '../../context/AuthContext';
 
@@ -15,17 +15,18 @@ const MessageModal = ({ show, title, message, onConfirm, onCancel }) => {
         <p>{message}</p>
         <div className="modal-buttons">
           {onConfirm && (
-            <button onClick={onConfirm}>
+            // Added specific classes for modal buttons for distinct styling
+            <button onClick={onConfirm} className="modal-confirm-btn">
               Yes
             </button>
           )}
           {onCancel && (
-            <button onClick={onCancel}>
+            <button onClick={onCancel} className="modal-cancel-btn">
               No
             </button>
           )}
           {(!onConfirm && !onCancel) && (
-            <button onClick={() => { /* Close logic handled by parent */ }}>
+            <button onClick={() => { /* Close logic handled by parent */ }} className="modal-okay-btn">
               Okay
             </button>
           )}
@@ -39,8 +40,8 @@ const MessageModal = ({ show, title, message, onConfirm, onCancel }) => {
 export default function AdminDashboard() {
   const { user } = useContext(AuthContext); // Get authenticated user from AuthContext
 
-  const [pendingRegistrations, setPendingRegistrations] = useState([]); // New state for pending registrations
-  const [approvedUsers, setApprovedUsers] = useState([]); // Existing state for approved users
+  const [pendingRegistrations, setPendingRegistrations] = useState([]); // State for pending registrations
+  const [approvedUsers, setApprovedUsers] = useState([]); // State for approved users
 
   // States for confirmation modals and messages
   const [viewingRegistration, setViewingRegistration] = useState(null); // For viewing full details
@@ -56,8 +57,7 @@ export default function AdminDashboard() {
   // --- Fetching Data ---
   const fetchPendingRegistrations = async () => {
     try {
-      // Backend API to get pending registrations
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users/registrations/pending`);
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/users/registrations/pending`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -69,10 +69,9 @@ export default function AdminDashboard() {
     }
   };
 
-  const fetchApprovedUsers = async () => { // Renamed from fetchUsers for clarity
+  const fetchApprovedUsers = async () => {
     try {
-      // Backend API to get all approved users
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users`);
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/users`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -85,17 +84,16 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
-    // Fetch both pending registrations and approved users on component mount
     fetchPendingRegistrations();
     fetchApprovedUsers();
-  }, []); // Empty dependency array means this runs once on mount
+  }, []);
 
   // --- Handling Registration Actions (Approve/Reject) ---
   const handleRegistrationAction = async (registrationId, action, reason = '') => {
     try {
       let response;
       if (action === 'approve') {
-        response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users/registrations/${registrationId}/approve`, {
+        response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/users/registrations/${registrationId}/approve`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
         });
@@ -104,25 +102,23 @@ export default function AdminDashboard() {
           setMessageModal({ show: true, title: 'Input Required', message: 'Please provide a reason for rejection.', onConfirm: closeMessageModal });
           return;
         }
-        response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users/registrations/${registrationId}/reject`, {
+        response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/users/registrations/${registrationId}/reject`, {
           method: 'DELETE',
         });
       } else {
-        return; // Should not happen
+        return;
       }
 
       const data = await response.json();
 
       if (response.ok) {
         setMessageModal({ show: true, title: 'Success', message: data.message, onConfirm: closeMessageModal });
-        // Refresh both lists after action
         fetchPendingRegistrations();
         fetchApprovedUsers();
       } else {
         setMessageModal({ show: true, title: 'Error', message: data.message || `Failed to ${action} registration.` });
       }
 
-      // Clear confirmation modal state
       setConfirmationRequest(null);
       setConfirmAction(null);
       setRejectionReason('');
@@ -133,12 +129,12 @@ export default function AdminDashboard() {
     }
   };
 
-  // --- Handling Approved User Management (Edit/Delete) ---
+  // --- Handling Approved User Management (Edit/Delete/Reset Password) ---
   const handleEditUser = async (userToEdit) => {
     const newName = prompt(`Edit name for ${userToEdit.name}:`, userToEdit.name);
     if (newName !== null && newName.trim() !== '') {
       try {
-        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users/${userToEdit._id}`, {
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/users/${userToEdit._id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name: newName.trim() }),
@@ -147,7 +143,7 @@ export default function AdminDashboard() {
           const errorData = await response.json();
           throw new Error(errorData.message || `Failed to update user! status: ${response.status}`);
         }
-        fetchApprovedUsers(); // Refresh approved users list
+        fetchApprovedUsers();
         setMessageModal({ show: true, title: 'Success', message: `User ${userToEdit.name} updated to ${newName}.`, onConfirm: closeMessageModal });
       } catch (error) {
         console.error("Error editing user:", error);
@@ -163,18 +159,47 @@ export default function AdminDashboard() {
       message: `Are you sure you want to delete user ${userName}?`,
       onConfirm: async () => {
         try {
-          const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users/${userIdToDelete}`, {
+          const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/users/${userIdToDelete}`, {
             method: 'DELETE',
           });
           if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.message || `Failed to delete user! status: ${response.status}`);
           }
-          fetchApprovedUsers(); // Refresh approved users list
+          fetchApprovedUsers();
           setMessageModal({ show: true, title: 'Success', message: `User ${userName} deleted successfully.`, onConfirm: closeMessageModal });
         } catch (error) {
           console.error("Error deleting user:", error);
           setMessageModal({ show: true, title: 'Error', message: `Failed to delete user: ${error.message}`, onConfirm: closeMessageModal });
+        } finally {
+          closeMessageModal();
+        }
+      },
+      onCancel: closeMessageModal
+    });
+  };
+
+  const handleResetPassword = async (userId, userName) => {
+    setMessageModal({
+      show: true,
+      title: 'Confirm Password Reset',
+      message: `Are you sure you want to reset the password for ${userName} to the default password ('password123')?`,
+      onConfirm: async () => {
+        try {
+          const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/users/${userId}/reset-password`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+          });
+          const data = await response.json();
+
+          if (response.ok) {
+            setMessageModal({ show: true, title: 'Success', message: data.message, onConfirm: closeMessageModal });
+          } else {
+            setMessageModal({ show: true, title: 'Error', message: data.message || 'Failed to reset password.' });
+          }
+        } catch (error) {
+          console.error("Error resetting password:", error);
+          setMessageModal({ show: true, title: 'Error', message: `Network error during password reset: ${error.message}`, onConfirm: closeMessageModal });
         } finally {
           closeMessageModal();
         }
@@ -201,7 +226,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="admin-dashboard">
-      <Header user={user} /> {/* Pass authenticated user */}
+      <Header user={user} />
       <h2>Admin Dashboard</h2>
 
       <section className="admin-section">
@@ -261,6 +286,7 @@ export default function AdminDashboard() {
                   <td>
                     <button onClick={() => handleEditUser(approvedUser)} className="edit-btn">Edit</button>
                     <button onClick={() => handleDeleteUser(approvedUser._id, approvedUser.name)} className="delete-btn">Delete</button>
+                    <button onClick={() => handleResetPassword(approvedUser._id, approvedUser.name)} className="reset-password-btn">Reset Password</button> {/* New Button */}
                   </td>
                 </tr>
               ))}

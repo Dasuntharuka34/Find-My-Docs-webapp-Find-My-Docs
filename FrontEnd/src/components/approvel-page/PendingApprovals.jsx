@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useContext } from 'react';
-import Header from '../common-dashboard/Header';
-import Footer from '../common-dashboard/Footer';
-import Sidebar from '../common-dashboard/Sidebar';
+import Header from '../pages/Header';
+import Footer from '../pages/Footer';
+import Sidebar from '../pages/Sidebar';
 import '../../styles/approvel-page/PendingApprovals.css';
 import { AuthContext } from '../../context/AuthContext';
-import { Link } from 'react-router-dom'; // <-- Link component එක import කරන්න
+import { Link } from 'react-router-dom'; 
 
 // Custom Message Modal Component
 const MessageModal = ({ show, title, message, onConfirm, onCancel }) => {
@@ -17,17 +17,20 @@ const MessageModal = ({ show, title, message, onConfirm, onCancel }) => {
         <p>{message}</p>
         <div className="modal-buttons">
           {onConfirm && (
-            <button onClick={onConfirm}>
+            // Added 'confirm-yes-btn' class for the 'Yes' button
+            <button onClick={onConfirm} className="confirm-yes-btn"> 
               Yes
             </button>
           )}
           {onCancel && (
-            <button onClick={onCancel}>
+            // Retained 'no-btn' class for the 'No' button
+            <button className='no-btn' onClick={onCancel}>
               No
             </button>
           )}
           {(!onConfirm && !onCancel) && (
-            <button onClick={() => { /* Close logic handled by parent */ }}>
+            // Retained 'okey-btn' class for the 'Okay' button
+            <button className='okey-btn' onClick={() => { /* Close logic handled by parent */ }}>
               Okay
             </button>
           )}
@@ -39,17 +42,16 @@ const MessageModal = ({ show, title, message, onConfirm, onCancel }) => {
 
 // --- NEW STAGE DEFINITIONS FOR SEQUENTIAL APPROVAL ---
 const approvalStages = [
-  { name: "Submitted", approverRole: null },              // Index 0 (Initial state when submitted by a student)
-  // { name: "Pending Staff Approval", approverRole: "Staff" },      // Index 1 (Next stage after student submission, or initial for Staff submitter if they approve their own?)
-  { name: "Pending Lecturer Approval", approverRole: "Lecturer" }, // Index 2
-  { name: "Pending HOD Approval", approverRole: "HOD" },    // Index 3
-  { name: "Pending Dean Approval", approverRole: "Dean" },    // Index 4
-  { name: "Pending VC Approval", approverRole: "VC" },      // Index 5
-  { name: "Approved", approverRole: null },               // Index 6 (Final Approved state)
-  { name: "Rejected", approverRole: null }                // Index 7 (Final Rejected state)
+  { name: "Submitted", approverRole: null }, 
+  // { name: "Pending Staff Approval", approverRole: "Staff" }, 
+  { name: "Pending Lecturer Approval", approverRole: "Lecturer" },
+  { name: "Pending HOD Approval", approverRole: "HOD" }, 
+  { name: "Pending Dean Approval", approverRole: "Dean" },
+  { name: "Pending VC Approval", approverRole: "VC" }, 
+  { name: "Approved", approverRole: null }, 
+  { name: "Rejected", approverRole: null } 
 ];
 
-// අනුමත කරන්නෙකුගේ role එක අනුව, ඔහුට පෙනිය යුතු ලිපි වල තත්වය (status) තීරණය කරයි.
 const approverRoleToStageIndex = {
     // "Staff": 1,
     "Lecturer": 1,
@@ -91,7 +93,7 @@ function PendingApprovals() {
 
     try {
       // Backend API should filter by status (which maps to the stage name)
-      const response = await fetch(`http://localhost:5000/api/letters/pendingApprovals/${targetStatusName}`);
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/letters/pendingApprovals/${targetStatusName}`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -147,7 +149,7 @@ function PendingApprovals() {
         setMessageModal({ show: true, title: 'Rejection', message: `Request for ${currentRequest.student} rejected. Reason: ${reason}`, onConfirm: closeMessageModal });
       }
 
-      const response = await fetch(`http://localhost:5000/api/letters/${id}/status`, {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/letters/${id}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -214,8 +216,8 @@ function PendingApprovals() {
                   <th>Student</th>
                   <th>Submitted On</th>
                   <th>Status</th>
-                  <th>Action</th>
                   <th>View Details</th> {/* <-- New table header */}
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -233,7 +235,7 @@ function PendingApprovals() {
                     <td> {/* <-- New table data cell for the View Details button */}
                       <Link
                         to={`/documents/${request._id}`}
-                        className="view-details-btn" // Reusing styling from DocumentsView.css
+                        className="view-details-btn" 
                       >
                         View Details
                       </Link>
@@ -290,6 +292,7 @@ function PendingApprovals() {
                   }
                   handleApproval(selectedRequest._id, confirmAction, rejectionReason);
                 }}
+                className="confirm-yes-btn" // Added class for 'Yes' button in confirmation modal
               >
                 Yes
               </button>
@@ -297,7 +300,7 @@ function PendingApprovals() {
                 setSelectedRequest(null);
                 setConfirmAction(null);
                 setRejectionReason('');
-              }}>
+              }} className="no-btn"> {/* Added class for 'No' button in confirmation modal */}
                 Cancel
               </button>
             </div>

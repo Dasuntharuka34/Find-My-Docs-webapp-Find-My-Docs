@@ -51,6 +51,14 @@ button {
   background-color: rgb(194, 56, 56);
   color: white;
 }
+.reset-password-btn { /* New style for reset password button */
+    background-color: #17a2b8; /* Teal/Cyan */
+    color: white;
+}
+.reset-password-btn:hover {
+    background-color: #138496;
+    transform: translateY(-1px);
+}
 
 .modal-backdrop {
   position: fixed;

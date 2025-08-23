@@ -27,10 +27,8 @@ const submitterRoleToInitialStageIndex = {
 // @route   POST /api/letters
 // @access  Private (e.g., Student, Staff, Lecturer, HOD, Dean, VC)
 const createLetter = async (req, res) => {
-    // req.body මගින් form fields ලබාගන්න
     const { type, reason, date, studentId, student, submitterRole } = req.body;
-    // req.file මගින් uploaded file එකේ තොරතුරු ලබාගන්න
-    const attachmentsPath = req.file ? req.file.path : null; // ගොනුවේ path එක ලබාගන්න
+    const attachmentsPath = req.file ? req.file.path : null; 
 
     const initialStageIndex = submitterRoleToInitialStageIndex[submitterRole] !== undefined
                                ? submitterRoleToInitialStageIndex[submitterRole]
@@ -47,7 +45,7 @@ const createLetter = async (req, res) => {
             status: initialStatus,
             currentStageIndex: initialStageIndex,
             submittedDate: new Date(),
-            attachments: attachmentsPath // ගොනුවේ path එක save කරන්න
+            attachments: attachmentsPath 
         });
         res.status(201).json(letter);
     } catch (error) {

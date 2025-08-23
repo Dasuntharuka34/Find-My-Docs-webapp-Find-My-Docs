@@ -58,6 +58,7 @@ import {
   rejectRegistration,
   updateUser,
   deleteUser,
+  resetUserPassword,
 } from '../controllers/userController.js';
 
 // --- Public Routes ---
@@ -74,6 +75,9 @@ router.post('/', createUser); // Manual user creation by admin
 router.put('/:id', upload.single('profilePicture'), updateUser); // Apply multer here
 
 router.delete('/:id', deleteUser);
+
+// Route to reset a user's password to a default value
+router.put('/:id/reset-password', resetUserPassword); // <-- New route for password reset
 
 // --- Admin Registration Approval Routes ---
 router.get('/registrations/pending', getPendingRegistrations);

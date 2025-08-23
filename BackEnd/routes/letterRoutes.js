@@ -12,8 +12,7 @@ import {
   getLetterById
 } from '../controllers/letterController.js';
 
-// uploads directory එක තිබේදැයි තහවුරු කරන්න
-const uploadsDir = 'uploads/';
+const uploadsDir = 'uploads/attachments/';
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir);
 }
@@ -21,10 +20,9 @@ if (!fs.existsSync(uploadsDir)) {
 // Multer storage configuration for letter attachments
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, uploadsDir); // uploads/ directory එකට save කරන්න
+    cb(null, uploadsDir);
   },
   filename: (req, file, cb) => {
-    // Unique filename එකක් සාදන්න
     cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
   },
 });
@@ -47,7 +45,6 @@ const upload = multer({
 
 
 // Route to create a new letter
-// upload.single('attachments') middleware එක මෙහිදී file upload එක හසුරුවයි
 router.post('/', upload.single('attachments'), createLetter);
 
 // Route to get letters by a specific user ID
