@@ -1,8 +1,10 @@
+// server.js
+
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors'; // Import cors
 import path from 'path'; // Node.js path module
-import { fileURLToPath }  from 'url'; // For ES Modules to get __dirname
+import { fileURLToPath } from 'url'; // For ES Modules to get __dirname
 import fs from 'fs'; // Import fs module
 
 import connectDB from './config/db.js';
@@ -12,7 +14,8 @@ import userRoutes from './routes/userRoutes.js';
 import registrationRoutes from './routes/registrationRoutes.js';
 import letterRoutes from './routes/letterRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
-import excuseRequestRoutes from './routes/excuseRequestRoutes.js'; // Ensure this is imported
+import excuseRequestRoutes from './routes/excuseRequestRoutes.js';
+import leaveRequestRoutes from './routes/LeaveRequestRoutes.js'; // Import the new leave request routes
 
 dotenv.config();
 
@@ -52,7 +55,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/registrations', registrationRoutes);
 app.use('/api/letters', letterRoutes);
 app.use('/api/notifications', notificationRoutes);
-app.use('/api/excuse-requests', excuseRequestRoutes); // Add this route
+app.use('/api/excuse-requests', excuseRequestRoutes);
+app.use('/api/leaverequests', leaveRequestRoutes); // Add the new leave request route here
 
 // Simple root route
 app.get('/', (req, res) => {

@@ -11,6 +11,7 @@ import DocumentsView from './components/pages/DocumentsView';
 import MyLettersPage from './components/pages/MyLettersPage';
 import ProfilePage from './components/pages/ProfilePage'; 
 import { AuthContext } from './context/AuthContext';
+import LeaveRequestForm from './components/forms/LeaveRequestForm';
 
 // PrivateRoute component
 const PrivateRoute = ({ children, allowedRoles }) => {
@@ -68,6 +69,12 @@ function App() {
         <Route path="/excuse-request" element={
           <PrivateRoute allowedRoles={['Student','Lecturer', 'HOD', 'Dean', 'VC']}>
             <ExcuseRequestForm />
+          </PrivateRoute>
+        } />
+
+        <Route path="/leave-request" element={
+          <PrivateRoute allowedRoles={['Lecturer', 'HOD', 'Dean', 'VC']}>
+            <LeaveRequestForm />
           </PrivateRoute>
         } />
 

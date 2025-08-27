@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import '../../styles/pages/Header.css';
-// import universityLogo from '../../assets/uni-logo.png';
+import universityLogo from '../../assets/uni-logo.png';
 import { AuthContext } from '../../context/AuthContext'; // AuthContext import කරන්න
 
 function Header({ user }) {
@@ -13,7 +13,7 @@ function Header({ user }) {
   return (
     <header className="header">
       <div className="header-left">
-        {/* {universityLogo && <img src={universityLogo} alt="University Logo" className="logo" />} */}
+        {universityLogo && <img src={universityLogo} alt="University Logo" className="logo" />}
         <h1 className="university-name">University of Jaffna</h1>
       </div>
       <div className="header-right">

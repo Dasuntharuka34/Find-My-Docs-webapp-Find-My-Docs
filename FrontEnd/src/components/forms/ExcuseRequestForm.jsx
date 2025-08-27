@@ -151,8 +151,7 @@ const ExcuseRequestForm = () => {
       formDataToSend.append('studentRole', user.role); // Pass user's role for initial stage calculation
 
       // Submit to the excuse-requests API endpoint, which now handles creating the Letter
-      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000'; // Fallback to localhost
-      const response = await fetch(`${backendUrl}/api/excuse-requests`, {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/excuse-requests`, {
         method: 'POST',
         body: formDataToSend,
       });

@@ -3,13 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import '../../styles/pages/NewLetterModal.css';
 
 const letterTypes = [
-  "Medical Certificate", // Keep Medical Certificate as an option
-  "Leave Request",
+  "Medical Certificate",
+  "Leave Request", // Added "Leave Request" as an option
   "Transcript Request",
   "Internship Letter",
   "Other"
 ];
-
 
 function NewLetterModal({ onClose, onSubmit }) {
   const navigate = useNavigate(); 
@@ -19,25 +18,26 @@ function NewLetterModal({ onClose, onSubmit }) {
     reason: '',
     date: '',
     attachments: null
-  });
+   });
 
-  const handleChange = e => {
-    const { name, value, files } = e.target;
-    if (name === 'attachments') {
-      setFormData(prev => ({ ...prev, attachments: files[0] }));
-    } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
-    }
+   const handleChange = e => {
+     const { name, value, files } = e.target;
+     if (name === 'attachments') {
+       setFormData(prev => ({ ...prev, attachments: files[0] }));
+     } else {
+       setFormData(prev => ({ ...prev, [name]: value }));
+     }
   };
 
-  const handleSubmit = e => {
+   const handleSubmit = e => {
     e.preventDefault();
-    // If "Medical Certificate" is selected, navigate to the excuse request form page
     if (formData.type === "Medical Certificate") {
-      onClose(); // Close the current NewLetterModal
-      navigate('/excuse-request'); // Navigate to the ExcuseRequestForm page
+      onClose(); 
+      navigate('/excuse-request'); 
+    } else if (formData.type === "Leave Request") { // Added condition for Leave Request
+      onClose();
+      navigate('/leave-request'); // Navigate to the LeaveRequestForm page
     } else {
-      // Otherwise, proceed with submitting a regular letter
       onSubmit({
         type: formData.type,
         reason: formData.reason,
@@ -59,8 +59,8 @@ function NewLetterModal({ onClose, onSubmit }) {
             </select>
           </label>
 
-          {/* Reason, Date, and Attachments fields are shown only if not Medical Certificate */}
-          {formData.type !== "Medical Certificate" && (
+          {/* The following fields are now conditionally rendered based on selected type */}
+          {formData.type !== "Medical Certificate" && formData.type !== "Leave Request" && (
             <>
               <label>
                 Reason
@@ -91,15 +91,16 @@ function NewLetterModal({ onClose, onSubmit }) {
                   name="attachments"
                   accept=".pdf,.jpg,.png,.doc,.docx"
                   onChange={handleChange}
-                  required // Attachments are required for regular letters
+                  required
                 />
               </label>
             </>
           )}
-           {/* If Medical Certificate is selected, show a message instead of the other fields */}
-           {formData.type === "Medical Certificate" && (
-            <p className="medical-cert-note">
-              Please click "Submit" to proceed to the Medical Excuse Request Form.
+
+          {/* New message for Medical Certificate and Leave Request types */}
+          {(formData.type === "Medical Certificate" || formData.type === "Leave Request") && (
+            <p className="form-note">
+              Please click "Next" to proceed to the specific {formData.type} Form.
             </p>
           )}
 

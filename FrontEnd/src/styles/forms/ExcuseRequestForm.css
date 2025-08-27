@@ -71,11 +71,11 @@ select {
   background-color: #d9534f;
   color: white;
   border: none;
-  padding: 6px 10px;
-  margin-left: 8px;
-  border-radius: 4px;
+  padding: 8px 10px;
+  margin: 8px;
+  border-radius: 10px;
   cursor: pointer;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 }
 
 .remove-btn:hover {

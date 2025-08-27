@@ -15,14 +15,6 @@ function Sidebar() {
     }
   };
 
-  const handleNewLetterClick = () => {
-    if (user && user.role === 'Student') {
-      navigate('/dashboard'); 
-    } else {
-      navigate(getDashboardPath()); 
-    }
-  };
-
   return (
     <nav className="sidebar">
       <ul>
@@ -31,9 +23,6 @@ function Sidebar() {
         </li>
         <li className="sidebar-item">
           <Link to="/my-letters" className="sidebar-link">My Letters</Link>
-        </li>
-        <li className="sidebar-item" onClick={handleNewLetterClick}>
-          <span className="sidebar-link">New Letter Request</span>
         </li>
         {user && (user.role === 'Lecturer' || user.role === 'HOD' || user.role === 'Dean' || user.role === 'VC' || user.role === 'Staff') && (
           <li className="sidebar-item">
