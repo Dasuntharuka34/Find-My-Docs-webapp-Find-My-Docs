@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
-import Header from '../pages/Header';
-import Footer from '../pages/Footer';
-import '../../styles/admin-dashboard/AdminDashboard.css';
-import { AuthContext } from '../../context/AuthContext';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
+import '../styles/pages/AdminDashboard.css';
+import { AuthContext } from '../context/AuthContext';
 
 // Custom Message Modal Component
 const MessageModal = ({ show, title, message, onConfirm, onCancel }) => {

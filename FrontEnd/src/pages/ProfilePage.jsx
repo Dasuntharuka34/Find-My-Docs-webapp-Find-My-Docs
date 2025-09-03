@@ -1,11 +1,12 @@
 import React, { useState, useContext, useEffect, useRef } from 'react';
-import Header from './Header';
-import Footer from './Footer';
-import Sidebar from './Sidebar';
-import { AuthContext } from '../../context/AuthContext';
-import '../../styles/pages/ProfilePage.css';
 
-// Custom Message Modal Component
+import Header from '../components/Header';
+import Footer from '../components/Footer';
+import Sidebar from '../components/Sidebar';
+import { AuthContext } from '../context/AuthContext';
+import '../styles/pages/ProfilePage.css';
+
+// ----------------- Modal -----------------
 const MessageModal = ({ show, title, message, onConfirm }) => {
   if (!show) return null;
 
@@ -24,6 +25,7 @@ const MessageModal = ({ show, title, message, onConfirm }) => {
   );
 };
 
+// ----------------- ProfilePage -----------------
 const ProfilePage = () => {
   const { user, token, updateUser: updateUserInContext } = useContext(AuthContext);
 
@@ -35,28 +37,23 @@ const ProfilePage = () => {
     department: '',
     indexNumber: '',
     role: '',
+    mobile: '',            // ✅ Added for Mobile
   });
-  const [profilePictureFile, setProfilePictureFile] = useState(null); // State for the uploaded file
-  const [profilePicturePreview, setProfilePicturePreview] = useState(null); // State for image preview URL (for immediate display)
-  const fileInputRef = useRef(null); // Ref for file input
+  const [profilePictureFile, setProfilePictureFile] = useState(null);
+  const [profilePicturePreview, setProfilePicturePreview] = useState(null);
+  const fileInputRef = useRef(null);
 
   const [messageModal, setMessageModal] = useState({ show: false, title: '', message: '' });
   const [error, setError] = useState('');
 
-  // Default profile picture URL (fallback)
-  const defaultProfilePic = 'https://placehold.co/100x100/aabbcc/ffffff?text=User'; 
+  const defaultProfilePic = 'https://placehold.co/100x100/aabbcc/ffffff?text=User';
 
-  // Function to construct the full image URL with a cache-buster
   const getFullImageUrl = (relativePath) => {
-    if (!relativePath) {
-      return defaultProfilePic;
-    }
-    // Prepend the backend base URL to the relative path
-    // Add a timestamp query parameter to force browser to reload the image and prevent caching
+    if (!relativePath) return defaultProfilePic;
     return `${process.env.REACT_APP_BACKEND_URL}${relativePath}?t=${new Date().getTime()}`;
   };
 
-  // Effect to initialize form data and profile picture when user loads or user data changes
+  // Initialize user data
   useEffect(() => {
     if (user) {
       setEditFormData({
@@ -66,28 +63,26 @@ const ProfilePage = () => {
         department: user.department || '',
         indexNumber: user.indexNumber || '',
         role: user.role || '',
+        mobile: user.mobile || '',      // ✅ Initialize mobile
       });
-      // Set initial profile picture preview from user data, including a cache-buster
       setProfilePicturePreview(getFullImageUrl(user.profilePicture));
     }
-  }, [user]); // Rerun when the user object in context changes
+  }, [user]);
 
   const closeMessageModal = () => {
     setMessageModal({ show: false, title: '', message: '' });
-    setError(''); // Clear error when modal closes
+    setError('');
   };
 
   const handleEditClick = () => {
     setIsEditing(true);
-    // When entering edit mode, ensure preview reflects current user's profile pic from context
     setProfilePicturePreview(getFullImageUrl(user.profilePicture));
-    setProfilePictureFile(null); // Clear any previously selected file when entering edit mode
+    setProfilePictureFile(null);
   };
 
   const handleCancelEdit = () => {
     setIsEditing(false);
-    setError(''); // Clear error on cancel
-    // Reset form data to original user data from context
+    setError('');
     if (user) {
       setEditFormData({
         name: user.name || '',
@@ -96,10 +91,10 @@ const ProfilePage = () => {
         department: user.department || '',
         indexNumber: user.indexNumber || '',
         role: user.role || '',
+        mobile: user.mobile || '',      // ✅ Reset mobile
       });
-      // Reset profile picture preview to original user's picture from context
       setProfilePicturePreview(getFullImageUrl(user.profilePicture));
-      setProfilePictureFile(null); // Clear selected file
+      setProfilePictureFile(null);
     }
   };
 
@@ -133,30 +128,23 @@ const ProfilePage = () => {
     return oldNicPattern.test(nic) || newNicPattern.test(nic);
   };
 
+  const validateMobile = (mobile) => {
+    const mobilePattern = /^\d{10}$/;   // ✅ 10 digit number
+    return mobilePattern.test(mobile);
+  };
+
+  // -------------- Save ----------------
   const handleSave = async (e) => {
     e.preventDefault();
 
-    // Frontend validation before sending to backend
-    if (!editFormData.name.trim()) {
-      setError("Full Name cannot be empty.");
-      return;
-    }
-    if (!validateEmail(editFormData.email)) {
-      setError("Please enter a valid email address.");
-      return;
-    }
-    if (!validateNic(editFormData.nic)) {
-        setError("Please enter a valid 9-digit (with V/X) or 12-digit NIC number.");
-        return;
-    }
-    if (editFormData.role === "Student" && !editFormData.indexNumber.trim()) {
-        setError("Student must provide an Index Number.");
-        return;
-    }
-    if (editFormData.department.trim() === "") { // Department is required for all
-        setError("Please select a department.");
-        return;
-    }
+    if (!editFormData.name.trim()) return setError("Full Name cannot be empty.");
+    if (!validateEmail(editFormData.email)) return setError("Please enter a valid email address.");
+    if (!validateNic(editFormData.nic)) return setError("Please enter a valid NIC.");
+    if (!validateMobile(editFormData.mobile)) return setError("Please enter a valid 10-digit mobile number."); // ✅ Validate mobile
+    if (editFormData.role === "Student" && !editFormData.indexNumber.trim())
+      return setError("Student must provide an Index Number.");
+    if (editFormData.department.trim() === "")
+      return setError("Please select a department.");
 
     try {
       const formDataToSend = new FormData();
@@ -164,39 +152,28 @@ const ProfilePage = () => {
       formDataToSend.append('email', editFormData.email);
       formDataToSend.append('nic', editFormData.nic);
       formDataToSend.append('department', editFormData.department);
-      formDataToSend.append('role', editFormData.role); 
-      if (editFormData.role === 'Student') { 
+      formDataToSend.append('role', editFormData.role);
+      formDataToSend.append('mobile', editFormData.mobile);  // ✅ Send mobile
+      if (editFormData.role === 'Student') {
         formDataToSend.append('indexNumber', editFormData.indexNumber);
       }
-      
       if (profilePictureFile) {
         formDataToSend.append('profilePicture', profilePictureFile);
       }
 
-
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/users/${user._id}`, {
         method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}` 
-        },
+        headers: { 'Authorization': `Bearer ${token}` },
         body: formDataToSend,
       });
 
       const data = await response.json();
-
-      console.log('Backend response after profile update:', data);
-
       if (response.ok) {
-        // Update user data in AuthContext.
-        updateUserInContext(data); 
-        
-        // Explicitly update the preview with the new path from the updated user object in context,
-        // and add a new timestamp to force browser refresh.
+        updateUserInContext(data);
         setProfilePicturePreview(getFullImageUrl(data.profilePicture));
-
         setMessageModal({ show: true, title: 'Success', message: 'Profile updated successfully!', onConfirm: closeMessageModal });
-        setIsEditing(false); // Exit editing mode
-        setProfilePictureFile(null); // Clear selected file after successful upload
+        setIsEditing(false);
+        setProfilePictureFile(null);
       } else {
         setError(data.message || 'Failed to update profile.');
         setMessageModal({ show: true, title: 'Error', message: data.message || 'Failed to update profile.', onConfirm: closeMessageModal });
@@ -204,10 +181,11 @@ const ProfilePage = () => {
     } catch (apiError) {
       console.error('Profile update error:', apiError);
       setError('Network error or server unavailable.');
-      setMessageModal({ show: true, title: 'Error', message: 'Network error or server unavailable. Please try again later.', onConfirm: closeMessageModal });
+      setMessageModal({ show: true, title: 'Error', message: 'Network error or server unavailable.', onConfirm: closeMessageModal });
     }
   };
 
+  // ----------------- UI -----------------
   if (!user) {
     return (
       <div className="profile-container">
@@ -231,115 +209,57 @@ const ProfilePage = () => {
         <main className="profile-content">
           <div className="profile-card">
             <h2>{user.name}</h2>
-            {/* Profile Picture Display (always visible) */}
+            {/* Profile Picture */}
             <div className="profile-picture-container">
-                <img
-                    // Use the profilePicturePreview state directly, which now contains the full URL with cache-buster
-                    src={profilePicturePreview} 
-                    alt="Profile"
-                    className="profile-picture"
-                    onError={(e) => { e.target.onerror = null; e.target.src = defaultProfilePic; }} // Fallback if image fails to load
-                />
-                {isEditing && (
-                    <button type="button" className="change-photo-btn" onClick={() => fileInputRef.current.click()}>
-                        Change Photo
-                    </button>
-                )}
-                <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleProfilePictureChange}
-                    style={{ display: 'none' }} // Hide the default file input
-                    accept="image/*" // Only allow image files
-                />
+              <img src={profilePicturePreview} alt="Profile" className="profile-picture"
+                onError={(e) => { e.target.onerror = null; e.target.src = defaultProfilePic; }} />
+              {isEditing && (
+                <button type="button" className="change-photo-btn" onClick={() => fileInputRef.current.click()}>
+                  Change Photo
+                </button>
+              )}
+              <input type="file" ref={fileInputRef} onChange={handleProfilePictureChange}
+                style={{ display: 'none' }} accept="image/*" />
             </div>
 
             {!isEditing ? (
               <>
-                <div className="profile-info-group">
-                  <strong>Name:</strong>
-                  <span>{user.name}</span>
-                </div>
-                <div className="profile-info-group">
-                  <strong>Email:</strong>
-                  <span>{user.email}</span>
-                </div>
-                <div className="profile-info-group">
-                  <strong>NIC:</strong>
-                  <span>{user.nic || 'N/A'}</span>
-                </div>
-                <div className="profile-info-group">
-                  <strong>Role:</strong>
-                  <span>{user.role}</span>
-                </div>
-                <div className="profile-info-group">
-                  <strong>Department:</strong>
-                  <span>{user.department || 'N/A'}</span>
-                </div>
+                <div className="profile-info-group"><strong>Name:</strong><span>{user.name}</span></div>
+                <div className="profile-info-group"><strong>Email:</strong><span>{user.email}</span></div>
+                <div className="profile-info-group"><strong>NIC:</strong><span>{user.nic || 'N/A'}</span></div>
+                <div className="profile-info-group"><strong>Mobile:</strong><span>{user.mobile || 'N/A'}</span></div> {/* ✅ Show mobile */}
+                <div className="profile-info-group"><strong>Role:</strong><span>{user.role}</span></div>
+                <div className="profile-info-group"><strong>Department:</strong><span>{user.department || 'N/A'}</span></div>
                 {user.role === 'Student' && (
-                  <div className="profile-info-group">
-                    <strong>Index Number:</strong>
-                    <span>{user.indexNumber || 'N/A'}</span>
-                  </div>
+                  <div className="profile-info-group"><strong>Index Number:</strong><span>{user.indexNumber || 'N/A'}</span></div>
                 )}
-                <button onClick={handleEditClick} className="edit-profile-btn">
-                  Edit Profile
-                </button>
+                <button onClick={handleEditClick} className="edit-profile-btn">Edit Profile</button>
               </>
             ) : (
               <form onSubmit={handleSave}>
                 <div className="form-group">
                   <label htmlFor="name">Name:</label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={editFormData.name}
-                    onChange={handleEditFormChange}
-                    required
-                  />
+                  <input type="text" id="name" name="name" value={editFormData.name} onChange={handleEditFormChange} required />
                 </div>
                 <div className="form-group">
                   <label htmlFor="email">Email:</label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={editFormData.email}
-                    onChange={handleEditFormChange}
-                    required
-                  />
+                  <input type="email" id="email" name="email" value={editFormData.email} onChange={handleEditFormChange} required />
                 </div>
                 <div className="form-group">
                   <label htmlFor="nic">NIC Number:</label>
-                  <input
-                    type="text"
-                    id="nic"
-                    name="nic"
-                    value={editFormData.nic}
-                    onChange={handleEditFormChange}
-                    required
-                  />
+                  <input type="text" id="nic" name="nic" value={editFormData.nic} onChange={handleEditFormChange} required />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="mobile">Mobile Number:</label>  {/* ✅ Mobile field */}
+                  <input type="text" id="mobile" name="mobile" value={editFormData.mobile} onChange={handleEditFormChange} required />
                 </div>
                 <div className="form-group">
                   <label htmlFor="role">Role:</label>
-                  <input
-                    type="text"
-                    id="role"
-                    name="role"
-                    value={editFormData.role}
-                    disabled // Role is not editable by user
-                  />
+                  <input type="text" id="role" name="role" value={editFormData.role} disabled />
                 </div>
                 <div className="form-group">
                   <label htmlFor="department">Department:</label>
-                  <select
-                    id="department"
-                    name="department"
-                    value={editFormData.department}
-                    onChange={handleEditFormChange}
-                    required
-                  >
+                  <select id="department" name="department" value={editFormData.department} onChange={handleEditFormChange} required>
                     <option value="">-- Select Department --</option>
                     <option value="Computer Science">Computer Science</option>
                     <option value="Physics">Physics</option>
@@ -354,14 +274,8 @@ const ProfilePage = () => {
                 {editFormData.role === 'Student' && (
                   <div className="form-group">
                     <label htmlFor="indexNumber">Index Number:</label>
-                    <input
-                      type="text"
-                      id="indexNumber"
-                      name="indexNumber"
-                      value={editFormData.indexNumber}
-                      onChange={handleEditFormChange}
-                      required
-                    />
+                    <input type="text" id="indexNumber" name="indexNumber"
+                      value={editFormData.indexNumber} onChange={handleEditFormChange} required />
                   </div>
                 )}
                 {error && <p className="profile-error">{error}</p>}

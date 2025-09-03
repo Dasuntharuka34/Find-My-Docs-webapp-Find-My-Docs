@@ -13,14 +13,17 @@ const generateToken = (id) => {
 // @route   POST /api/users/register
 // @access  Public
 const registerUser = async (req, res) => {
-  const { name, email, nic, password, role, department, indexNumber } = req.body;
+  const { name, email, nic, password, role, department, indexNumber, mobile } = req.body;
 
   try {
-    // Check if user/registration exists by email or NIC
+    // Check if user/registration exists by email, NIC, or mobile
     const userExistsByEmail = await User.findOne({ email });
     const userExistsByNic = await User.findOne({ nic });
+    const userExistsByMobile = await User.findOne({ mobile });
+
     const registrationPendingByEmail = await Registration.findOne({ email, status: 'pending' });
     const registrationPendingByNic = await Registration.findOne({ nic, status: 'pending' });
+    const registrationPendingByMobile = await Registration.findOne({ mobile, status: 'pending' });
 
     if (userExistsByEmail) {
       return res.status(400).json({ message: 'User with this email is already registered.' });
@@ -28,11 +31,17 @@ const registerUser = async (req, res) => {
     if (userExistsByNic) {
       return res.status(400).json({ message: 'User with this NIC is already registered.' });
     }
+    if (userExistsByMobile) {
+      return res.status(400).json({ message: 'User with this mobile number is already registered.' });
+    }
     if (registrationPendingByEmail) {
       return res.status(400).json({ message: 'A registration request with this email is already pending admin approval.' });
     }
     if (registrationPendingByNic) {
       return res.status(400).json({ message: 'A registration request with this NIC is already pending admin approval.' });
+    }
+    if (registrationPendingByMobile) {
+      return res.status(400).json({ message: 'A registration request with this mobile number is already pending admin approval.' });
     }
 
     // Create a new registration request in the Registration collection
@@ -40,11 +49,12 @@ const registerUser = async (req, res) => {
       name,
       email,
       nic,
+      mobile,
       password, // Password will be hashed by the pre-save hook in Registration model
       role,
-      department: department,
+      department,
       indexNumber: role === 'Student' ? indexNumber : undefined,
-      profilePicture: null, // Default profile picture for new registrations
+      profilePicture: null,
       status: 'pending',
     });
 
@@ -89,10 +99,11 @@ const authUser = async (req, res) => {
         name: user.name,
         email: user.email,
         nic: user.nic,
+        mobile: user.mobile, // ✅ return mobile
         role: user.role,
         department: user.department,
         indexNumber: user.indexNumber,
-        profilePicture: user.profilePicture, // Include profilePicture in the returned user object
+        profilePicture: user.profilePicture,
       },
       token,
       message: 'Login successful',
@@ -116,20 +127,25 @@ const getUsers = async (req, res) => {
   }
 };
 
-// @desc    Create a new user (This can be used by Admin to manually add already approved users if needed)
+// @desc    Create a new user (Admin)
 // @route   POST /api/users
 // @access  Private/Admin
 const createUser = async (req, res) => {
-  const { name, email, nic, password, role, indexNumber, department } = req.body;
+  const { name, email, nic, mobile, password, role, indexNumber, department } = req.body;
 
   try {
     const userExistsByEmail = await User.findOne({ email });
     const userExistsByNic = await User.findOne({ nic });
+    const userExistsByMobile = await User.findOne({ mobile });
+
     if (userExistsByEmail) {
       return res.status(400).json({ message: 'User with this email already exists' });
     }
     if (userExistsByNic) {
-        return res.status(400).json({ message: 'User with this NIC already exists' });
+      return res.status(400).json({ message: 'User with this NIC already exists' });
+    }
+    if (userExistsByMobile) {
+      return res.status(400).json({ message: 'User with this mobile number already exists' });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -138,12 +154,13 @@ const createUser = async (req, res) => {
     const user = await User.create({
       name,
       email,
-      nic: nic,
+      nic,
+      mobile,
       password: hashedPassword,
       role,
       indexNumber: role === 'Student' ? indexNumber : undefined,
-      department: department,
-      profilePicture: null, // Default profile picture for newly created users
+      department,
+      profilePicture: null,
     });
 
     if (user) {
@@ -152,6 +169,7 @@ const createUser = async (req, res) => {
         name: user.name,
         email: user.email,
         nic: user.nic,
+        mobile: user.mobile,
         role: user.role,
         profilePicture: user.profilePicture,
         message: 'User created successfully by admin',
@@ -194,22 +212,27 @@ const approveRegistration = async (req, res) => {
       return res.status(400).json({ message: 'Registration is not in pending status.' });
     }
 
-    // Check for duplicates in User collection before creating
+    // Check for duplicates before creating
     const userExistsByEmail = await User.findOne({ email: registration.email });
     const userExistsByNic = await User.findOne({ nic: registration.nic });
+    const userExistsByMobile = await User.findOne({ mobile: registration.mobile });
+
     if (userExistsByEmail) {
       return res.status(400).json({ message: 'A user with this email already exists. Cannot approve duplicate.' });
     }
     if (userExistsByNic) {
-        return res.status(400).json({ message: 'A user with this NIC already exists. Cannot approve duplicate.' });
+      return res.status(400).json({ message: 'A user with this NIC already exists. Cannot approve duplicate.' });
     }
-
+    if (userExistsByMobile) {
+      return res.status(400).json({ message: 'A user with this mobile number already exists. Cannot approve duplicate.' });
+    }
 
     const newUser = await User.create({
       name: registration.name,
       email: registration.email,
       nic: registration.nic,
-      password: registration.password, // Already hashed
+      mobile: registration.mobile,
+      password: registration.password,
       role: registration.role,
       department: registration.department,
       indexNumber: registration.indexNumber,
@@ -254,69 +277,56 @@ const rejectRegistration = async (req, res) => {
 
 // @desc    Update a user profile
 // @route   PUT /api/users/:id
-// @access  Private/User (Protected by auth middleware)
+// @access  Private/User
 const updateUser = async (req, res) => {
-  // --- DEBUGGING LOGS ---
-  console.log('--- Inside updateUser controller ---');
-  console.log('req.body:', req.body);
-  console.log('req.file:', req.file);
-  console.log('req.params.id:', req.params.id);
-  // --- END DEBUGGING LOGS ---
-
   const { id } = req.params;
-  // Make sure to access req.body properties safely, as they might be undefined if FormData is empty
-  const name = req.body.name;
-  const email = req.body.email;
-  const nic = req.body.nic;
-  const department = req.body.department;
-  const indexNumber = req.body.indexNumber;
-  const role = req.body.role; // Get role from req.body as it's sent from frontend edit form
 
+  const { name, email, nic, mobile, department, indexNumber } = req.body;
   const profilePicturePath = req.file ? `/uploads/profile_pictures/${req.file.filename}` : null;
 
   try {
     const user = await User.findById(id);
-
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Check if new email/NIC already exists for another user (excluding current user)
+    // Check for email/nic/mobile duplicates
     if (email && email !== user.email) {
       const emailExists = await User.findOne({ email });
-      if (emailExists && emailExists._id.toString() !== user._id.toString()) { // Ensure it's not the current user's own email
+      if (emailExists && emailExists._id.toString() !== user._id.toString()) {
         return res.status(400).json({ message: 'Email already in use by another account.' });
       }
     }
     if (nic && nic !== user.nic) {
       const nicExists = await User.findOne({ nic });
-      if (nicExists && nicExists._id.toString() !== user._id.toString()) { // Ensure it's not the current user's own NIC
+      if (nicExists && nicExists._id.toString() !== user._id.toString()) {
         return res.status(400).json({ message: 'NIC already in use by another account.' });
+      }
+    }
+    if (mobile && mobile !== user.mobile) {
+      const mobileExists = await User.findOne({ mobile });
+      if (mobileExists && mobileExists._id.toString() !== user._id.toString()) {
+        return res.status(400).json({ message: 'Mobile number already in use by another account.' });
       }
     }
 
     user.name = name || user.name;
     user.email = email || user.email;
     user.nic = nic || user.nic;
+    user.mobile = mobile || user.mobile;
     user.department = department || user.department;
-    // Role should not be updated by user, only admin can change roles
-    // user.role = role || user.role; // Keep original role, or only admin updates this
 
-    // Update indexNumber only if the user's role is Student based on original role
-    // Or based on the role submitted from the form if the role field is meant to be sent (but it's disabled in frontend)
-    if (user.role === 'Student') { // Use user.role from DB for this logic, not necessarily req.body.role
+    if (user.role === 'Student') {
       user.indexNumber = indexNumber || user.indexNumber;
     } else {
       user.indexNumber = undefined;
     }
 
-    // Update profile picture only if a new file was uploaded
     if (profilePicturePath) {
       user.profilePicture = profilePicturePath;
-    } else if (req.body.removeProfilePicture === 'true') { // Example for removing
+    } else if (req.body.removeProfilePicture === 'true') {
       user.profilePicture = null;
     }
-
 
     const updatedUser = await user.save();
 
@@ -325,6 +335,7 @@ const updateUser = async (req, res) => {
       name: updatedUser.name,
       email: updatedUser.email,
       nic: updatedUser.nic,
+      mobile: updatedUser.mobile,
       role: updatedUser.role,
       department: updatedUser.department,
       indexNumber: updatedUser.indexNumber,

@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from 'react-router-dom';
-import universityLogo from '../../assets/uni-logo.png'; // Make sure this path is correct
-import Footer from '../pages/Footer'; // Make sure this path is correct
-import '../../styles/auth/RegisterPage.css'; // You'll need to create or update this CSS file
+import universityLogo from '../assets/uni-logo.png'; // Make sure this path is correct
+import Footer from '../components/Footer'; // Make sure this path is correct
+import '../styles/pages/RegisterPage.css'; // You'll need to create or update this CSS file
 
 // Custom Message Modal Component
 const MessageModal = ({ show, title, message, onConfirm }) => {

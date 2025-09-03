@@ -1,5 +1,5 @@
 import React from 'react';
-import '../../styles/pages/ProgressTracker.css';
+import '../styles/components/ProgressTracker.css';
 
 
 function ProgressTracker({ stages, currentStage }) { // stages prop now receives array of names

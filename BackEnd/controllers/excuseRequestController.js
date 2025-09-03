@@ -124,7 +124,8 @@ const createExcuseRequest = async (req, res) => {
       // (This field exists in the Letter model for backward compatibility with old data)
     });
     // --- End Letter creation for Medical Certificate ---
-
+    
+    
 
     // Notify the student who submitted the request
     await Notification.create({
@@ -157,7 +158,8 @@ const createExcuseRequest = async (req, res) => {
   } catch (error) {
     console.error("Error submitting Medical Certificate Letter:", error);
     // Ensure error response is JSON for frontend to parse correctly
-    res.status(500).json({ message: 'Error submitting Medical Certificate Letter', error: error.message });
+    console.error("❌ Error creating ExcuseRequest:", error);  // <-- will show exact cause
+    res.status(500).json({ message: "Error submitting Medical Certificate Letter", error: error.message });
   }
 };
 

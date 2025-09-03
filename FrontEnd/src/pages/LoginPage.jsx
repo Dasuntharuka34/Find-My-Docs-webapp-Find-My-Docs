@@ -1,9 +1,9 @@
 import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom"; 
-import universityLogo from '../../assets/uni-logo.png'; // Make sure this path is correct
-import Footer from '../pages/Footer'; // Make sure this path is correct
-import '../../styles/auth/LoginPage.css'; // You'll need to create or update this CSS file
-import { AuthContext } from '../../context/AuthContext'; // AuthContext for login functionality
+import universityLogo from '../assets/uni-logo.png'; // Make sure this path is correct
+import Footer from "../components/Footer"; // Make sure this path is correct
+import '../styles/pages/LoginPage.css'; // You'll need to create or update this CSS file
+import { AuthContext } from '../context/AuthContext'; // AuthContext for login functionality
 
 // Custom Message Modal Component
 const MessageModal = ({ show, title, message, onConfirm }) => {

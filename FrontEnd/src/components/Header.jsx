@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
-import '../../styles/pages/Header.css';
-import universityLogo from '../../assets/uni-logo.png';
-import { AuthContext } from '../../context/AuthContext'; // AuthContext import කරන්න
+import '../styles/components/Header.css';
+import universityLogo from '../assets/uni-logo.png';
+import { AuthContext } from '../context/AuthContext'; // AuthContext import කරන්න
 
 function Header({ user }) {
   const { logout } = useContext(AuthContext); 

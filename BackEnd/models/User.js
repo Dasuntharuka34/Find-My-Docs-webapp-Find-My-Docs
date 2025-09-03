@@ -31,9 +31,12 @@ const userSchema = mongoose.Schema(
     indexNumber: {
       type: String,
     },
-    profilePicture: { // Added profilePicture field
+    mobile: {                        // ✅ Added mobile field
       type: String,
-      default: null, // Default to null, or a path to a default image
+    },
+    profilePicture: {
+      type: String,
+      default: null,
     },
   },
   {

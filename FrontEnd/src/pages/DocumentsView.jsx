@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import ProgressTracker from './ProgressTracker';
-import '../../styles/pages/DocumentsView.css';
-import Header from './Header';
-import Footer from './Footer';
-import Sidebar from './Sidebar';
-import { AuthContext } from '../../context/AuthContext';
+import ProgressTracker from '../components/ProgressTracker';
+import '../styles/pages/DocumentsView.css';
+import Header from '../components/Header'
+import Footer from '../components/Footer';
+import Sidebar from '../components/Sidebar';
+import { AuthContext } from '../context/AuthContext';
 
 // --- APPROVAL STAGE DEFINITIONS (MUST BE CONSISTENT ACROSS ALL RELEVANT FILES) ---
 const approvalStages = [

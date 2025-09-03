@@ -1,7 +1,7 @@
 /* Import common styles if MyLettersPage.css is the only one loaded */
 /* If this CSS is concatenated or imported after main dashboard CSS, these imports might not be strictly necessary */
 @import url('./Dashboard.css'); /* For .dashboard-container, .main-content, etc. */
-@import url('./RecentLetters.css'); /* For .recent-letters, .status-badge table styling */
+@import url('../components/RecentLetters.css'); /* For .recent-letters, .status-badge table styling */
 
 /* Specific styles for MyLettersPage table and buttons */
 .recent-letters table {

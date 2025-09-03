@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
-import Header from './Header';
-import Footer from './Footer';
-import Sidebar from './Sidebar';
-import '../../styles/pages/MyLettersPage.css'; // Make sure this CSS file is created and imported
-import { AuthContext } from '../../context/AuthContext';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
+import Sidebar from '../components/Sidebar';
+import '../styles/pages/MyLettersPage.css'; // Make sure this CSS file is created and imported
+import { AuthContext } from '../context/AuthContext';
 
 // Custom Message Modal Component (same as used in other dashboards)
 const MessageModal = ({ show, title, message, onConfirm, onCancel }) => {
@@ -93,8 +93,9 @@ function MyLettersPage() {
   return (
     <div className="dashboard-container"> {/* Using dashboard-container for overall layout from Dashboard.css */}
       <Header user={user} />
+      <Sidebar />
       <div className="approvals-layout"> {/* Reusing layout for sidebar + content from PendingApprovals.css or Dashboard.css */}
-        <Sidebar />
+        
         <main className="letter-content"> {/* Reusing main-content for styling */}
           <div className="letter-contenter">
           

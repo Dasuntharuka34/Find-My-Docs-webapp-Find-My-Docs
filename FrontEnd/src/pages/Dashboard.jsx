@@ -1,21 +1,21 @@
 import React, { useState, useEffect, useContext } from 'react';
-import Header from './Header';
-import Sidebar from './Sidebar';
+import Header from '../components/Header';
+import Sidebar from '../components/Sidebar';
 // import ProgressTracker from './ProgressTracker';
-import RecentLetters from './RecentLetters';
-import Notifications from './Notifications';
-import NewLetterModal from './NewLetterModal';
-import Footer from './Footer';
+import RecentLetters from '../components/RecentLetters'
+import Notifications from '../components/Notifications';
+import NewLetterModal from '../components/NewLetterModal';
+import Footer from '../components/Footer';
 import ExcuseRequestForm from '../forms/ExcuseRequestForm'; // Import ExcuseRequestForm
-import '../../styles/pages/Dashboard.css';
-import '../../styles/pages/ProgressTracker.css';
-import '../../styles/pages/RecentLetters.css';
-import '../../styles/pages/Notifications.css';
-import '../../styles/pages/NewLetterModal.css';
-import '../../styles/pages/Header.css';
-import '../../styles/pages/Footer.css';
-import '../../styles/pages/Sidebar.css';
-import { AuthContext } from '../../context/AuthContext';
+import '../styles/pages/Dashboard.css';
+import '../styles/components/ProgressTracker.css';
+import '../styles/components/RecentLetters.css';
+import '../styles/components/Notifications.css';
+import '../styles/components/NewLetterModal.css';
+import '../styles/components/Header.css';
+import '../styles/components/Footer.css';
+import '../styles/components/Sidebar.css';
+import { AuthContext } from '../context/AuthContext';
 
 
 // Custom Message Modal Component

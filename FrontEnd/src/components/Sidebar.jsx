@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom'; 
-import '../../styles/pages/Sidebar.css';
-import { AuthContext } from '../../context/AuthContext'; 
+import '../styles/components/Sidebar.css';
+import { AuthContext } from '../context/AuthContext'; 
 
 function Sidebar() {
   const { user } = useContext(AuthContext);

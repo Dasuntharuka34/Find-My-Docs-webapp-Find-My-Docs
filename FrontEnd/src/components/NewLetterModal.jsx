@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; 
-import '../../styles/pages/NewLetterModal.css';
+import '../styles/components/NewLetterModal.css';
 
 const letterTypes = [
   "Medical Certificate",

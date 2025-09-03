@@ -1,17 +1,17 @@
 import React, { useContext, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import Dashboard from './components/pages/Dashboard';
-import AdminDashboard from './components/admin-dashboard/AdminDashboard';
+import Dashboard from './pages/Dashboard';
+import AdminDashboard from './pages/AdminDashboard';
 // import SpecialDashboard from './components/special-user-dashboard/SpecialDashboard';
-import ExcuseRequestForm from './components/forms/ExcuseRequestForm';
-import PendingApprovals from './components/approvel-page/PendingApprovals';
-import LoginPage from './components/auth/LoginPage';
-import RegisterPage from './components/auth/RegisterPage';
-import DocumentsView from './components/pages/DocumentsView';
-import MyLettersPage from './components/pages/MyLettersPage';
-import ProfilePage from './components/pages/ProfilePage'; 
+import ExcuseRequestForm from './forms/ExcuseRequestForm';
+import PendingApprovals from './pages/PendingApprovals';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import DocumentsView from './pages/DocumentsView';
+import MyLettersPage from './pages/MyLettersPage';
+import ProfilePage from './pages/ProfilePage'; 
 import { AuthContext } from './context/AuthContext';
-import LeaveRequestForm from './components/forms/LeaveRequestForm';
+import LeaveRequestForm from './forms/LeaveRequestForm';
 
 // PrivateRoute component
 const PrivateRoute = ({ children, allowedRoles }) => {

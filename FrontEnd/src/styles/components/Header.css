@@ -1,0 +1,60 @@
+.header {
+  display: flex;
+  justify-content: space-between; /* logo + name left | user info right */
+  align-items: center;
+  padding: 0 20px;
+  background-color: #d8e5f8; /* light blue */
+  border-bottom: 1px solid #aac4f8;
+  box-shadow: 0 2px 4px rgb(0 0 0 / 0.1);
+  height: 60px;
+  position: relative; /* prevents overrides messing with layout */
+  z-index: 1000;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo {
+  height: 45px;
+  width: 45px;
+  object-fit: contain;
+}
+
+.university-name {
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: #1a3e72;
+  margin: 0; /* ensure no extra spacing */
+  line-height: 1;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-weight: 600;
+  font-size: 1rem;
+  color: #1a3e72;
+}
+
+.user-info {
+  white-space: nowrap;
+}
+
+.logout-btn {
+  background-color: #f44336;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 4px;
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.logout-btn:hover {
+  background-color: #d32f2f; /* darker red for hover */
+}

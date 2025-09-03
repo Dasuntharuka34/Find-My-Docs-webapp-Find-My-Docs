@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../../styles/forms/LeaveRequestForm.css';
-import { AuthContext } from '../../context/AuthContext';
+import '../styles/forms/LeaveRequestForm.css';
+import { AuthContext } from '../context/AuthContext';
 
 
 // Custom Message Modal Component
@@ -111,8 +111,7 @@ const LeaveRequestForm = () => {
       formDataToSend.append('requesterName', user.name);
       formDataToSend.append('requesterRole', user.role);
 
-      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
-      const response = await fetch(`${backendUrl}/api/leaverequests`, {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/leaverequests`, {
         method: 'POST',
         body: formDataToSend,
       });

@@ -8,22 +8,28 @@
 
 /* Layout for sidebar and main content */
 .profile-layout {
-  display: flex;
-  flex: 1; /* Allows it to take up remaining vertical space */
-  /* Ensure sidebar and content take full available height */
-  min-height: calc(100vh - var(--header-height, 80px) - var(--footer-height, 60px)); /* Adjust header/footer height as per your actual CSS */
+  display: grid;
+  grid-template-columns: 220px 1fr; /* Sidebar fixed width */
+  grid-template-rows: 1fr;          /* Single row: main content */
+  grid-template-areas: "sidebar main";
+  flex: 1;
+  min-height: calc(100vh - var(--header-height, 80px) - var(--footer-height, 60px));
 }
 
-/* Main content area for the profile details */
+.sidebar {
+  grid-area: sidebar;
+}
+
 .profile-content {
-  flex: 1; /* Takes up available space */
+  grid-area: main;
   padding: 30px;
   display: flex;
-  justify-content: center; /* Center the profile card horizontally */
-  align-items: flex-start; /* Align card to the top */
-  overflow-y: auto; /* Enable scrolling if content overflows */
-  height: 100%; /* Ensure it takes full height within flex container */
+  justify-content: center;
+  align-items: flex-start;
+  overflow-y: auto;
+  height: 100%;
 }
+
 
 /* Styling for the profile information card */
 .profile-card {
@@ -216,7 +222,7 @@
 
 
 /* Responsive adjustments */
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .profile-content {
     padding: 20px;
   }
@@ -244,4 +250,5 @@
   .cancel-profile-btn {
     width: 100%;
   }
+  
 }

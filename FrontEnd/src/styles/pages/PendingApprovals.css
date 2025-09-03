@@ -155,9 +155,9 @@
 }
 
 /* Sidebar: fixed width */
-.approvals-layout > .sidebar {
+/* .approvals-layout > .sidebar {
   flex-shrink: 0;
-}
+} */
 
 /* Main table content */
 .approvals-content {

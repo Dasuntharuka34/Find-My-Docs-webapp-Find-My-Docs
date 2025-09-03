@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom'; 
-import '../../styles/pages/RecentLetters.css';
+import '../styles/components/RecentLetters.css';
 
 // --- APPROVAL STAGE DEFINITIONS (MUST BE CONSISTENT ACROSS ALL RELEVANT FILES) ---
 // Dashboard, SpecialDashboard, PendingApprovals, ProgressTracker, DocumentsView, MyLettersPage, letterController.js

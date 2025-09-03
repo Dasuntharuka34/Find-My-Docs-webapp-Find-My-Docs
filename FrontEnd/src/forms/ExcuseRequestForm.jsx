@@ -1,8 +1,7 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../../styles/forms/ExcuseRequestForm.css';
-import { AuthContext } from '../../context/AuthContext';
-
+import '../styles/forms/ExcuseRequestForm.css';
+import { AuthContext } from '../context/AuthContext';
 
 // Custom Message Modal Component
 const MessageModal = ({ show, title, message, onConfirm, onCancel }) => {
@@ -41,10 +40,10 @@ const ExcuseRequestForm = () => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    name: '',
-    regNo: '',
-    mobile: '',
-    email: '',
+    name: user?.name || '',
+    regNo: user?.indexNumber || '',
+    mobile: user?.mobile || '',
+    email: user?.email || '',
     address: '',
     levelOfStudy: '',
     subjectCombo: '',
@@ -63,6 +62,17 @@ const ExcuseRequestForm = () => {
   const closeMessageModal = () => {
     setMessageModal({ show: false, title: '', message: '' });
   };
+
+  // The useEffect hook is used to update the form with the user's name
+  // from the AuthContext as soon as the user data is available.
+  useEffect(() => {
+    if (user && user.name) {
+      setFormData(prevData => ({
+        ...prevData,
+        name: user.name,
+      }));
+    }
+  }, [user]); // The effect will re-run whenever the 'user' object changes.
 
   const handleChange = (e, index) => {
     const { name, value } = e.target;
@@ -191,7 +201,7 @@ const ExcuseRequestForm = () => {
         <p className="form-subtitle">Application to Excuse Academic Absence</p>
 
         <div className="form-row">
-          <input name="name" value={formData.name} onChange={handleChange} placeholder="Name with initials" required />
+          <input name="name" value={formData.name} onChange={handleChange} placeholder="Name with initials" readOnly required />
           <input name="regNo" value={formData.regNo} onChange={handleChange} placeholder="Registration Number" required />
         </div>
 

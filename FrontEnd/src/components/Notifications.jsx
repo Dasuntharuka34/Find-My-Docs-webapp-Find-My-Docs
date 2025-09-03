@@ -1,5 +1,5 @@
 import React from 'react';
-import '../../styles/pages/Notifications.css';
+import '../styles/components/Notifications.css';
 
 const alertColors = {
   success: '#d4edda',
