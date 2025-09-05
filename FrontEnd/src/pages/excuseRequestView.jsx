@@ -10,12 +10,12 @@ import { AuthContext } from '../context/AuthContext';
 // --- APPROVAL STAGE DEFINITIONS (MUST BE CONSISTENT WITH BACKEND) ---
 const approvalStages = [
   { name: "Submitted", approverRole: null },
-  { name: "Pending Staff Approval", approverRole: "Lecturer" },
+  { name: "Pending Lecturer Approval", approverRole: "Lecturer" },
   { name: "Pending HOD Approval", approverRole: "HOD" },
   { name: "Pending Dean Approval", approverRole: "Dean" },
   { name: "Pending VC Approval", approverRole: "VC" },
   { name: "Approved", approverRole: null },
-  { name: "Rejected", approverRole: null }
+//   { name: "Rejected", approverRole: null }
 ];
 // --- END APPROVAL STAGE DEFINITIONS ---
 

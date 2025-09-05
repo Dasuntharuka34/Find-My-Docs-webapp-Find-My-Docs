@@ -40,7 +40,6 @@ const MessageModal = ({ show, title, message, onConfirm, onCancel }) => {
 // Status colors consistent with RecentLetters component
 const statusColors = {
   Submitted: '#808080',
-  "Pending Staff Approval": '#5bc0de',
   "Pending Lecturer Approval": '#5bc0de',
   "Pending HOD Approval": '#5bc0de',
   "Pending Dean Approval": '#5bc0de',
@@ -53,6 +52,7 @@ function MyLettersPage() {
   const { user } = useContext(AuthContext);
   const [letters, setLetters] = useState([]);
   const [leaveRequests, setLeaveRequests] = useState([]);
+  const [excuseRequests, setExcuseRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [messageModal, setMessageModal] = useState({ show: false, title: '', message: '' });
 
@@ -64,12 +64,13 @@ function MyLettersPage() {
     const fetchAllRequests = async () => {
       if (!user || !user._id) {
         setLoading(false);
-        setMessageModal({ show: true, title: 'Error', message: 'User not authenticated. Please log in to view your letters.', onConfirm: closeMessageModal });
+        setMessageModal({ show: true, title: 'Error', message: 'User not authenticated. Please log in to view your requests.', onConfirm: closeMessageModal });
         return;
       }
 
       setLoading(true);
       try {
+        // Fetch Letters
         const lettersResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/letters/byUser/${user._id}`);
         if (!lettersResponse.ok) {
           throw new Error(`Failed to fetch letters: HTTP status ${lettersResponse.status}`);
@@ -77,12 +78,21 @@ function MyLettersPage() {
         const lettersData = await lettersResponse.json();
         setLetters(lettersData);
         
+        // Fetch Leave Requests
         const leaveRequestsResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/leaverequests/byUser/${user._id}`);
         if (!leaveRequestsResponse.ok) {
           throw new Error(`Failed to fetch leave requests: HTTP status ${leaveRequestsResponse.status}`);
         }
         const leaveRequestsData = await leaveRequestsResponse.json();
         setLeaveRequests(leaveRequestsData);
+
+        // Fetch Excuse Requests
+        const excuseRequestsResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/excuserequests/byUser/${user._id}`);
+        if (!excuseRequestsResponse.ok) {
+          throw new Error(`Failed to fetch excuse requests: HTTP status ${excuseRequestsResponse.status}`);
+        }
+        const excuseRequestsData = await excuseRequestsResponse.json();
+        setExcuseRequests(excuseRequestsData);
 
         setLoading(false);
       } catch (error) {
@@ -126,7 +136,6 @@ function MyLettersPage() {
                     {letters.map(letter => (
                       <tr key={letter._id}>
                         <td>{letter.type}</td>
-                        {/* Correctly format date */}
                         <td>{new Date(letter.submittedDate).toLocaleDateString()}</td>
                         <td>
                           <span
@@ -169,7 +178,6 @@ function MyLettersPage() {
                     {leaveRequests.map(request => (
                       <tr key={request._id}>
                         <td>{request.reason}</td>
-                        {/* Correctly format date */}
                         <td>{new Date(request.submittedDate).toLocaleDateString()}</td>
                         <td>{new Date(request.startDate).toLocaleDateString()}</td>
                         <td>{new Date(request.endDate).toLocaleDateString()}</td>
@@ -182,7 +190,51 @@ function MyLettersPage() {
                           </span>
                         </td>
                         <td>
-                          <Link to={`/leaverequests/${request._id}`} className="view-details-btn">
+                          <Link to={`/leave-request/${request._id}`} className="view-details-btn">
+                            View Details
+                          </Link>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+
+            {/* --- Excuse Requests Table --- */}
+            <div className="recent-letters" style={{ marginTop: '40px' }}>
+              <h2>My Submitted Excuse Requests</h2>
+              {excuseRequests.length === 0 ? (
+                <p>You have not submitted any excuse requests yet.</p>
+              ) : (
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Student Name</th>
+                      <th>Registration No</th>
+                      <th>Reason</th>
+                      <th>Submitted Date</th>
+                      <th>Current Status</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {excuseRequests.map(request => (
+                      <tr key={request._id}>
+                        <td>{request.studentName}</td>
+                        <td>{request.regNo}</td>
+                        <td>{request.reason}</td>
+                        <td>{new Date(request.submittedDate).toLocaleDateString()}</td>
+                        <td>
+                          <span
+                            className="status-badge"
+                            style={{ backgroundColor: statusColors[request.status] || '#777' }}
+                          >
+                            {request.status}
+                          </span>
+                        </td>
+                        <td>
+                          <Link to={`/excuse-request/${request._id}`} className="view-details-btn">
                             View Details
                           </Link>
                         </td>

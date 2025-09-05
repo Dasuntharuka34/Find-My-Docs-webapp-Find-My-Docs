@@ -15,7 +15,7 @@ const approvalStages = [
   { name: "Pending Dean Approval", approverRole: "Dean" },
   { name: "Pending VC Approval", approverRole: "VC" },
   { name: "Approved", approverRole: null },
-  { name: "Rejected", approverRole: null }
+//   { name: "Rejected", approverRole: null }
 ];
 
 const LeaveRequestView = () => {
@@ -124,16 +124,22 @@ const LeaveRequestView = () => {
     );
   }
 
-  const history = leaveRequest.approvals.map(approval => {
-    return {
-      stage: approvalStages.findIndex(stage => stage.approverRole === approval.approverRole),
-      status: approval.status,
-      timestamp: approval.approvedAt || leaveRequest.submittedDate,
-      updatedBy: approval.approverRole || 'Requester',
-      comments: approval.status === 'approved' ? `Approved by ${approval.approverRole}` : `Rejected by ${approval.approverRole}`
-    };
-  });
+  // Filter out pending approvals from history
+  const history = leaveRequest.approvals
+    .filter(approval => approval.status !== 'pending') // Only include approved/rejected actions
+    .map(approval => {
+      return {
+        stage: approvalStages.findIndex(stage => stage.approverRole === approval.approverRole),
+        status: approval.status,
+        timestamp: approval.approvedAt || leaveRequest.submittedDate,
+        updatedBy: approval.approverRole || 'Requester',
+        comments: approval.status === 'approved' 
+          ? `Approved by ${approval.approverRole}` 
+          : `Rejected by ${approval.approverRole}`
+      };
+    });
   
+  // Add initial submission to history
   history.unshift({
     stage: 0,
     status: 'Submitted',
@@ -185,7 +191,7 @@ const LeaveRequestView = () => {
             <div className="history-section">
               <h3>Approval History</h3>
               {history.length <= 1 ? (
-                <p>No detailed history available for this leave request.</p>
+                <p>No approval actions taken yet.</p>
               ) : (
                 <div className="history-table">
                   <div className="history-header">

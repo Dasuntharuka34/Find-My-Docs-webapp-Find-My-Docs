@@ -12,7 +12,7 @@ const approvalStages = [
   { name: "Pending Dean Approval", approverRole: "Dean" },
   { name: "Pending VC Approval", approverRole: "VC" },
   { name: "Approved", approverRole: null },
-  { name: "Rejected", approverRole: null }
+  // { name: "Rejected", approverRole: null }
 ];
 
 // Maps student role to initial stage index

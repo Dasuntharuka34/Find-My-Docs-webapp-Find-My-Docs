@@ -10,7 +10,7 @@ const approvalStages = [
   { name: "Pending Dean Approval", approverRole: "Dean" },
   { name: "Pending VC Approval", approverRole: "VC" },
   { name: "Approved", approverRole: null },
-  { name: "Rejected", approverRole: null }
+  // { name: "Rejected", approverRole: null }
 ];
 
 // ඉල්ලීමක් ඉදිරිපත් කරන පුද්ගලයාගේ භූමිකාව අනුව ආරම්භක අදියර තීරණය කිරීම

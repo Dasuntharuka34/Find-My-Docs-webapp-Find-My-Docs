@@ -15,7 +15,7 @@ const approvalStages = [
   { name: "Pending Dean Approval", approverRole: "Dean" },
   { name: "Pending VC Approval", approverRole: "VC" },
   { name: "Approved", approverRole: null },
-  { name: "Rejected", approverRole: null }
+  // { name: "Rejected", approverRole: null }
 ];
 // --- END APPROVAL STAGE DEFINITIONS ---
 

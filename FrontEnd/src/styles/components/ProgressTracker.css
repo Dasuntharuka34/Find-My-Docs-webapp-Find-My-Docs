@@ -43,6 +43,7 @@
   font-weight: 700;
   font-size: 0.95rem;
   z-index: 2;
+  transition: all 0.3s ease;
 }
 
 .step-label {
@@ -53,6 +54,7 @@
   color: #1748cf;
   word-wrap: break-word;
   max-width: 100px;
+  transition: all 0.3s ease;
 }
 
 .step-line {
@@ -63,12 +65,14 @@
   left: 50%;
   width: 100%;
   z-index: 0;
+  transition: all 0.3s ease;
 }
 
 .step:last-child .step-line {
   display: none;
 }
 
+/* Completed step */
 .step.completed .step-circle,
 .step.active .step-circle {
   background-color: #279c4c; /* green */
@@ -82,4 +86,61 @@
 .step.active .step-label {
   font-weight: 700;
   color: #2e7d32;
+}
+
+/* Rejected step */
+.step.rejected .step-circle {
+  background-color: #d32f2f; /* red */
+  color: white;
+  animation: pulse-rejected 1.5s infinite;
+}
+
+.step.rejected .step-label {
+  color: #d32f2f;
+  font-weight: 700;
+}
+
+/* If the request is rejected, make all lines before the rejected stage red */
+.step.rejected ~ .step .step-line {
+  background-color: #ffcdd2; /* light red */
+}
+
+.step.rejected ~ .step.completed .step-line {
+  background-color: #ffcdd2; /* light red for completed steps after rejection */
+}
+
+/* Pulse animation for rejected state */
+@keyframes pulse-rejected {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .steps-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .step {
+    flex-direction: row;
+    width: 100%;
+    min-width: auto;
+  }
+  
+  .step-circle {
+    margin-right: 15px;
+  }
+  
+  .step-line {
+    display: none;
+  }
+  
+  .step-label {
+    margin-top: 0;
+    text-align: left;
+    max-width: none;
+  }
 }

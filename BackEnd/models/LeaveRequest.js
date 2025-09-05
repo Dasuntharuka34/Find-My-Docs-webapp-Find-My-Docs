@@ -12,8 +12,8 @@ const approvalStageSchema = mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['pending', 'approved', 'rejected'],
-    default: 'pending'
+    enum: ['Submitted', 'Pending Lecturer Approval', 'Pending HOD Approval', 'Pending Dean Approval', 'Pending VC Approval', 'Approved', 'Rejected'],
+    default: 'Submitted'
   },
   comment: {
     type: String,

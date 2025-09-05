@@ -9,7 +9,7 @@ const approvalStages = [
   { name: "Pending Dean Approval", approverRole: "Dean" },    // Index 4
   { name: "Pending VC Approval", approverRole: "VC" },      // Index 5
   { name: "Approved", approverRole: null },               // Index 6 (Final Approved state)
-  { name: "Rejected", approverRole: null }                // Index 7 (Final Rejected state)
+//   { name: "Rejected", approverRole: null }                // Index 7 (Final Rejected state)
 ];
 
 // Maps submitter roles to the initial stage index for a new letter.
