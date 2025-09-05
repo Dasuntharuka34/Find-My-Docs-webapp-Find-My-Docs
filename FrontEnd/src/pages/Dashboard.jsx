@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
 import Header from '../components/Header';
 import Sidebar from '../components/Sidebar';
-// import ProgressTracker from './ProgressTracker';
-import RecentLetters from '../components/RecentLetters'
+import RecentLetters from '../components/RecentLetters';
 import Notifications from '../components/Notifications';
 import NewLetterModal from '../components/NewLetterModal';
 import Footer from '../components/Footer';
-import ExcuseRequestForm from '../forms/ExcuseRequestForm'; // Import ExcuseRequestForm
+import ExcuseRequestForm from '../forms/ExcuseRequestForm';
+import LeaveRequestForm from '../forms/LeaveRequestForm'; // Import the new component
 import '../styles/pages/Dashboard.css';
 import '../styles/components/ProgressTracker.css';
 import '../styles/components/RecentLetters.css';
@@ -16,7 +16,6 @@ import '../styles/components/Header.css';
 import '../styles/components/Footer.css';
 import '../styles/components/Sidebar.css';
 import { AuthContext } from '../context/AuthContext';
-
 
 // Custom Message Modal Component
 const MessageModal = ({ show, title, message, onConfirm, onCancel }) => {
@@ -69,15 +68,15 @@ const submitterRoleToInitialStageIndex = {
 };
 // --- END NEW STAGE DEFINITIONS ---
 
-
 function Dashboard() {
   const { user } = useContext(AuthContext);
   
   const [currentStage, setCurrentStage] = useState(0);
   const [letters, setLetters] = useState([]);
   const [notifications, setNotifications] = useState([]);
-  const [modalOpen, setModalOpen] = useState(false); // For NewLetterModal
-  const [showExcuseRequestModal, setShowExcuseRequestModal] = useState(false); // For ExcuseRequestForm
+  const [modalOpen, setModalOpen] = useState(false);
+  const [showExcuseRequestModal, setShowExcuseRequestModal] = useState(false);
+  const [showLeaveRequestModal, setShowLeaveRequestModal] = useState(false); // New state for Leave Request Modal
 
   const [messageModal, setMessageModal] = useState({ show: false, title: '', message: '' });
 
@@ -134,14 +133,13 @@ function Dashboard() {
     }
   }, [user]);
 
-  // Handle new letter submit (for non-Medical Certificate letters)
+  // Handle new letter submit (for non-Medical Certificate/Leave Request letters)
   const addLetter = async (newLetterData) => {
     if (!user || !user._id || !user.name || !user.role) {
       setMessageModal({ show: true, title: 'Error', message: 'User not authenticated or role missing. Please log in again.', onConfirm: closeMessageModal });
       return;
     }
 
-    // Determine initial stage based on submitter's role
     const initialStageIndex = submitterRoleToInitialStageIndex[user.role] || 0;
     const initialStatus = approvalStages[initialStageIndex].name;
 
@@ -204,9 +202,22 @@ function Dashboard() {
   // Function to close Excuse Request Modal (and refresh data if needed)
   const closeExcuseRequestFormModal = () => {
     setShowExcuseRequestModal(false);
-    fetchLetters(); // Refresh letters, as excuse requests are now "documents" that might appear
+    fetchLetters();
   };
 
+  // Function to open Leave Request Modal
+  const openLeaveRequestFormModal = () => {
+    setShowLeaveRequestModal(true);
+  };
+
+  // Function to close Leave Request Modal (and refresh data if needed)
+  const closeLeaveRequestFormModal = () => {
+    setShowLeaveRequestModal(false);
+    // You should have a separate fetch function for leave requests here
+    // or refactor fetchLetters to also fetch leave requests and merge them.
+    // For now, let's just refresh the letter list.
+    fetchLetters();
+  };
 
   if (!user) {
     return <p>Loading user data...</p>;
@@ -235,8 +246,9 @@ function Dashboard() {
           </div>
         </section>
       </main>
-      {modalOpen && <NewLetterModal onClose={() => setModalOpen(false)} onSubmit={addLetter} onOpenExcuseRequestForm={openExcuseRequestFormModal} />}
+      {modalOpen && <NewLetterModal onClose={() => setModalOpen(false)} onSubmit={addLetter} onOpenExcuseRequestForm={openExcuseRequestFormModal} onOpenLeaveRequestForm={openLeaveRequestFormModal} />}
       {showExcuseRequestModal && <ExcuseRequestForm onClose={closeExcuseRequestFormModal} />}
+      {showLeaveRequestModal && <LeaveRequestForm onClose={closeLeaveRequestFormModal} />} {/* Render the Leave Request Form */}
       <Footer />
 
       <MessageModal

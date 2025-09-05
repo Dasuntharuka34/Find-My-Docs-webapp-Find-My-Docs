@@ -24,12 +24,6 @@
   transition: margin-left 0.3s ease; /* Smooth transition for sidebar toggle */
 }
 
-/* If sidebar is collapsible, adjust margin-left based on sidebar state */
-/* .documents-layout.sidebar-collapsed .documents-main-content {
-  margin-left: 60px; // Example for collapsed sidebar width
-} */
-
-
 .documents-view h1, .documents-view h3 {
   color: #1a3e72; /* Dark blue heading */
   margin-bottom: 20px;

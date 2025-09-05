@@ -64,6 +64,10 @@ const leaveRequestSchema = mongoose.Schema({
     enum: ['Submitted', 'Pending Lecturer Approval', 'Pending HOD Approval', 'Pending Dean Approval', 'Pending VC Approval', 'Approved', 'Rejected'],
     default: 'Submitted'
   },
+  submittedDate: {
+      type: Date,
+      default: Date.now,
+    },
   approvals: [approvalStageSchema], // Array to track each approval stage
   submittedAt: {
     type: Date,

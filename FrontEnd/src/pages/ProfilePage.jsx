@@ -1,12 +1,11 @@
 import React, { useState, useContext, useEffect, useRef } from 'react';
-
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Sidebar from '../components/Sidebar';
 import { AuthContext } from '../context/AuthContext';
 import '../styles/pages/ProfilePage.css';
 
-// ----------------- Modal -----------------
+// ----------------- Message Modal Component -----------------
 const MessageModal = ({ show, title, message, onConfirm }) => {
   if (!show) return null;
 
@@ -25,11 +24,12 @@ const MessageModal = ({ show, title, message, onConfirm }) => {
   );
 };
 
-// ----------------- ProfilePage -----------------
+// ----------------- ProfilePage Main Component -----------------
 const ProfilePage = () => {
   const { user, token, updateUser: updateUserInContext } = useContext(AuthContext);
 
   const [isEditing, setIsEditing] = useState(false);
+  const [showPasswordChange, setShowPasswordChange] = useState(false);
   const [editFormData, setEditFormData] = useState({
     name: '',
     email: '',
@@ -37,13 +37,20 @@ const ProfilePage = () => {
     department: '',
     indexNumber: '',
     role: '',
-    mobile: '',            // ✅ Added for Mobile
+    mobile: '',
   });
+
+  const [passwordFormData, setPasswordFormData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmNewPassword: '',
+  });
+
   const [profilePictureFile, setProfilePictureFile] = useState(null);
   const [profilePicturePreview, setProfilePicturePreview] = useState(null);
   const fileInputRef = useRef(null);
 
-  const [messageModal, setMessageModal] = useState({ show: false, title: '', message: '' });
+  const [messageModal, setMessageModal] = useState({ show: false, title: '', message: '', onConfirm: () => {} });
   const [error, setError] = useState('');
 
   const defaultProfilePic = 'https://placehold.co/100x100/aabbcc/ffffff?text=User';
@@ -53,7 +60,6 @@ const ProfilePage = () => {
     return `${process.env.REACT_APP_BACKEND_URL}${relativePath}?t=${new Date().getTime()}`;
   };
 
-  // Initialize user data
   useEffect(() => {
     if (user) {
       setEditFormData({
@@ -63,25 +69,38 @@ const ProfilePage = () => {
         department: user.department || '',
         indexNumber: user.indexNumber || '',
         role: user.role || '',
-        mobile: user.mobile || '',      // ✅ Initialize mobile
+        mobile: user.mobile || '',
       });
       setProfilePicturePreview(getFullImageUrl(user.profilePicture));
     }
   }, [user]);
 
   const closeMessageModal = () => {
-    setMessageModal({ show: false, title: '', message: '' });
+    setMessageModal({ show: false, title: '', message: '', onConfirm: () => {} });
     setError('');
   };
 
   const handleEditClick = () => {
     setIsEditing(true);
+    setShowPasswordChange(false);
     setProfilePicturePreview(getFullImageUrl(user.profilePicture));
     setProfilePictureFile(null);
   };
 
+  const handlePasswordChangeClick = () => {
+    setShowPasswordChange(true);
+    setIsEditing(false);
+    setPasswordFormData({
+      currentPassword: '',
+      newPassword: '',
+      confirmNewPassword: '',
+    });
+    setError('');
+  };
+
   const handleCancelEdit = () => {
     setIsEditing(false);
+    setShowPasswordChange(false);
     setError('');
     if (user) {
       setEditFormData({
@@ -91,7 +110,7 @@ const ProfilePage = () => {
         department: user.department || '',
         indexNumber: user.indexNumber || '',
         role: user.role || '',
-        mobile: user.mobile || '',      // ✅ Reset mobile
+        mobile: user.mobile || '',
       });
       setProfilePicturePreview(getFullImageUrl(user.profilePicture));
       setProfilePictureFile(null);
@@ -101,19 +120,24 @@ const ProfilePage = () => {
   const handleEditFormChange = (e) => {
     const { name, value } = e.target;
     setEditFormData({ ...editFormData, [name]: value });
-    setError(''); // Clear error on input change
+    setError('');
+  };
+
+  const handlePasswordFormChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordFormData({ ...passwordFormData, [name]: value });
+    setError('');
   };
 
   const handleProfilePictureChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setProfilePictureFile(file);
-      setProfilePicturePreview(URL.createObjectURL(file)); // Create a temporary URL for immediate preview
-      setError(''); // Clear errors
+      setProfilePicturePreview(URL.createObjectURL(file));
+      setError('');
     } else {
       setProfilePictureFile(null);
-      // If no file selected, revert preview to current user's picture (if any) or default
-      setProfilePicturePreview(getFullImageUrl(user.profilePicture)); 
+      setProfilePicturePreview(getFullImageUrl(user.profilePicture));
     }
   };
 
@@ -129,18 +153,18 @@ const ProfilePage = () => {
   };
 
   const validateMobile = (mobile) => {
-    const mobilePattern = /^\d{10}$/;   // ✅ 10 digit number
+    const mobilePattern = /^\d{10}$/;
     return mobilePattern.test(mobile);
   };
 
-  // -------------- Save ----------------
+  // -------------- Save Profile Changes ----------------
   const handleSave = async (e) => {
     e.preventDefault();
 
     if (!editFormData.name.trim()) return setError("Full Name cannot be empty.");
     if (!validateEmail(editFormData.email)) return setError("Please enter a valid email address.");
     if (!validateNic(editFormData.nic)) return setError("Please enter a valid NIC.");
-    if (!validateMobile(editFormData.mobile)) return setError("Please enter a valid 10-digit mobile number."); // ✅ Validate mobile
+    if (!validateMobile(editFormData.mobile)) return setError("Please enter a valid 10-digit mobile number.");
     if (editFormData.role === "Student" && !editFormData.indexNumber.trim())
       return setError("Student must provide an Index Number.");
     if (editFormData.department.trim() === "")
@@ -153,7 +177,7 @@ const ProfilePage = () => {
       formDataToSend.append('nic', editFormData.nic);
       formDataToSend.append('department', editFormData.department);
       formDataToSend.append('role', editFormData.role);
-      formDataToSend.append('mobile', editFormData.mobile);  // ✅ Send mobile
+      formDataToSend.append('mobile', editFormData.mobile);
       if (editFormData.role === 'Student') {
         formDataToSend.append('indexNumber', editFormData.indexNumber);
       }
@@ -185,7 +209,57 @@ const ProfilePage = () => {
     }
   };
 
-  // ----------------- UI -----------------
+  // -------------- Handle Password Change ----------------
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+
+    const { currentPassword, newPassword, confirmNewPassword } = passwordFormData;
+
+    // Client-side validation
+    if (!currentPassword || !newPassword || !confirmNewPassword) {
+      return setError("All password fields are required.");
+    }
+    if (newPassword.length < 6) {
+      return setError("New password must be at least 6 characters long.");
+    }
+    if (newPassword !== confirmNewPassword) {
+      return setError("New passwords do not match.");
+    }
+
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/users/${user._id}/change-password`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ currentPassword, newPassword, confirmNewPassword }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setMessageModal({
+          show: true,
+          title: 'Success',
+          message: 'Password changed successfully!',
+          onConfirm: () => {
+            closeMessageModal();
+            setShowPasswordChange(false); // Hide the form on success
+            setPasswordFormData({ currentPassword: '', newPassword: '', confirmNewPassword: '' });
+          },
+        });
+      } else {
+        setError(data.message || 'Failed to change password. Please check your current password.');
+        setMessageModal({ show: true, title: 'Error', message: data.message || 'Failed to change password.', onConfirm: closeMessageModal });
+      }
+    } catch (apiError) {
+      console.error('Password change error:', apiError);
+      setError('Network error or server unavailable.');
+      setMessageModal({ show: true, title: 'Error', message: 'Network error or server unavailable.', onConfirm: closeMessageModal });
+    }
+  };
+
+  // ----------------- UI Rendering -----------------
   if (!user) {
     return (
       <div className="profile-container">
@@ -222,20 +296,27 @@ const ProfilePage = () => {
                 style={{ display: 'none' }} accept="image/*" />
             </div>
 
-            {!isEditing ? (
+            {/* Display View */}
+            {!isEditing && !showPasswordChange ? (
               <>
                 <div className="profile-info-group"><strong>Name:</strong><span>{user.name}</span></div>
                 <div className="profile-info-group"><strong>Email:</strong><span>{user.email}</span></div>
                 <div className="profile-info-group"><strong>NIC:</strong><span>{user.nic || 'N/A'}</span></div>
-                <div className="profile-info-group"><strong>Mobile:</strong><span>{user.mobile || 'N/A'}</span></div> {/* ✅ Show mobile */}
+                <div className="profile-info-group"><strong>Mobile:</strong><span>{user.mobile || 'N/A'}</span></div>
                 <div className="profile-info-group"><strong>Role:</strong><span>{user.role}</span></div>
                 <div className="profile-info-group"><strong>Department:</strong><span>{user.department || 'N/A'}</span></div>
                 {user.role === 'Student' && (
                   <div className="profile-info-group"><strong>Index Number:</strong><span>{user.indexNumber || 'N/A'}</span></div>
                 )}
-                <button onClick={handleEditClick} className="edit-profile-btn">Edit Profile</button>
+                <div className="profile-actions">
+                  <button onClick={handleEditClick} className="edit-profile-btn">Edit Profile</button>
+                  <button onClick={handlePasswordChangeClick} className="change-password-btn">Change Password</button>
+                </div>
               </>
-            ) : (
+            ) : null}
+
+            {/* Edit Profile Form */}
+            {isEditing && (
               <form onSubmit={handleSave}>
                 <div className="form-group">
                   <label htmlFor="name">Name:</label>
@@ -250,7 +331,7 @@ const ProfilePage = () => {
                   <input type="text" id="nic" name="nic" value={editFormData.nic} onChange={handleEditFormChange} required />
                 </div>
                 <div className="form-group">
-                  <label htmlFor="mobile">Mobile Number:</label>  {/* ✅ Mobile field */}
+                  <label htmlFor="mobile">Mobile Number:</label>
                   <input type="text" id="mobile" name="mobile" value={editFormData.mobile} onChange={handleEditFormChange} required />
                 </div>
                 <div className="form-group">
@@ -285,6 +366,32 @@ const ProfilePage = () => {
                 </div>
               </form>
             )}
+
+            {/* Change Password Form */}
+            {showPasswordChange && (
+              <form onSubmit={handleChangePassword}>
+                <div className="form-group">
+                  <label htmlFor="currentPassword">Current Password:</label>
+                  <input type="password" id="currentPassword" name="currentPassword"
+                    value={passwordFormData.currentPassword} onChange={handlePasswordFormChange} required />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="newPassword">New Password:</label>
+                  <input type="password" id="newPassword" name="newPassword"
+                    value={passwordFormData.newPassword} onChange={handlePasswordFormChange} required />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="confirmNewPassword">Confirm New Password:</label>
+                  <input type="password" id="confirmNewPassword" name="confirmNewPassword"
+                    value={passwordFormData.confirmNewPassword} onChange={handlePasswordFormChange} required />
+                </div>
+                {error && <p className="profile-error">{error}</p>}
+                <div className="profile-actions">
+                  <button type="submit" className="save-profile-btn">Save Password</button>
+                  <button type="button" onClick={handleCancelEdit} className="cancel-profile-btn">Cancel</button>
+                </div>
+              </form>
+            )}
           </div>
         </main>
       </div>
@@ -293,7 +400,7 @@ const ProfilePage = () => {
         show={messageModal.show}
         title={messageModal.title}
         message={messageModal.message}
-        onConfirm={closeMessageModal}
+        onConfirm={messageModal.onConfirm}
       />
     </div>
   );

@@ -183,7 +183,8 @@
 }
 
 .save-profile-btn,
-.cancel-profile-btn {
+.cancel-profile-btn,
+.change-password-btn {
   padding: 10px 20px;
   border-radius: 8px;
   font-size: 1rem;
@@ -210,6 +211,20 @@
 
 .cancel-profile-btn:hover {
   background-color: #5a6268;
+  transform: translateY(-2px);
+}
+
+.change-password-btn {
+  background-color: #28a745; /* Grey for cancel */
+  color: white;
+  height: 39px;
+  margin-top: auto;
+  margin-right: auto;
+  /* padding: 12px 25px; */
+}
+
+.change-password-btn:hover {
+  background-color: #218838;
   transform: translateY(-2px);
 }
 

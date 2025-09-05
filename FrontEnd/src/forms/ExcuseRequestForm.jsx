@@ -1,9 +1,9 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../styles/forms/ExcuseRequestForm.css';
 import { AuthContext } from '../context/AuthContext';
+import '../styles/forms/ExcuseRequestForm.css';
 
-// Custom Message Modal Component
+// Custom Message Modal Component (ලබා දී ඇති කෝඩ් එකට අනුවම තබා ගන්න)
 const MessageModal = ({ show, title, message, onConfirm, onCancel }) => {
   if (!show) return null;
 
@@ -36,7 +36,7 @@ const MessageModal = ({ show, title, message, onConfirm, onCancel }) => {
 
 
 const ExcuseRequestForm = () => {
-  const { user } = useContext(AuthContext); 
+  const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -51,28 +51,15 @@ const ExcuseRequestForm = () => {
     reason: '',
     reasonDetails: '',
     lectureAbsents: '',
-    date: '',
   });
 
   const [medicalForm, setMedicalForm] = useState(null);
   const [medicalFormError, setMedicalFormError] = useState('');
-
   const [messageModal, setMessageModal] = useState({ show: false, title: '', message: '' });
 
   const closeMessageModal = () => {
     setMessageModal({ show: false, title: '', message: '' });
   };
-
-  // The useEffect hook is used to update the form with the user's name
-  // from the AuthContext as soon as the user data is available.
-  useEffect(() => {
-    if (user && user.name) {
-      setFormData(prevData => ({
-        ...prevData,
-        name: user.name,
-      }));
-    }
-  }, [user]); // The effect will re-run whenever the 'user' object changes.
 
   const handleChange = (e, index) => {
     const { name, value } = e.target;
@@ -87,10 +74,7 @@ const ExcuseRequestForm = () => {
   };
 
   const addAbsenceRow = () => {
-    setFormData({
-      ...formData,
-      absences: [...formData.absences, { courseCode: '', date: '' }],
-    });
+    setFormData({ ...formData, absences: [...formData.absences, { courseCode: '', date: '' }] });
   };
 
   const handleMedicalFormUpload = (e) => {
@@ -102,66 +86,46 @@ const ExcuseRequestForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!user || !user._id || !user.name || !user.role) { // Ensure user is authenticated and has role
+    if (!user || !user._id || !user.name || !user.role) {
       setMessageModal({ show: true, title: 'Error', message: 'User not authenticated or role missing. Please log in again.', onConfirm: closeMessageModal });
       return;
     }
 
-    // --- UPDATED FRONTEND VALIDATION FOR ALL REQUIRED FIELDS ---
-    if (
-      !formData.name.trim() ||
-      !formData.regNo.trim() ||
-      !formData.mobile.trim() ||
-      !formData.email.trim() ||
-      !formData.address.trim() ||
-      !formData.levelOfStudy ||
-      !formData.subjectCombo.trim() ||
-      !formData.reason ||
-      !formData.reasonDetails.trim() ||
-      !formData.lectureAbsents.trim() ||
-      !formData.date
-    ) {
+    if (!formData.name.trim() || !formData.regNo.trim() || !formData.reason.trim() || formData.absences.some(item => !item.courseCode || !item.date)) {
       setMessageModal({ show: true, title: 'Validation Error', message: 'Please fill in all the required fields.', onConfirm: closeMessageModal });
       return;
     }
-
-    // Validate absence rows
-    for (const absence of formData.absences) {
-      if (!absence.courseCode.trim() || !absence.date.trim()) {
-        setMessageModal({ show: true, title: 'Validation Error', message: 'Please fill in all course code and date fields for absences, or remove empty rows.', onConfirm: closeMessageModal });
-        return;
-      }
-    }
-
-    // Medical form is required if reason is 'illness'
+    
+    // Check if medical form is required and uploaded
     if (formData.reason === 'illness' && !medicalForm) {
       setMessageModal({ show: true, title: 'Validation Error', message: 'Medical form is required for illness reason.', onConfirm: closeMessageModal });
       return;
     }
-    // --- END UPDATED FRONTEND VALIDATION ---
-
 
     try {
       const formDataToSend = new FormData();
+      
       // Append all form data fields
       for (const key in formData) {
         if (key === 'absences') {
+          // Serialize the absences array to a JSON string
           formDataToSend.append(key, JSON.stringify(formData[key]));
         } else {
           formDataToSend.append(key, formData[key]);
         }
       }
-      // Append medical form file
+      
+      // Append file
       if (medicalForm) {
         formDataToSend.append('medicalForm', medicalForm);
       }
-      // Append studentId, studentName, and studentRole from authenticated user
+      
+      // Append user details from AuthContext
       formDataToSend.append('studentId', user._id);
       formDataToSend.append('studentName', user.name);
-      formDataToSend.append('studentRole', user.role); // Pass user's role for initial stage calculation
+      formDataToSend.append('studentRole', user.role);
 
-      // Submit to the excuse-requests API endpoint, which now handles creating the Letter
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/excuse-requests`, {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/excuserequests`, {
         method: 'POST',
         body: formDataToSend,
       });
@@ -171,18 +135,30 @@ const ExcuseRequestForm = () => {
         throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
       }
 
-      setMessageModal({ show: true, title: 'Success', message: 'Medical Certificate submitted successfully!', onConfirm: () => {
-        closeMessageModal();
-        // Reset form after successful submission
-        setFormData({
-          name: '', regNo: '', mobile: '', email: '', address: '',
-          levelOfStudy: '', subjectCombo: '', absences: [{ courseCode: '', date: '' }],
-          reason: '', reasonDetails: '', lectureAbsents: '', date: '',
-        });
-        setMedicalForm(null);
-        // Navigate to My Letters page after successful submission
-        navigate('/my-letters'); 
-      }});
+      setMessageModal({
+        show: true,
+        title: 'Success',
+        message: 'Excuse request submitted successfully!',
+        onConfirm: () => {
+          closeMessageModal();
+          // Reset form after successful submission
+          setFormData({
+            name: '',
+            regNo: '',
+            mobile: '',
+            email: '',
+            address: '',
+            levelOfStudy: '',
+            subjectCombo: '',
+            absences: [{ courseCode: '', date: '' }],
+            reason: '',
+            reasonDetails: '',
+            lectureAbsents: '',
+          });
+          setMedicalForm(null);
+          navigate('/my-letters');
+        },
+      });
 
     } catch (error) {
       console.error("Error submitting excuse request:", error);
@@ -190,10 +166,8 @@ const ExcuseRequestForm = () => {
     }
   };
 
-  if (!user) {
-    return <p style={{textAlign: 'center', marginTop: '50px', fontSize: '1.5rem'}}>Loading user data...</p>;
-  }
-
+  // Rest of the component (return statement) remains the same
+  // ...
   return (
     <div className="excuse-form-page-container">
       <form className="form-container" onSubmit={handleSubmit}>
@@ -201,35 +175,35 @@ const ExcuseRequestForm = () => {
         <p className="form-subtitle">Application to Excuse Academic Absence</p>
 
         <div className="form-row">
-          <input name="name" value={formData.name} onChange={handleChange} placeholder="Name with initials" readOnly required />
+          <input name="name" value={formData.name} onChange={handleChange} placeholder="Name with initials" required />
           <input name="regNo" value={formData.regNo} onChange={handleChange} placeholder="Registration Number" required />
         </div>
 
         <div className="form-row">
-          <input name="mobile" value={formData.mobile} onChange={handleChange} placeholder="Mobile Number" required />
-          <input name="email" value={formData.email} onChange={handleChange} placeholder="Email Address" required />
+          <input name="mobile" value={formData.mobile} onChange={handleChange} placeholder="Mobile Number" />
+          <input name="email" value={formData.email} onChange={handleChange} placeholder="Email Address" />
         </div>
 
-        <textarea name="address" value={formData.address} onChange={handleChange} placeholder="Postal Address" required />
+        <textarea name="address" value={formData.address} onChange={handleChange} placeholder="Postal Address" />
 
         <div className="form-row">
-          <select name="levelOfStudy" value={formData.levelOfStudy} onChange={handleChange} required>
-                <option value="">-- Select Level of Study --</option>
-                <option value="1G">1G</option>
-                <option value="1S">1S</option>
-                <option value="2G">2G</option>
-                <option value="2S">2S</option>
-                <option value="3G">3G</option>
-                <option value="3S">3S</option>
-                <option value="3M">3M</option>
-                <option value="4S">4S</option>
-                <option value="4M">4M</option>
-                <option value="4X">4X</option>
-              </select>
+          <select name="levelOfStudy" value={formData.levelOfStudy} onChange={handleChange}>
+            <option value="">-- Select Level of Study --</option>
+            <option value="1G">1G</option>
+            <option value="1S">1S</option>
+            <option value="2G">2G</option>
+            <option value="2S">2S</option>
+            <option value="3G">3G</option>
+            <option value="3S">3S</option>
+            <option value="3M">3M</option>
+            <option value="4S">4S</option>
+            <option value="4M">4M</option>
+            <option value="4X">4X</option>
+          </select>
         </div>
 
         <div className="form-row">
-          <input name="subjectCombo" value={formData.subjectCombo} onChange={handleChange} placeholder="Subject Combination or Specialisation" required />
+          <input name="subjectCombo" value={formData.subjectCombo} onChange={handleChange} placeholder="Subject Combination or Specialisation" />
         </div>
 
         <div className="absence-section">
@@ -241,14 +215,14 @@ const ExcuseRequestForm = () => {
                 value={item.courseCode}
                 onChange={(e) => handleChange(e, index)}
                 placeholder="Course Code"
-                required // Mark as required
+                required
               />
               <input
                 name="absence_date"
                 value={item.date}
                 onChange={(e) => handleChange(e, index)}
                 placeholder="Date(s)"
-                required // Mark as required
+                required
               />
               {formData.absences.length > 1 && (
                 <button
@@ -278,12 +252,10 @@ const ExcuseRequestForm = () => {
             <option value="illness">Sudden illness or hospitalization</option>
             <option value="death">Demise of a parent/guardian/sibling</option>
           </select>
-          <textarea name="reasonDetails" value={formData.reasonDetails} onChange={handleChange} placeholder="Details of Reason" required />
+          <textarea name="reasonDetails" value={formData.reasonDetails} onChange={handleChange} placeholder="Details of Reason" />
         </div>
 
-        <input name="lectureAbsents" value={formData.lectureAbsents} onChange={handleChange} placeholder="No. of lectures/practicals missed" required />
-
-        <input name="date" type="date" value={formData.date} onChange={handleChange} required />
+        <input name="lectureAbsents" value={formData.lectureAbsents} onChange={handleChange} placeholder="No. of lectures/practicals missed" />
 
         <div className="form-group">
           <label>Upload Medical Form:</label>
@@ -292,7 +264,7 @@ const ExcuseRequestForm = () => {
         </div>
 
         <button type="submit" className="submit-btn">Submit Application</button>
-        
+
         <MessageModal
           show={messageModal.show}
           title={messageModal.title}

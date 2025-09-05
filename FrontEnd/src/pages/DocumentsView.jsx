@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import ProgressTracker from '../components/ProgressTracker';
 import '../styles/pages/DocumentsView.css';
 import Header from '../components/Header'
@@ -22,7 +22,6 @@ const approvalStages = [
 const DocumentsView = () => {
   const { id } = useParams();
   const { user } = useContext(AuthContext);
-  const navigate = useNavigate();
 
   const [document, setDocument] = useState(null); // This will hold the Letter object (which might contain populated old excuseRequest)
   const [history, setHistory] = useState([]);

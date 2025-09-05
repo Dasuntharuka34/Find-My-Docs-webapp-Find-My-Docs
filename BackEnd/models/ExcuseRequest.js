@@ -1,75 +1,105 @@
+// models/ExcuseRequest.js
+
 import mongoose from 'mongoose';
 
-const excuseRequestSchema = mongoose.Schema(
-  {
-    studentId: { // Optional: if you have authenticated users
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-    },
-    name: {
-      type: String,
-      required: true,
-    },
-    regNo: {
-      type: String,
-      required: true,
-    },
-    mobile: {
-      type: String,
-    },
-    email: {
-      type: String,
-    },
-    address: {
-      type: String,
-    },
-    levelOfStudy: {
-      type: String,
-    },
-    subjectCombo: {
-      type: String,
-    },
-    absences: [ // Array of objects
-      {
-        courseCode: { type: String },
-        date: { type: String }, // Or Date type if you parse it
-      },
-    ],
-    reason: {
-      type: String,
-      required: true,
-    },
-    reasonDetails: {
-      type: String,
-    },
-    lectureAbsents: {
-      type: String, // Can be Number
-    },
-    date: { // Date of the application
-      type: Date,
-      required: true,
-    },
-    medicalFormPath: { // Path to the uploaded file
-      type: String,
-    },
-    status: {
-      type: String,
-      default: 'Pending', // Initial status
-      enum: ['Pending', 'Approved', 'Rejected'],
-    },
-    submittedDate: {
-      type: Date,
-      default: Date.now,
-    },
-    // You can add fields for who approved/rejected and when
-    approvedBy: { type: String },
-    rejectedBy: { type: String },
-    approvalDate: { type: Date },
+// Define the approval stage schema
+const approvalStageSchema = mongoose.Schema({
+  approverRole: {
+    type: String,
+    enum: ['Lecturer', 'HOD', 'Dean', 'VC'],
+    required: true
   },
-  {
-    timestamps: true, // Adds createdAt and updatedAt timestamps
+  approverId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  status: {
+    type: String,
+    enum: ['pending', 'approved', 'rejected'],
+    default: 'pending'
+  },
+  comment: {
+    type: String,
+    default: ''
+  },
+  approvedAt: {
+    type: Date
   }
-);
+});
+
+// Define the main ExcuseRequest schema
+const excuseRequestSchema = mongoose.Schema({
+  studentId: {
+    type: String,
+    required: true
+  },
+  studentName: {
+    type: String,
+    required: true
+  },
+  regNo: {
+    type: String,
+    required: true
+  },
+  mobile: {
+    type: String
+  },
+  email: {
+    type: String
+  },
+  address: {
+    type: String
+  },
+  levelOfStudy: {
+    type: String
+  },
+  subjectCombo: {
+    type: String
+  },
+  absences: [
+    {
+      courseCode: {
+        type: String,
+        required: true
+      },
+      date: {
+        type: String,
+        required: true
+      }
+    }
+  ],
+  reason: {
+    type: String,
+    required: true
+  },
+  reasonDetails: {
+    type: String
+  },
+  lectureAbsents: {
+    type: String
+  },
+  attachments: {
+    type: String // File path or URL
+  },
+  status: {
+    type: String,
+    enum: ['Submitted', 'Pending Lecturer Approval', 'Pending HOD Approval', 'Pending Dean Approval', 'Pending VC Approval', 'Approved', 'Rejected'],
+    default: 'Submitted'
+  },
+  submittedDate: {
+    type: Date,
+    default: Date.now
+  },
+  lastUpdated: {
+    type: Date,
+    default: Date.now
+  },
+  approvals: [approvalStageSchema],
+  currentStageIndex: {
+    type: Number,
+    required: true,
+  }
+});
 
 const ExcuseRequest = mongoose.model('ExcuseRequest', excuseRequestSchema);
 

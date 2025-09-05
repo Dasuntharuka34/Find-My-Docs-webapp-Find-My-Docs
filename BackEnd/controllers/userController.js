@@ -99,7 +99,7 @@ const authUser = async (req, res) => {
         name: user.name,
         email: user.email,
         nic: user.nic,
-        mobile: user.mobile, // ✅ return mobile
+        mobile: user.mobile,
         role: user.role,
         department: user.department,
         indexNumber: user.indexNumber,
@@ -367,7 +367,8 @@ const deleteUser = async (req, res) => {
     res.status(500).json({ message: 'Error deleting user', error: error.message });
   }
 };
-// @desc    Reset a user's password to a default value
+
+// @desc    Reset a user's password to a default value (Admin function)
 // @route   PUT /api/users/:id/reset-password
 // @access  Private/Admin
 const resetUserPassword = async (req, res) => {
@@ -395,7 +396,49 @@ const resetUserPassword = async (req, res) => {
   }
 };
 
+// @desc    Change a user's own password
+// @route   PUT /api/users/:id/change-password
+// @access  Private
+const changePassword = async (req, res) => {
+  const { id } = req.params;
+  const { currentPassword, newPassword, confirmNewPassword } = req.body;
+
+  // Basic validation
+  if (!currentPassword || !newPassword || !confirmNewPassword) {
+    return res.status(400).json({ message: 'Please provide all required fields.' });
+    
+  }
+
+  if (newPassword !== confirmNewPassword) {
+    return res.status(400).json({ message: 'New password and confirmation do not match.' });
+  }
+
+  try {
+    const user = await User.findById(id);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    // Compare the old password with the one in the database
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Invalid old password.' });
+    }
+
+    // Hash the new password and save it
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+    await user.save();
+
+    res.status(200).json({ message: 'Password changed successfully.' });
+
+  } catch (error) {
+    console.error('Error changing password:', error);
+    res.status(500).json({ message: 'Server error changing password.', error: error.message });
+  }
+};
+
 
 // Export all controller functions for use in routes
-export { registerUser, authUser, getUsers, createUser, getPendingRegistrations, approveRegistration, rejectRegistration, updateUser, deleteUser, resetUserPassword };
-
+export { registerUser, authUser, getUsers, createUser, getPendingRegistrations, approveRegistration, rejectRegistration, updateUser, deleteUser, resetUserPassword, changePassword };

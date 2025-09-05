@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Sidebar from '../components/Sidebar';
-import '../styles/pages/MyLettersPage.css'; // Make sure this CSS file is created and imported
+import '../styles/pages/MyLettersPage.css';
 import { AuthContext } from '../context/AuthContext';
 
 // Custom Message Modal Component (same as used in other dashboards)
@@ -52,6 +52,7 @@ const statusColors = {
 function MyLettersPage() {
   const { user } = useContext(AuthContext);
   const [letters, setLetters] = useState([]);
+  const [leaveRequests, setLeaveRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [messageModal, setMessageModal] = useState({ show: false, title: '', message: '' });
 
@@ -60,92 +61,142 @@ function MyLettersPage() {
   };
 
   useEffect(() => {
-    const fetchMyLetters = async () => {
+    const fetchAllRequests = async () => {
       if (!user || !user._id) {
         setLoading(false);
         setMessageModal({ show: true, title: 'Error', message: 'User not authenticated. Please log in to view your letters.', onConfirm: closeMessageModal });
         return;
       }
 
+      setLoading(true);
       try {
-        // Fetch letters specific to the logged-in user
-        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/letters/byUser/${user._id}`);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+        const lettersResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/letters/byUser/${user._id}`);
+        if (!lettersResponse.ok) {
+          throw new Error(`Failed to fetch letters: HTTP status ${lettersResponse.status}`);
         }
-        const data = await response.json();
-        setLetters(data);
+        const lettersData = await lettersResponse.json();
+        setLetters(lettersData);
+        
+        const leaveRequestsResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/leaverequests/byUser/${user._id}`);
+        if (!leaveRequestsResponse.ok) {
+          throw new Error(`Failed to fetch leave requests: HTTP status ${leaveRequestsResponse.status}`);
+        }
+        const leaveRequestsData = await leaveRequestsResponse.json();
+        setLeaveRequests(leaveRequestsData);
+
         setLoading(false);
       } catch (error) {
-        console.error("Error fetching my letters:", error);
+        console.error("Error fetching data:", error);
         setLoading(false);
-        setMessageModal({ show: true, title: 'Error', message: `Failed to load your letters: ${error.message}`, onConfirm: closeMessageModal });
+        setMessageModal({ show: true, title: 'Error', message: `Failed to load your data: ${error.message}`, onConfirm: closeMessageModal });
       }
     };
 
-    fetchMyLetters();
-  }, [user]); // Re-fetch when user object changes (e.g., after login)
+    fetchAllRequests();
+  }, [user]);
 
   if (loading) {
-    return <p style={{textAlign: 'center', marginTop: '50px', fontSize: '1.5rem'}}>Loading your letters...</p>;
+    return <p style={{textAlign: 'center', marginTop: '50px', fontSize: '1.5rem'}}>Loading your requests...</p>;
   }
 
   return (
-    <div className="dashboard-container"> {/* Using dashboard-container for overall layout from Dashboard.css */}
+    <div className="dashboard-container">
       <Header user={user} />
       <Sidebar />
-      <div className="approvals-layout"> {/* Reusing layout for sidebar + content from PendingApprovals.css or Dashboard.css */}
-        
-        <main className="letter-content"> {/* Reusing main-content for styling */}
+      <div className="approvals-layout">
+        <main className="letter-content">
           <div className="letter-contenter">
-          
-          {letters.length === 0 ? (
-            <div>
+            
+            {/* --- Letters Table --- */}
+            <div className="recent-letters">
               <h2>My Submitted Letters</h2>
-            <p>You have not submitted any letters yet.</p>
-            </div>
-          ) : (
-            <div className="recent-letters"> {/* Reusing RecentLetters styling */}
-            <h2>My Submitted Letters</h2>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Type</th>
-                    <th>Submitted Date</th>
-                    <th>Current Status</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {letters.map(letter => (
-                    <tr key={letter._id}>
-                      <td>{letter.type}</td>
-                      <td>{new Date(letter.submittedDate).toLocaleDateString()}</td>
-                      <td>
-                        <span
-                          className="status-badge"
-                          style={{ backgroundColor: statusColors[letter.status] || '#777' }}
-                        >
-                          {letter.status}
-                        </span>
-                      </td>
-                      <td>
-                        {/* Link to a detailed view of the document/letter */}
-                        <Link to={`/documents/${letter._id}`} className="view-details-btn">
-                          View Details
-                        </Link>
-                      </td>
+              {letters.length === 0 ? (
+                <p>You have not submitted any letters yet.</p>
+              ) : (
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Type</th>
+                      <th>Submitted Date</th>
+                      <th>Current Status</th>
+                      <th>Action</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {letters.map(letter => (
+                      <tr key={letter._id}>
+                        <td>{letter.type}</td>
+                        {/* Correctly format date */}
+                        <td>{new Date(letter.submittedDate).toLocaleDateString()}</td>
+                        <td>
+                          <span
+                            className="status-badge"
+                            style={{ backgroundColor: statusColors[letter.status] || '#777' }}
+                          >
+                            {letter.status}
+                          </span>
+                        </td>
+                        <td>
+                          <Link to={`/documents/${letter._id}`} className="view-details-btn">
+                            View Details
+                          </Link>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
-          )}
+
+            {/* --- Leave Requests Table --- */}
+            <div className="recent-letters" style={{ marginTop: '40px' }}>
+              <h2>My Submitted Leave Requests</h2>
+              {leaveRequests.length === 0 ? (
+                <p>You have not submitted any leave requests yet.</p>
+              ) : (
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Reason</th>
+                      <th>Submitted Date</th>
+                      <th>Start Date</th>
+                      <th>End Date</th>
+                      <th>Current Status</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {leaveRequests.map(request => (
+                      <tr key={request._id}>
+                        <td>{request.reason}</td>
+                        {/* Correctly format date */}
+                        <td>{new Date(request.submittedDate).toLocaleDateString()}</td>
+                        <td>{new Date(request.startDate).toLocaleDateString()}</td>
+                        <td>{new Date(request.endDate).toLocaleDateString()}</td>
+                        <td>
+                          <span
+                            className="status-badge"
+                            style={{ backgroundColor: statusColors[request.status] || '#777' }}
+                          >
+                            {request.status}
+                          </span>
+                        </td>
+                        <td>
+                          <Link to={`/leaverequests/${request._id}`} className="view-details-btn">
+                            View Details
+                          </Link>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+
           </div>
         </main>
       </div>
       <Footer />
-
       <MessageModal
         show={messageModal.show}
         title={messageModal.title}

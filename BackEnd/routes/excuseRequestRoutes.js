@@ -4,10 +4,15 @@ import path from 'path';
 import fs from 'fs';
 
 import {
+  createExcuseRequest,
   getExcuseRequests,
-  getExcuseRequestById, // <-- New import
-  createExcuseRequest
-} from '../controllers/excuseRequestController.js'; // <-- Import functions from controller
+  getExcuseRequestById,
+  getExcuseRequestsByUserId,
+  approveExcuseRequest,
+  rejectExcuseRequest,
+  deleteExcuseRequest,
+  getPendingExcuseApprovals
+} from '../controllers/excuseRequestController.js';
 
 const router = express.Router();
 
@@ -17,7 +22,7 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir);
 }
 
-// Configure storage for multer
+// Configure storage for multer to handle file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, uploadsDir);
@@ -29,7 +34,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 1024 * 1024 * 5 }, // 5MB file size limit
+  limits: { fileSize: 1024 * 1024 * 10 }, // 10MB file size limit
   fileFilter: (req, file, cb) => {
     const filetypes = /jpeg|jpg|png|pdf|doc|docx/;
     const mimetype = filetypes.test(file.mimetype);
@@ -42,16 +47,36 @@ const upload = multer({
   }
 });
 
-// @desc    Submit an excuse request form with file upload
-// @route   POST /api/excuse-requests
-router.post('/', upload.single('medicalForm'), createExcuseRequest); // Using the imported controller function
+// @desc    Submit a new excuse request form with an optional file upload
+// @route   POST /api/excuserequests
+router.post('/', upload.single('medicalForm'), createExcuseRequest);
 
-// @desc    Get all excuse requests
-// @route   GET /api/excuse-requests
+// @desc    Get all excuse requests (for approvers)
+// @route   GET /api/excuserequests
 router.get('/', getExcuseRequests);
 
+// @desc    Get all excuse requests for a single user
+// @route   GET /api/excuserequests/byUser/:userId
+router.get('/byUser/:userId', getExcuseRequestsByUserId);
+
+// @desc    Approve a excuse request
+// @route   PUT /api/excuserequests/:id/approve
+router.put('/:id/approve', approveExcuseRequest);
+
+// @desc    Reject a excuse request
+// @route   PUT /api/excuserequests/:id/reject
+router.put('/:id/reject', rejectExcuseRequest);
+
+// @desc    Delete a excuse request
+// @route   DELETE /api/excuserequests/:id
+router.delete('/:id', deleteExcuseRequest);
+
 // @desc    Get a single excuse request by ID
-// @route   GET /api/excuse-requests/:id
-router.get('/:id', getExcuseRequestById); // <-- New route for fetching by ID
+// @route   GET /api/excuserequests/:id
+router.get('/:id', getExcuseRequestById);
+
+
+router.get('/pendingApprovals/:statusName', getPendingExcuseApprovals);
+
 
 export default router;

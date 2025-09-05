@@ -1,5 +1,3 @@
-// LeaveRequestRoutes.js
-
 import express from 'express';
 import multer from 'multer';
 import path from 'path';
@@ -7,14 +5,16 @@ import fs from 'fs';
 
 // Import all necessary controller functions
 import {
-  createLeaveRequest, 
+  createLeaveRequest,
   getLeaveRequests,
   getLeaveRequestById,
-  getMyLeaveRequests,
+  getLeaveRequestsByUserId, // Renamed and imported correctly
   approveLeaveRequest,
   rejectLeaveRequest,
-  deleteLeaveRequest
-} from '../controllers/leaveRequestController.js'; 
+  deleteLeaveRequest,
+  // --- IMPORT THE NEW FUNCTION ---
+  getPendingLeaveRequests
+} from '../controllers/leaveRequestController.js';
 
 const router = express.Router();
 
@@ -52,32 +52,38 @@ const upload = multer({
 });
 
 
-// @desc    Submit a new leave request form with an optional file upload
-// @route   POST /api/leaverequests
-router.post('/', upload.single('leaveForm'), createLeaveRequest); 
+// @desc    Submit a new leave request form with an optional file upload
+// @route   POST /api/leaverequests
+router.post('/', upload.single('leaveForm'), createLeaveRequest);
 
-// @desc    Get all leave requests (for approvers)
-// @route   GET /api/leaverequests
+// @desc    Get all leave requests (for approvers)
+// @route   GET /api/leaverequests
 router.get('/', getLeaveRequests);
 
-// @desc    Get all leave requests for a single user
-// @route   GET /api/leaverequests/myrequests
-router.get('/myrequests', getMyLeaveRequests);
+// @desc    Get all leave requests for a single user
+// @route   GET /api/leaverequests/byUser/:userId
+router.get('/byUser/:userId', getLeaveRequestsByUserId); // <-- This is the corrected route
 
-// @desc    Approve a leave request
-// @route   PUT /api/leaverequests/:id/approve
+// --- ADD THE NEW ROUTE HERE TO FIX THE ERROR ---
+// @desc    Get all pending leave requests for a specific status
+// @route   GET /api/leaverequests/pendingApprovals/:status
+router.get('/pendingApprovals/:status', getPendingLeaveRequests);
+// --- FIX ENDS HERE ---
+
+// @desc    Approve a leave request
+// @route   PUT /api/leaverequests/:id/approve
 router.put('/:id/approve', approveLeaveRequest);
 
-// @desc    Reject a leave request
-// @route   PUT /api/leaverequests/:id/reject
+// @desc    Reject a leave request
+// @route   PUT /api/leaverequests/:id/reject
 router.put('/:id/reject', rejectLeaveRequest);
 
-// @desc    Delete a leave request
-// @route   DELETE /api/leaverequests/:id
+// @desc    Delete a leave request
+// @route   DELETE /api/leaverequests/:id
 router.delete('/:id', deleteLeaveRequest);
 
-// @desc    Get a single leave request by ID
-// @route   GET /api/leaverequests/:id
+// @desc    Get a single leave request by ID
+// @route   GET /api/leaverequests/:id
 router.get('/:id', getLeaveRequestById);
 
 

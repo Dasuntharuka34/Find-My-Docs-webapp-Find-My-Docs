@@ -1,5 +1,5 @@
-import React, { useContext, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import React, { useContext } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
 // import SpecialDashboard from './components/special-user-dashboard/SpecialDashboard';
@@ -9,23 +9,18 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DocumentsView from './pages/DocumentsView';
 import MyLettersPage from './pages/MyLettersPage';
-import ProfilePage from './pages/ProfilePage'; 
+import ProfilePage from './pages/ProfilePage';
 import { AuthContext } from './context/AuthContext';
+import ExcuseRequestView from './pages/excuseRequestView';
 import LeaveRequestForm from './forms/LeaveRequestForm';
+import LeaveRequestView from './pages/LeaveRequestView';
 
-// PrivateRoute component
+// PrivateRoute component (fixed)
 const PrivateRoute = ({ children, allowedRoles }) => {
   const { isLoggedIn, user } = useContext(AuthContext);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!isLoggedIn) {
-      navigate('/login');
-    }
-  }, [isLoggedIn, navigate]);
-
+  
   if (!isLoggedIn) {
-    return null;
+    return <Navigate to="/login" replace />;
   }
 
   if (allowedRoles && user && !allowedRoles.includes(user.role)) {
@@ -48,6 +43,7 @@ function App() {
         
         <Route path="/" element={isLoggedIn ? <Navigate to={user?.role === 'Admin' ? "/admin-dashboard" : "/dashboard"} /> : <Navigate to="/login" />} />
 
+        {/* Protected Routes */}
         <Route path="/dashboard" element={
           <PrivateRoute allowedRoles={['Student','Lecturer', 'HOD', 'Dean', 'VC']}>
             <Dashboard />
@@ -89,10 +85,23 @@ function App() {
             <DocumentsView />
           </PrivateRoute>
         } />
+        
+        <Route path="/excuse-request/:id" element={
+          <PrivateRoute allowedRoles={['Student', 'Lecturer', 'HOD', 'Dean', 'VC', 'Admin']}>
+            <ExcuseRequestView />
+          </PrivateRoute>
+        } />
 
+        {/* Fixed: Consistent route pattern */}
+        <Route path="/leave-request/:id" element={
+          <PrivateRoute allowedRoles={['Student', 'Lecturer', 'HOD', 'Dean', 'VC', 'Admin']}>
+            <LeaveRequestView />
+          </PrivateRoute>
+        } />
+        
         <Route path="/notifications" element={
           <PrivateRoute allowedRoles={['Student', 'Lecturer', 'HOD', 'Dean', 'VC', 'Admin']}>
-             <p style={{textAlign: 'center', marginTop: '50px', fontSize: '1.5rem'}}>Notifications Page Under Construction</p>
+            <p style={{textAlign: 'center', marginTop: '50px', fontSize: '1.5rem'}}>Notifications Page Under Construction</p>
           </PrivateRoute>
         } />
 
@@ -105,7 +114,6 @@ function App() {
 
         {/* Catch-all route for 404 - Not Found */}
         <Route path="*" element={<p style={{textAlign: 'center', marginTop: '50px', fontSize: '1.5rem'}}>404 - Page Not Found</p>} />
-
       </Routes>
     </Router>
   );

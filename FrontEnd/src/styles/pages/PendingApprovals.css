@@ -1,29 +1,66 @@
+/* Base container and layout styles */
 .pending-approvals-container {
   width: 100%;
   height: 100%;
 }
 
+.approvals-layout {
+  display: flex;
+  height: 90%;
+}
+
+.approvals-content {
+  flex: 1;
+  padding: 20px;
+}
+
+/* Style for each request section (Excuse and Leave) */
+.approvals-section {
+  margin-bottom: 30px; /* Provides space between the two tables */
+}
+
+/* Table styling, copied from MyLettersPage for consistency */
 .approvals-table {
   width: 100%;
   border-collapse: collapse;
+  margin-top: 10px;
 }
 
 .approvals-table th,
 .approvals-table td {
-  padding: 12px;
-  border: 1px solid #ddd;
+  border: 1px solid #e0e0e0;
+  padding: 12px 15px;
   text-align: left;
 }
 
+.approvals-table th {
+  background-color: #d8e5f8;
+  color: #1a3e72;
+  font-weight: 600;
+}
+
+.approvals-table tbody tr:nth-child(even) {
+  background-color: #f8f8f8;
+}
+
+.approvals-table tbody tr:hover {
+  background-color: #eef7ff;
+}
+
+/* Status badge styling */
 .status-badge {
   padding: 5px 10px;
   border-radius: 5px;
   font-weight: bold;
   color: white;
-  background-color: #787b7e;
+  background-color: #787b7e; /* Default gray */
 }
 
-.status-badge.pending {
+.status-badge.pending,
+.status-badge.pending-lecturer-approval,
+.status-badge.pending-hod-approval,
+.status-badge.pending-dean-approval,
+.status-badge.pending-vc-approval {
   background-color: orange;
 }
 
@@ -35,46 +72,58 @@
   background-color: red;
 }
 
-.approve-btn {
-  background-color: #4caf50;
-  color: white;
-  padding: 6px 10px;
-  margin-right: 5px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
+/* Action button styles */
+.approve-btn,
 .reject-btn {
-  background-color: #f44336;
-  color: white;
-  padding: 6px 10px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-/* Style for the "View Details" button - Copied from DocumentsView.css/MyLettersPage.css */
-.view-details-btn {
-  background-color: #007bff; /* Primary blue */
   color: white;
   padding: 8px 15px;
   border: none;
   border-radius: 5px;
-  text-decoration: none; /* Remove underline for links */
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  margin-right: 5px;
+}
+
+.approve-btn {
+  background-color: #4CAF50; /* Green */
+}
+
+.approve-btn:hover {
+  background-color: #45a049;
+  transform: translateY(-1px);
+}
+
+.reject-btn {
+  background-color: #f44336; /* Red */
+}
+
+.reject-btn:hover {
+  background-color: #da190b;
+  transform: translateY(-1px);
+}
+
+/* "View Details" button style (already consistent) */
+.view-details-btn {
+  background-color: #007bff;
+  color: white;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 5px;
+  text-decoration: none;
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.2s ease;
   font-size: 0.9rem;
-  display: inline-block; /* Allows padding and margin to work correctly */
+  display: inline-block;
   text-align: center;
 }
 
 .view-details-btn:hover {
-  background-color: #0056b3; /* Darker blue on hover */
-  transform: translateY(-1px); /* Slight lift effect */
+  background-color: #0056b3;
+  transform: translateY(-1px);
 }
 
-
+/* Modal styling */
 .modal-backdrop {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -98,12 +147,12 @@
   margin-top: 20px;
   display: flex;
   justify-content: space-around;
-  gap: 10px; /* Add gap between buttons */
+  gap: 10px;
 }
 
-/* Styles for the modal confirmation buttons */
+/* Modal confirmation button styles */
 .modal-buttons .confirm-yes-btn {
-  background-color: #4CAF50; /* Green color for 'Yes' / Confirm */
+  background-color: #4CAF50;
   color: white;
   padding: 8px 16px;
   border: none;
@@ -118,7 +167,7 @@
 }
 
 .modal-buttons .no-btn {
-  background-color: #f44336; /* Red color for 'No' / Cancel */
+  background-color: #f44336;
   color: white;
   padding: 8px 16px;
   border: none;
@@ -133,7 +182,7 @@
 }
 
 .modal-buttons .okey-btn {
-  background-color: #007bff; /* Blue color for 'Okay' (general purpose) */
+  background-color: #007bff;
   color: white;
   padding: 8px 16px;
   border: none;
@@ -147,50 +196,51 @@
   background-color: #0056b3;
 }
 
-
-/* Wrap sidebar and content */
-.approvals-layout {
-  display: flex;
-  height: 90%;
+/* --- Responsive Styles (for mobile) --- */
+@media (max-width: 768px) {
+  .approvals-table th,
+  .approvals-table td {
+    padding: 8px 10px;
+    font-size: 0.9rem;
+  }
 }
 
-/* Sidebar: fixed width */
-/* .approvals-layout > .sidebar {
-  flex-shrink: 0;
-} */
+@media (max-width: 480px) {
+  .approvals-table {
+    border: none;
+  }
 
-/* Main table content */
-.approvals-content {
-  flex: 1;
-  padding: 20px;
-}
+  .approvals-table thead {
+    display: none; /* Hide header on mobile */
+  }
 
-/* Optional: make table responsive */
-.approvals-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
-}
+  .approvals-table tr {
+    border: 1px solid #e0e0e0;
+    margin-bottom: 10px;
+    display: block;
+    background-color: #fff;
+  }
 
-.approvals-table th, .approvals-table td {
-  border: 1px solid #ddd;
-  padding: 8px;
-}
+  .approvals-table td {
+    border: none;
+    border-bottom: 1px solid #e0e0e0;
+    position: relative;
+    padding-left: 50%;
+    text-align: right;
+    display: block;
+    font-size: 0.9rem;
+  }
 
-.status-badge {
-  padding: 4px 8px;
-  border-radius: 4px;
-  color: white;
-}
+  .approvals-table td:before {
+    position: absolute;
+    top: 12px;
+    left: 10px;
+    width: 45%;
+    padding-right: 10px;
+    white-space: nowrap;
+    text-align: left;
+    font-weight: 600;
+    color: #1a3e72;
+  }
 
-.status-badge.pending {
-  background-color: orange;
-}
-
-.status-badge.approved {
-  background-color: green;
-}
-
-.status-badge.rejected {
-  background-color: red;
 }

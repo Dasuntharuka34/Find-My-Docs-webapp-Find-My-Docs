@@ -34,7 +34,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 1024 * 1024 * 2 }, // 2MB file size limit for profile pictures
+  limits: { fileSize: 1024 * 1024 * 5 }, // 5MB file size limit
   fileFilter: (req, file, cb) => {
     const filetypes = /jpeg|jpg|png/;
     const mimetype = filetypes.test(file.mimetype);
@@ -59,6 +59,7 @@ import {
   updateUser,
   deleteUser,
   resetUserPassword,
+  changePassword, // <-- New import
 } from '../controllers/userController.js';
 
 // --- Public Routes ---
@@ -78,6 +79,9 @@ router.delete('/:id', deleteUser);
 
 // Route to reset a user's password to a default value
 router.put('/:id/reset-password', resetUserPassword); // <-- New route for password reset
+
+// Route to allow a user to change their own password
+router.put('/:id/change-password', changePassword); // <-- New route for user password change
 
 // --- Admin Registration Approval Routes ---
 router.get('/registrations/pending', getPendingRegistrations);
