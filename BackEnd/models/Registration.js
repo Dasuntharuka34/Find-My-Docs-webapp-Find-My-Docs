@@ -17,6 +17,11 @@ const registrationSchema = mongoose.Schema(
       required: true,
       unique: true,
     },
+    mobile: { // Add mobile field
+      type: String,
+      required: true,
+      unique: true,
+    },
     password: {
       type: String,
       required: true,

@@ -11,7 +11,7 @@
   }
   
   .footer-link {
-    color: #1a3e72;
+    color: var(--text-h2);
     text-decoration: none;
   }
   

@@ -45,8 +45,7 @@ const approvalStages = {
     { name: "Pending HOD Approval", approverRole: "HOD" },
     { name: "Pending Dean Approval", approverRole: "Dean" },
     { name: "Pending VC Approval", approverRole: "VC" },
-    { name: "Approved", approverRole: null },
-    { name: "Rejected", approverRole: null }
+    { name: "Approved", approverRole: null }
   ],
   LeaveRequest: [
     { name: "Submitted", approverRole: null },
@@ -54,8 +53,7 @@ const approvalStages = {
     { name: "Pending HOD Approval", approverRole: "HOD" },
     { name: "Pending Dean Approval", approverRole: "Dean" },
     { name: "Pending VC Approval", approverRole: "VC" },
-    { name: "Approved", approverRole: null },
-    { name: "Rejected", approverRole: null }
+    { name: "Approved", approverRole: null }
   ]
 };
 
@@ -131,46 +129,60 @@ function PendingApprovals() {
   }, [user]);
 
   const handleApproval = async (request, action, reason = '') => {
-    if (!user || !user.name || !user.role) {
+    if (!user || !user.name || !user.role || !user._id) {
       setMessageModal({ show: true, title: 'Error', message: 'User not authenticated. Please log in again.', onConfirm: closeMessageModal });
       return;
     }
 
     try {
       const isLeaveRequest = request.type !== undefined;
-      const targetApprovalStages = isLeaveRequest ? approvalStages.LeaveRequest : approvalStages.ExcuseRequest;
       
-     // --- FIX START: Correcting API endpoints based on the action ---
-let apiEndpoint;
-let requestBody;
+      // --- FIX START: Include approverId in request body ---
+      let apiEndpoint;
+      let requestBody;
 
-if (isLeaveRequest) {
-  if (action === 'approve') {
-    apiEndpoint = `${process.env.REACT_APP_BACKEND_URL}/api/leaverequests/${request._id}/approve`;
-    requestBody = { approverRole: user.role };
-  } else if (action === 'reject') {
-    if (reason.trim() === '') {
-      setMessageModal({ show: true, title: 'Input Required', message: 'Please provide a reason for rejection.', onConfirm: closeMessageModal });
-      return;
-    }
-    apiEndpoint = `${process.env.REACT_APP_BACKEND_URL}/api/leaverequests/${request._id}/reject`;
-    requestBody = { approverRole: user.role, rejectionReason: reason };
-  }
-} else { 
-  // FIXED: Use the correct endpoints for excuse requests
-  if (action === 'approve') {
-    apiEndpoint = `${process.env.REACT_APP_BACKEND_URL}/api/excuserequests/${request._id}/approve`;
-    requestBody = { approverRole: user.role };
-  } else if (action === 'reject') {
-    if (reason.trim() === '') {
-      setMessageModal({ show: true, title: 'Input Required', message: 'Please provide a reason for rejection.', onConfirm: closeMessageModal });
-      return;
-    }
-    apiEndpoint = `${process.env.REACT_APP_BACKEND_URL}/api/excuserequests/${request._id}/reject`;
-    requestBody = { approverRole: user.role, comment: reason };
-  }
-}
-// --- FIX END ---
+      if (isLeaveRequest) {
+        if (action === 'approve') {
+          apiEndpoint = `${process.env.REACT_APP_BACKEND_URL}/api/leaverequests/${request._id}/approve`;
+          requestBody = { 
+            approverRole: user.role,
+            approverId: user._id // Added approverId
+          };
+        } else if (action === 'reject') {
+          if (reason.trim() === '') {
+            setMessageModal({ show: true, title: 'Input Required', message: 'Please provide a reason for rejection.', onConfirm: closeMessageModal });
+            return;
+          }
+          apiEndpoint = `${process.env.REACT_APP_BACKEND_URL}/api/leaverequests/${request._id}/reject`;
+          requestBody = { 
+            approverRole: user.role,
+            approverId: user._id, // Added approverId
+            rejectionReason: reason 
+          };
+        }
+      } else { 
+        // For excuse requests
+        if (action === 'approve') {
+          apiEndpoint = `${process.env.REACT_APP_BACKEND_URL}/api/excuserequests/${request._id}/approve`;
+          requestBody = { 
+            approverRole: user.role,
+            approverId: user._id // Added approverId
+          };
+        } else if (action === 'reject') {
+          if (reason.trim() === '') {
+            setMessageModal({ show: true, title: 'Input Required', message: 'Please provide a reason for rejection.', onConfirm: closeMessageModal });
+            return;
+          }
+          apiEndpoint = `${process.env.REACT_APP_BACKEND_URL}/api/excuserequests/${request._id}/reject`;
+          requestBody = { 
+            approverRole: user.role,
+            approverId: user._id, // Added approverId
+            comment: reason 
+          };
+        }
+      }
+      // --- FIX END ---
+
       const response = await fetch(apiEndpoint, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -192,7 +204,7 @@ if (isLeaveRequest) {
       setMessageModal({ 
           show: true, 
           title: 'Success', 
-          message: `Request for ${isLeaveRequest ? request.studentName : request.student} has been ${action}d successfully.`, 
+          message: `Request for ${isLeaveRequest ? request.studentName : request.studentName} has been ${action}d successfully.`, 
           onConfirm: closeMessageModal 
       });
 
@@ -239,7 +251,6 @@ if (isLeaveRequest) {
               <table className="approvals-table">
                 <thead>
                   <tr>
-                    {/* <th>ID</th> */}
                     <th>Requester</th>
                     <th>Submitted On</th>
                     <th>Status</th>
@@ -250,7 +261,6 @@ if (isLeaveRequest) {
                 <tbody>
                   {excuseRequests.map(request => (
                     <tr key={request._id}>
-                      {/* <td>{request._id.slice(-5)}</td> */}
                       <td>{request.studentName}</td>
                       <td>{request.submittedDate ? new Date(request.submittedDate).toLocaleDateString() : 'N/A'}</td>
                       <td>
@@ -289,7 +299,6 @@ if (isLeaveRequest) {
               <table className="approvals-table">
                 <thead>
                   <tr>
-                    {/* <th>ID</th> */}
                     <th>Requester</th>
                     <th>Submitted On</th>
                     <th>Status</th>
@@ -300,7 +309,6 @@ if (isLeaveRequest) {
                 <tbody>
                   {leaveRequests.map(request => (
                     <tr key={request._id}>
-                      {/* <td>{request._id.slice(-5)}</td> */}
                       <td>{request.studentName}</td>
                       <td>{request.submittedDate ? new Date(request.submittedDate).toLocaleDateString() : 'N/A'}</td>
                       <td>
@@ -338,7 +346,7 @@ if (isLeaveRequest) {
             <h3>Confirm {confirmAction === 'approve' ? 'Approval' : 'Rejection'}</h3>
             <p>
               Are you sure you want to <strong>{confirmAction}</strong> the request for{' '}
-              <strong>{selectedRequest.type}</strong> submitted by <strong>{selectedRequest.student || selectedRequest.requesterName}</strong>?
+              <strong>{selectedRequest.type || 'Excuse Request'}</strong> submitted by <strong>{selectedRequest.studentName}</strong>?
             </p>
             {confirmAction === 'reject' && (
               <div>

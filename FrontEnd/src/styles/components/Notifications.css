@@ -1,30 +1,199 @@
-.notifications-panel {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    flex: 1;
-    box-shadow: 0 0 6px rgb(0 0 0 / 0.1);
-    max-height: 280px;
-    overflow-y: auto;
-    min-width: 260px;
+.no-notifications {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-secondary);
+  font-style: italic;
+  font-size: 1.1rem;
+}
+
+.notifications-widget {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: var(--card-shadow);
+  padding: 20px;
+}
+.notifications-widget h2{
+  color: var(--text-h2);
+}
+.notifications-summary {
+  padding: 15px 20px;
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.notifications-summary p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.notifications-summary p a{
+    color: var(--text-h2);
+}
+
+.notifications-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: calc(100vh - 250px); /* Adjust based on content */
+  overflow-y: auto;
+}
+
+.notification-item {
+  padding: 15px 20px;
+  border-bottom: 1px solid var(--border-light);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
+  margin: 5px;
+  border-radius: 10px;
+}
+
+
+.notification-item.unread {
+  opacity: 1;
+  cursor: pointer;
+}
+
+.notification-item.read {
+  opacity: 0.8;
+  cursor: default;
+}
+
+.notification-item.unread:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+  transform: translateX(5px);
+}
+
+.notification-content {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding-left: 15px;
+}
+
+.unread-dot {
+  position: absolute;
+  top: 8px;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  background-color: var(--accent-color);
+  border-radius: 50%;
+}
+
+.notification-time {
+  font-size: 0.8rem;
+  opacity: 0.8;
+  margin-top: 5px;
+}
+
+/* Different border colors based on notification type */
+.notification-item[style*="success"] {
+  border-left: 4px solid #28a745;
+}
+
+.notification-item[style*="error"] {
+  border-left: 4px solid #dc3545;
+}
+
+.notification-item[style*="info"] {
+  border-left: 4px solid #17a2b8;
+}
+
+.notification-item[style*="warning"] {
+  border-left: 4px solid #ffc107;
+}
+
+/* Responsive design for tablets */
+@media (max-width: 1024px) {
+  .notifications-page-container {
+    grid-template-columns: 180px 1fr;
   }
   
-  .notifications-panel h2 {
-    margin-bottom: 15px;
-    color: #1a3e72;
+  .notifications-page-content {
+    padding: 15px;
   }
   
-  .notifications-panel ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+  .page-header h1 {
+    font-size: 1.6rem;
+  }
+}
+
+/* Responsive design for mobile devices */
+@media (max-width: 768px) {
+  .notifications-page-container {
+    grid-template-columns: 1fr;
+    grid-template-rows: 60px auto 1fr 40px;
+    grid-template-areas:
+      "header"
+      "sidebar"
+      "main"
+      "footer";
+  }
+  
+  .notifications-page-content {
+    padding: 15px;
+    min-height: calc(100vh - 140px); /* Adjust for mobile layout */
+  }
+  
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .page-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .mark-all-read-btn {
+    align-self: stretch;
+    text-align: center;
   }
   
   .notification-item {
     padding: 12px 15px;
-    border-radius: 6px;
-    margin-bottom: 10px;
-    font-weight: 600;
-    font-size: 0.95rem;
   }
   
+  .notification-message {
+    font-size: 0.9rem;
+  }
+  
+  .notification-time {
+    font-size: 0.75rem;
+  }
+  
+  .notifications-list {
+    max-height: calc(100vh - 300px); /* Adjust for mobile */
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 480px) {
+  .notifications-page-content {
+    padding: 10px;
+  }
+  
+  .page-header h1 {
+    font-size: 1.4rem;
+  }
+  
+  .notifications-container {
+    border-radius: 6px;
+  }
+  
+  .notification-item {
+    padding: 10px 12px;
+  }
+  
+  .notification-content {
+    padding-left: 12px;
+  }
+  
+  .unread-dot {
+    width: 8px;
+    height: 8px;
+    top: 10px;
+  }
+}

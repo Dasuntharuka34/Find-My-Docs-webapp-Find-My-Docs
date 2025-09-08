@@ -14,8 +14,7 @@ const approvalStages = [
   { name: "Pending HOD Approval", approverRole: "HOD" },
   { name: "Pending Dean Approval", approverRole: "Dean" },
   { name: "Pending VC Approval", approverRole: "VC" },
-  { name: "Approved", approverRole: null },
-//   { name: "Rejected", approverRole: null }
+  { name: "Approved", approverRole: null }
 ];
 
 const LeaveRequestView = () => {
@@ -124,29 +123,32 @@ const LeaveRequestView = () => {
     );
   }
 
-  // Filter out pending approvals from history
-  const history = leaveRequest.approvals
-    .filter(approval => approval.status !== 'pending') // Only include approved/rejected actions
+  // Filter out pending approvals and use approver name instead of role
+    const history = leaveRequest?.approvals
+    .filter(approval => approval.status !== 'pending')
     .map(approval => {
-      return {
+        return {
         stage: approvalStages.findIndex(stage => stage.approverRole === approval.approverRole),
         status: approval.status,
         timestamp: approval.approvedAt || leaveRequest.submittedDate,
-        updatedBy: approval.approverRole || 'Requester',
-        comments: approval.status === 'approved' 
-          ? `Approved by ${approval.approverRole}` 
-          : `Rejected by ${approval.approverRole}`
-      };
-    });
-  
-  // Add initial submission to history
-  history.unshift({
-    stage: 0,
-    status: 'Submitted',
-    timestamp: leaveRequest.submittedDate,
-    updatedBy: leaveRequest.studentName,
-    comments: 'Initial submission'
-  });
+        // Use approverName if available, otherwise fall back to approverRole
+        updatedBy: approval.approverName || approval.approverRole || 'System',
+        comments: approval.comment || (approval.status === 'approved' 
+            ? `Approved by ${approval.approverRole}` 
+            : `Rejected by ${approval.approverRole}`)
+        };
+    }) || [];
+
+    // Add initial submission to history
+    if (leaveRequest) {
+        history.unshift({
+            stage: 0,
+            status: 'Submitted',
+            timestamp: leaveRequest.submittedDate,
+            updatedBy: leaveRequest.studentName,
+            comments: 'Initial submission'
+        });
+    }
   
   return (
     <div className="documents-view-container">
@@ -191,7 +193,7 @@ const LeaveRequestView = () => {
             <div className="history-section">
               <h3>Approval History</h3>
               {history.length <= 1 ? (
-                <p>No approval actions taken yet.</p>
+                <p>No detailed history available for this leave request.</p>
               ) : (
                 <div className="history-table">
                   <div className="history-header">

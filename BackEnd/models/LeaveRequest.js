@@ -10,10 +10,17 @@ const approvalStageSchema = mongoose.Schema({
     enum: ['Lecturer', 'HOD', 'Dean', 'VC'],
     required: true
   },
+  approverId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  approverName: {
+    type: String // Add this field
+  },
   status: {
     type: String,
-    enum: ['Submitted', 'Pending Lecturer Approval', 'Pending HOD Approval', 'Pending Dean Approval', 'Pending VC Approval', 'Approved', 'Rejected'],
-    default: 'Submitted'
+    enum: ['pending', 'approved', 'rejected'],
+    default: 'pending'
   },
   comment: {
     type: String,

@@ -14,6 +14,7 @@ import { AuthContext } from './context/AuthContext';
 import ExcuseRequestView from './pages/excuseRequestView';
 import LeaveRequestForm from './forms/LeaveRequestForm';
 import LeaveRequestView from './pages/LeaveRequestView';
+import NotificationsPage from './pages/NotificationsPage';
 
 // PrivateRoute component (fixed)
 const PrivateRoute = ({ children, allowedRoles }) => {
@@ -101,7 +102,7 @@ function App() {
         
         <Route path="/notifications" element={
           <PrivateRoute allowedRoles={['Student', 'Lecturer', 'HOD', 'Dean', 'VC', 'Admin']}>
-            <p style={{textAlign: 'center', marginTop: '50px', fontSize: '1.5rem'}}>Notifications Page Under Construction</p>
+           <NotificationsPage />
           </PrivateRoute>
         } />
 

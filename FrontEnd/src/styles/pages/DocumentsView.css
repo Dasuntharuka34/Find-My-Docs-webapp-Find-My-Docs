@@ -11,17 +11,20 @@
   display: flex;
   flex: 1; /* Allows it to take remaining vertical space */
   width: 100%;
+  background-color: var(--bg-secondary);
+  
 }
 
 /* Main content area for documents details */
 .documents-main-content {
   flex: 1; /* Allows main content to grow */
-  padding: 20px;
-  max-width: calc(100% - 250px); /* Adjust max-width considering sidebar width (e.g., 250px) */
+  padding: 30px;
+  max-width: 100%; /* Adjust max-width considering sidebar width (e.g., 250px) */
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #333;
+  color: var(--text-primary);
   box-sizing: border-box; /* Include padding in element's total width */
   transition: margin-left 0.3s ease; /* Smooth transition for sidebar toggle */
+  background-color: var(--bg-primary);
 }
 
 .documents-view h1, .documents-view h3 {
@@ -30,7 +33,7 @@
 }
 
 .document-container {
-  background-color: #ffffff;
+  background-color: var(--bg-secondary);
   padding: 30px;
   border-radius: 10px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
@@ -51,6 +54,7 @@
 
 .document-header-row h1 {
   margin-bottom: 0; /* Remove default h1 margin if it conflicts */
+  color: var(--text-h2);
 }
 
 /* Style for the Go Back button */
@@ -77,8 +81,12 @@
   line-height: 1.6;
 }
 
+.document-info p a {
+  color: var(--text-h2);
+}
+
 .document-info strong {
-  color: #1a3e72;
+  color: var(--thead-text);
 }
 
 .progress-section {

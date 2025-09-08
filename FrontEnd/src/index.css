@@ -11,3 +11,111 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+:root {
+  /* Light theme variables */
+  --bg-primary: #eef3f5;
+  --bg-secondary: #f0f7ff;
+  --bg-hover: #e9ecef;
+  --text:black;
+  --text-h2: #4c6d9c;
+  --text-primary: #212529;
+  --text-secondary: #6c757d;
+  --header-text: #344d70;
+  --sidebar-text: #344d70;
+  --text-title :#000000;
+  --text-subtitle:#3f3e3e;
+  --thead-text:#1a3e72;
+  --thead-bg:#d8e5f8;
+  --thead-hover-bg:#cfdff8;
+  --border-color: #dee2e6;
+  --switch-track: #ced4da;
+  --switch-thumb: #495057;
+  --card-bg: #ffffff;
+  --card-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  --accent-hover: #0056b3; /* Darker shade for hover states */
+  --border-light: #e9ecef;
+  --border-color: #dee2e6;
+  --success-color: #dbdbdb;
+  --success-hover: #afafaf;
+  --error-color: #c55959;
+  --error-hover: #c53030;
+  --success-bg: rgba(40, 167, 69, 0.1);
+}
+
+.dark {
+  /* Dark theme variables */
+  --bg-primary: #202020;
+  --bg-secondary: #2b2a2a;
+  --bg-hover: #3d3d3d;
+  --text: white;
+  --text-h2: #6390cf;
+  --text-primary: #babbbb;
+  --text-secondary: #adb5bd;
+  --header-text: #6390cf;
+  --sidebar-text: #6390cf;
+  --text-title :#ffffff;
+  --text-subtitle:#a7a7a7;
+  --thead-text:#f7f7f7;
+  --thead-bg:#45566e;
+  --thead-hover-bg:#45608a;  
+  --table-header:#1a3e72;
+  --table-header-bg:#1a3e72;
+  --border-color: #495057;
+  --switch-track: #6c757d;
+  --switch-thumb: #f8f9fa;
+  --card-bg: #2d2d2d;
+  --card-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  --accent-hover: #3b82f6; /* Different hover color for dark mode */
+  --border-light: #374151; /* Darker light border for dark mode */
+  --success-color: #333333;
+  --success-hover: #141414;
+  --error-color: #c55959;
+  --error-hover: #c53030;
+  --success-bg: rgba(81, 207, 102, 0.1);
+}
+
+/* Apply theme variables to your components */
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Update your existing components to use CSS variables */
+.header {
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.sidebar {
+  background-color: var(--bg-secondary);
+  border-right: 1px solid var(--border-color);
+}
+
+.card {
+  background-color: var(--card-bg);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border-color);
+}
+
+.table {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+}
+
+.table th,
+.table td {
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.input, .select, .textarea {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.input:focus, .select:focus, .textarea:focus {
+  border-color: var(--text-secondary);
+}

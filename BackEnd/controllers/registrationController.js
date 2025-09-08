@@ -18,7 +18,7 @@ const getPendingRegistrations = async (req, res) => {
 // @route   POST /api/registrations
 // @access  Public
 const createRegistration = async (req, res) => {
-  const { name, email, nic, password, role, indexNumber, department } = req.body;
+  const { name, email, nic, mobile, password, role, indexNumber, department } = req.body;
 
   try {
     const registrationExists = await Registration.findOne({ email });
@@ -30,6 +30,7 @@ const createRegistration = async (req, res) => {
       name,
       email,
       nic,
+      mobile,
       password, // Hash this!
       role,
       indexNumber: role === 'Student' ? indexNumber : undefined,
@@ -42,6 +43,7 @@ const createRegistration = async (req, res) => {
         name: registration.name,
         email: registration.email,
         nic: registration.nic,
+        mobile: registration.mobile,
         role: registration.role,
         department:registration.department,
         message: 'Registration submitted successfully. Awaiting admin approval.',
@@ -49,6 +51,8 @@ const createRegistration = async (req, res) => {
     } else {
       res.status(400).json({ message: 'Invalid registration data' });
     }
+
+    // ... rest of the function
   } catch (error) {
     res.status(500).json({ message: 'Error creating registration', error: error.message });
   }

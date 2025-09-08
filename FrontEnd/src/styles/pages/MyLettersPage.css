@@ -22,13 +22,9 @@
 }
 
 .recent-letters th {
-  background-color: #d8e5f8;
-  color: #1a3e72;
+  background-color: var(--thead-bg);
+  color: var(--text-primary);
   font-weight: 600;
-}
-
-.recent-letters tbody tr:nth-child(even) {
-  background-color: #f8f8f8;
 }
 
 .recent-letters tbody tr:hover {
@@ -71,14 +67,14 @@
 }
 
 .modal {
-  background-color: #fff;
+  background-color: var(--bg-primary);
   border-radius: 8px;
   width: 400px;
   max-width: 90%;
   padding: 20px;
   box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
   font-size: 1rem;
-  color: #1a3e72;
+  color: var(--text-primary);
   text-align: center;
 }
 
@@ -86,11 +82,12 @@
   margin-bottom: 20px;
   font-weight: 700;
   font-size: 1.5rem;
+  color: var(--text-primary);
 }
 
 .modal p {
   margin-bottom: 20px;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .modal-actions {
@@ -121,6 +118,9 @@
 .modal-actions .cancel-btn {
   background-color: #f44336;
   color: white;
+  padding: 10px 20px;
+  margin-top: 26px ;
+  height: 35px;
 }
 
 .modal-actions .cancel-btn:hover {

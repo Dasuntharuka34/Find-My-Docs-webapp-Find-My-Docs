@@ -2,6 +2,7 @@ import React, { useContext } from 'react';
 import '../styles/components/Header.css';
 import universityLogo from '../assets/uni-logo.png';
 import { AuthContext } from '../context/AuthContext'; // AuthContext import කරන්න
+import ThemeSwitch from './ThemeSwitch';
 
 function Header({ user }) {
   const { logout } = useContext(AuthContext); 
@@ -17,6 +18,7 @@ function Header({ user }) {
         <h1 className="university-name">University of Jaffna</h1>
       </div>
       <div className="header-right">
+        <ThemeSwitch />
         <div className="user-info">
           <span className="user-name">{user.name}</span> | <span className="user-role">{user.role}</span>
         </div>

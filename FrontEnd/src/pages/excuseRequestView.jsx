@@ -14,8 +14,7 @@ const approvalStages = [
   { name: "Pending HOD Approval", approverRole: "HOD" },
   { name: "Pending Dean Approval", approverRole: "Dean" },
   { name: "Pending VC Approval", approverRole: "VC" },
-  { name: "Approved", approverRole: null },
-//   { name: "Rejected", approverRole: null }
+  { name: "Approved", approverRole: null }
 ];
 // --- END APPROVAL STAGE DEFINITIONS ---
 
@@ -85,7 +84,7 @@ const ExcuseRequestView = () => {
           comments: 'Initial submission'
         });
 
-        // Add approval stages
+        // Add approval stages - FILTER OUT PENDING APPROVALS
         if (fetchedRequest.approvals && fetchedRequest.approvals.length > 0) {
           fetchedRequest.approvals.forEach((approval, index) => {
             if (approval.status !== 'pending') {
@@ -93,10 +92,11 @@ const ExcuseRequestView = () => {
                 stage: index + 1,
                 status: approval.status === 'approved' ? 'Approved' : 'Rejected',
                 timestamp: approval.approvedAt || fetchedRequest.submittedDate,
-                updatedBy: approval.approverRole || 'System',
-                comments: approval.status === 'approved' 
+                // Use approverName if available, otherwise fall back to approverRole
+                updatedBy: approval.approverName || approval.approverRole || 'System',
+                comments: approval.comment || (approval.status === 'approved' 
                   ? `Approved by ${approval.approverRole}` 
-                  : `Rejected by ${approval.approverRole}`
+                  : `Rejected by ${approval.approverRole}`)
               });
             }
           });
@@ -214,7 +214,7 @@ const ExcuseRequestView = () => {
                   <strong>Subject Combination:</strong> {excuseRequest.subjectCombo}
                 </div>
                 <div className="info-item">
-                  <strong>Submitted Date:</strong> {new Date(excuseRequest.submittedDate).toLocaleDateString()}
+                  <strong>Submitted Date:</strong> {new Date(excuseRequest.submittedDate).toLocaleString()}
                 </div>
               </div>
 
@@ -268,19 +268,20 @@ const ExcuseRequestView = () => {
               <ProgressTracker
                 stages={approvalStages.map(s => s.name)}
                 currentStage={excuseRequest.currentStageIndex}
+                isRejected={excuseRequest.status === "Rejected"}
               />
             </div>
 
             <div className="history-section">
               <h3>Approval History</h3>
               {history.length === 0 ? (
-                <p>No detailed history available for this excuse request.</p>
+                <p>No approval history available for this excuse request.</p>
               ) : (
                 <div className="history-table">
                   <div className="history-header">
                     <div>Stage</div>
                     <div>Status</div>
-                    <div>Date</div>
+                    <div>Date & Time</div>
                     <div>Updated By</div>
                     <div>Comments</div>
                   </div>

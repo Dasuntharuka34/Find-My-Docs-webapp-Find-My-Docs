@@ -9,8 +9,7 @@ const approvalStages = [
   { name: "Pending HOD Approval", approverRole: "HOD" },
   { name: "Pending Dean Approval", approverRole: "Dean" },
   { name: "Pending VC Approval", approverRole: "VC" },
-  { name: "Approved", approverRole: null },
-  // { name: "Rejected", approverRole: null }
+  { name: "Approved", approverRole: null }
 ];
 
 // ඉල්ලීමක් ඉදිරිපත් කරන පුද්ගලයාගේ භූමිකාව අනුව ආරම්භක අදියර තීරණය කිරීම
@@ -30,11 +29,10 @@ const createLeaveRequest = async (req, res) => {
     const {
       requesterId,
       requesterName,
-      requesterRole, // Changed from studentRole to requesterRole
+      requesterRole,
       reason,
       startDate,
       endDate,
-      attachments,
       reasonDetails,
       contactDuringLeave,
       remarks,
@@ -44,46 +42,42 @@ const createLeaveRequest = async (req, res) => {
       return res.status(400).json({ message: 'Please provide all required fields' });
     }
 
-    // Determine initial stage based on the submitter's role (Lecturer, HOD, Dean)
+    // Determine initial stage based on the submitter's role
     const initialStageIndex = submitterRoleToInitialStageIndex[requesterRole] || 0;
     const initialStatus = approvalStages[initialStageIndex].name;
     const firstApproverRole = approvalStages[initialStageIndex].approverRole;
 
     const newRequest = new LeaveRequest({
-      studentId: requesterId, // Correctly map to studentId in model
-      studentName: requesterName, // Correctly map to studentName in model
+      studentId: requesterId,
+      studentName: requesterName,
       reason,
-      reasonDetails,
-      contactDuringLeave,
-      remarks,
+      reasonDetails: reasonDetails || '',
+      contactDuringLeave: contactDuringLeave || '',
+      remarks: remarks || '',
       startDate,
       endDate,
-      attachments, // This will be the file path from multer
+      attachments: req.file ? req.file.path : null,
       status: initialStatus,
       currentStageIndex: initialStageIndex,
       submittedDate: new Date(),
-      // The attachments field on the model is a String.
-      // In a real app, you would save the file using multer, get the path, and save that path.
-      // For now, let's assume the frontend sends the file as a string (base64 or URL).
-      attachments: req.file ? req.file.path : null // Use multer's file path if file was uploaded
     });
 
     // Add the first stage to the approvals array
     newRequest.approvals.push({
-      approverRole: approvalStages[initialStageIndex].approverRole,
+      approverRole: firstApproverRole,
       status: 'pending'
     });
 
     const createdRequest = await newRequest.save();
 
-    // 🔔 Notify the requester
+    // Notify the requester
     await Notification.create({
       userId: requesterId,
       message: `Your leave request has been submitted. Status: ${initialStatus}.`,
       type: 'info',
     });
 
-    // 🔔 Notify the first approver role
+    // Notify the first approver role
     if (firstApproverRole) {
       const approvers = await User.find({ role: firstApproverRole });
       if (approvers.length > 0) {
@@ -172,13 +166,13 @@ const getLeaveRequestsByUserId = async (req, res) => {
   }
 };
 
-// @desc    Handle approval for a leave request
-// @route   PUT /api/leaverequests/:id/approve
-// @access  Private (e.g., approver roles)
+// @desc    Handle approval for a leave request
+// @route   PUT /api/leaverequests/:id/approve
+// @access  Private (e.g., approver roles)
 const approveLeaveRequest = async (req, res) => {
   try {
     const { id } = req.params;
-    const approverRole = req.body.approverRole;
+    const { approverRole, approverId, comment } = req.body;
 
     const request = await LeaveRequest.findById(id);
 
@@ -191,6 +185,12 @@ const approveLeaveRequest = async (req, res) => {
       return res.status(403).json({ message: 'You are not authorized to approve this request at this stage.' });
     }
 
+    // Get the approver user details from database
+    const approverUser = await User.findById(approverId);
+    if (!approverUser) {
+      return res.status(404).json({ message: 'Approver user not found.' });
+    }
+
     const nextStageIndex = request.currentStageIndex + 1;
     const nextStage = approvalStages[nextStageIndex];
 
@@ -198,15 +198,18 @@ const approveLeaveRequest = async (req, res) => {
     request.status = nextStage.name;
     request.approvals.push({
       approverRole: approverRole,
+      approverId: approverId,
+      approverName: approverUser.name, // Add approver's name
       status: 'approved',
-      approvedAt: new Date()
+      approvedAt: new Date(),
+      comment: comment || ''
     });
 
     await request.save();
 
     await Notification.create({
       userId: request.studentId,
-      message: `Your leave request for ${request.reason} has been approved by ${approverRole}. Current status: ${nextStage.name}.`,
+      message: `Your leave request for ${request.reason} has been approved by ${approverUser.name}. Current status: ${nextStage.name}.`,
       type: 'info',
     });
 
@@ -239,13 +242,13 @@ const approveLeaveRequest = async (req, res) => {
   }
 };
 
-// @desc    Handle rejection for a leave request
-// @route   PUT /api/leaverequests/:id/reject
-// @access  Private (e.g., approver roles)
+// @desc    Handle rejection for a leave request
+// @route   PUT /api/leaverequests/:id/reject
+// @access  Private (e.g., approver roles)
 const rejectLeaveRequest = async (req, res) => {
   try {
     const { id } = req.params;
-    const approverRole = req.body.approverRole;
+    const { approverRole, approverId, comment } = req.body;
 
     const request = await LeaveRequest.findById(id);
 
@@ -258,18 +261,27 @@ const rejectLeaveRequest = async (req, res) => {
       return res.status(403).json({ message: 'You are not authorized to reject this request at this stage.' });
     }
 
+    // Get the approver user details from database
+    const approverUser = await User.findById(approverId);
+    if (!approverUser) {
+      return res.status(404).json({ message: 'Approver user not found.' });
+    }
+
     request.status = 'Rejected';
     request.approvals.push({
       approverRole: approverRole,
+      approverId: approverId,
+      approverName: approverUser.name, // Add approver's name
       status: 'rejected',
-      approvedAt: new Date()
+      approvedAt: new Date(),
+      comment: comment || 'Request rejected'
     });
 
     await request.save();
 
     await Notification.create({
       userId: request.studentId,
-      message: `Your leave request for ${request.reason} has been REJECTED by ${approverRole}.`,
+      message: `Your leave request for ${request.reason} has been REJECTED by ${approverUser.name}.${comment ? ` Reason: ${comment}` : ''}`,
       type: 'error',
     });
 

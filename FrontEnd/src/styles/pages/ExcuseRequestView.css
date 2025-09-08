@@ -13,11 +13,11 @@
 .excuse-request-main-content {
   flex: 1;
   padding: 20px;
-  background-color: #f5f5f5;
+  background-color: var(--bg-primary);
 }
 
 .excuse-request-container {
-  background: white;
+  background: var(--bg-secondary);
   border-radius: 8px;
   padding: 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -45,12 +45,15 @@
 
 .info-item {
   padding: 10px;
-  background-color: #f9f9f9;
+  background-color: var(--bg-primary);
   border-radius: 4px;
 }
 
 .info-item.full-width {
   grid-column: 1 / -1;
+}
+.info-item.full-width a {
+  color: var(--text-h2);
 }
 
 .absences-table, .history-table {
@@ -68,7 +71,8 @@
 
 .absences-header, .history-header {
   font-weight: bold;
-  background-color: #f0f0f0;
+  background-color: var(--thead-bg);
+  color: var(--thead-text);
 }
 
 .absences-header {

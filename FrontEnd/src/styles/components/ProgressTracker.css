@@ -1,5 +1,5 @@
 .progress-tracker {
-  background-color: #ffffff;
+  background-color: var(--bg-primary);
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 0 6px rgb(0 0 0 / 0.1);
@@ -10,7 +10,7 @@
 
 .progress-tracker h2 {
   margin-bottom: 15px;
-  color: #1a3e72;
+  color: var(--text-h2);
 }
 
 .steps-container {
@@ -51,7 +51,7 @@
   text-align: center;
   font-weight: 600;
   font-size: 0.9rem;
-  color: #1748cf;
+  color: var(--text);
   word-wrap: break-word;
   max-width: 100px;
   transition: all 0.3s ease;
@@ -73,9 +73,13 @@
 }
 
 /* Completed step */
-.step.completed .step-circle,
-.step.active .step-circle {
+.step.completed .step-circle {
   background-color: #279c4c; /* green */
+  color: white;
+}
+
+.step.active .step-circle {
+  background-color: #eb955c;
   color: white;
 }
 
@@ -83,10 +87,7 @@
   background-color: #4caf50;
 }
 
-.step.active .step-label {
-  font-weight: 700;
-  color: #2e7d32;
-}
+
 
 /* Rejected step */
 .step.rejected .step-circle {

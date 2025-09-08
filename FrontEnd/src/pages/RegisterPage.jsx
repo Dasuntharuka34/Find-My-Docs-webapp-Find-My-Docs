@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from 'react-router-dom';
-import universityLogo from '../assets/uni-logo.png'; // Make sure this path is correct
-import Footer from '../components/Footer'; // Make sure this path is correct
-import '../styles/pages/RegisterPage.css'; // You'll need to create or update this CSS file
+import universityLogo from '../assets/uni-logo.png';
+import Footer from '../components/Footer';
+import '../styles/pages/RegisterPage.css';
 
 // Custom Message Modal Component
 const MessageModal = ({ show, title, message, onConfirm }) => {
@@ -27,12 +27,13 @@ export default function RegisterPage() {
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
-    nic: "", // Added NIC field
+    nic: "",
+    mobile: "", // Added mobile field
     department: "",
-    accountType: "Student", // Default role
+    accountType: "Student",
     password: "",
     confirmPassword: "",
-    indexNumber: "" // Added for students
+    indexNumber: ""
   });
 
   const [error, setError] = useState("");
@@ -41,21 +42,13 @@ export default function RegisterPage() {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    setError(""); // Clear error on input change
-    // If accountType changes, clear department/indexNumber
-    if (e.target.name === "accountType") {
-      setFormData(prev => ({
-        ...prev,
-        department: "",
-        indexNumber: ""
-      }));
-    }
+    setError("");
   };
 
   const closeMessageModal = () => {
     setMessageModal({ show: false, title: '', message: '' });
     if (messageModal.title === 'Success') {
-      navigate('/login'); // Redirect to login page on successful registration submission
+      navigate('/login');
     }
   };
 
@@ -70,10 +63,15 @@ export default function RegisterPage() {
   };
 
   const validateNic = (nic) => {
-    // Basic NIC validation: 10 or 12 digits
     const oldNicPattern = /^\d{9}[vVxX]$/;
     const newNicPattern = /^\d{12}$/;
     return oldNicPattern.test(nic) || newNicPattern.test(nic);
+  };
+
+  const validateMobile = (mobile) => {
+    // Sri Lankan mobile number validation
+    const mobilePattern = /^(\+94|0)(7[0-9]{8})$/;
+    return mobilePattern.test(mobile);
   };
 
   const handleSubmit = async (e) => {
@@ -84,14 +82,16 @@ export default function RegisterPage() {
       setError("Please enter a valid email address");
       return;
     }
-    if (!validateNic(formData.nic)) { // NIC validation
+    if (!validateNic(formData.nic)) {
       setError("Please enter a valid 9-digit (with V/X) or 12-digit NIC number.");
       return;
     }
+    if (!validateMobile(formData.mobile)) {
+      setError("Please enter a valid Sri Lankan mobile number (07XXXXXXXX or +947XXXXXXXX)");
+      return;
+    }
     if (!validatePassword(formData.password)) {
-      setError(
-        "Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a number, and a symbol."
-      );
+      setError("Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a number, and a symbol.");
       return;
     }
     if (formData.password !== formData.confirmPassword) {
@@ -99,17 +99,16 @@ export default function RegisterPage() {
       return;
     }
     if (formData.accountType === "Student" && formData.indexNumber.trim() === "") {
-        setError("Student must provide an Index Number.");
-        return;
+      setError("Student must provide an Index Number.");
+      return;
     }
-    // Department is now always visible and required for all roles
-    if (formData.department.trim() === "") { // Make department required for all
-        setError("Please select a department.");
-        return;
+    if (formData.department.trim() === "") {
+      setError("Please select a department.");
+      return;
     }
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users/register`, {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/registrations`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -117,10 +116,11 @@ export default function RegisterPage() {
         body: JSON.stringify({
           name: formData.fullName,
           email: formData.email,
-          nic: formData.nic, // Included NIC in the request body
+          nic: formData.nic,
+          mobile: formData.mobile, // Send mobile to backend
           password: formData.password,
-          role: formData.accountType, // Map accountType to role
-          department: formData.department, // Department is always sent
+          role: formData.accountType,
+          department: formData.department,
           indexNumber: formData.accountType === "Student" ? formData.indexNumber : undefined,
         }),
       });
@@ -129,16 +129,16 @@ export default function RegisterPage() {
 
       if (response.ok) {
         setMessageModal({ show: true, title: 'Success', message: data.message || 'Registration request submitted successfully! Please wait for admin approval to log in.' });
-        // Optionally reset form
         setFormData({
-            fullName: "",
-            email: "",
-            nic: "", // Reset NIC
-            department: "",
-            accountType: "Student",
-            password: "",
-            confirmPassword: "",
-            indexNumber: ""
+          fullName: "",
+          email: "",
+          nic: "",
+          mobile: "",
+          department: "",
+          accountType: "Student",
+          password: "",
+          confirmPassword: "",
+          indexNumber: ""
         });
       } else {
         setMessageModal({ show: true, title: 'Registration Failed', message: data.message || 'Something went wrong during registration.' });
@@ -169,6 +169,7 @@ export default function RegisterPage() {
           <input
             className="registration-input"
             name="fullName"
+            type="text"
             value={formData.fullName}
             onChange={handleChange}
             required
@@ -181,13 +182,12 @@ export default function RegisterPage() {
             className="registration-input"
             type="email"
             name="email"
-            placeholder="e.g., example@university.edu"
             value={formData.email}
             onChange={handleChange}
             required
           />
 
-          <label className="block font-semibold" htmlFor="nic"> {/* NIC Input Field */}
+          <label className="block font-semibold" htmlFor="nic">
             NIC Number
           </label>
           <input
@@ -196,6 +196,20 @@ export default function RegisterPage() {
             name="nic"
             placeholder="e.g., 901234567V or 200012345678"
             value={formData.nic}
+            onChange={handleChange}
+            required
+          />
+
+          {/* Add Mobile Number Field */}
+          <label className="block font-semibold" htmlFor="mobile">
+            Mobile Number
+          </label>
+          <input
+            className="registration-input"
+            type="tel"
+            name="mobile"
+            placeholder="e.g., 0712345678 or +94712345678"
+            value={formData.mobile}
             onChange={handleChange}
             required
           />
@@ -226,6 +240,7 @@ export default function RegisterPage() {
               <input
                 className="registration-input"
                 name="indexNumber"
+                type="text"
                 placeholder="e.g., 2021/CSC/001"
                 value={formData.indexNumber}
                 onChange={handleChange}
@@ -234,29 +249,25 @@ export default function RegisterPage() {
             </>
           )}
 
-          {/* Department field is now always visible */}
-          <>
-            <label className="block font-semibold" htmlFor="department">
-              Department
-            </label>
-            <select
-              className="registration-select"
-              name="department"
-              value={formData.department}
-              onChange={handleChange}
-              required // Department is now required for ALL roles, including students
-            >
-              <option value="">-- Select Department --</option>
-              {/* Department options */}
-              <option value="Computer Science">Computer Science</option>
-              <option value="Physics">Physics</option>
-              <option value="Chemistry">Chemistry</option>
-              <option value="Botany">Botany</option>
-              <option value="Fisheries">Fisheries</option>
-              <option value="Mathematics and Statistics">Mathematics and Statistics</option>
-              <option value="Zoology">Zoology</option>
-            </select>
-          </>
+          <label className="block font-semibold" htmlFor="department">
+            Department
+          </label>
+          <select
+            className="registration-select"
+            name="department"
+            value={formData.department}
+            onChange={handleChange}
+            required
+          >
+            <option value="">-- Select Department --</option>
+            <option value="Computer Science">Computer Science</option>
+            <option value="Physics">Physics</option>
+            <option value="Chemistry">Chemistry</option>
+            <option value="Botany">Botany</option>
+            <option value="Fisheries">Fisheries</option>
+            <option value="Mathematics and Statistics">Mathematics and Statistics</option>
+            <option value="Zoology">Zoology</option>
+          </select>
 
           <label className="block font-semibold" htmlFor="password">
             Password

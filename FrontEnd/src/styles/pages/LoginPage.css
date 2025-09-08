@@ -1,6 +1,6 @@
 .login-page {
   height: 100vh;
-  background: url('../../assets/UOJ_login.jpg') no-repeat center center;
+  background: url('../../assets/UOJ_login.jpg') no-repeat center center ;
   background-size: cover;
   display: flex;
   justify-content: center;
@@ -17,7 +17,7 @@
 }
 
 .login-box {
-  background-color: #ffffff;
+  background-color: var(--bg-primary);
   padding: 40px;
   border-radius: 10px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
@@ -37,9 +37,16 @@
 }
 .login-box h2 {
   margin-bottom: 30px;
-  color: #1a3e72; /* Dark blue */
+  color: var(--text-h2); /* Dark blue */
   font-size: 2.2rem;
   font-weight: 700;
+}
+.login-box .login-links p{
+  color: var(--text-primary);
+}
+
+.login-box .login-links p a{
+  color: var(--text-h2);
 }
 
 .form-group {

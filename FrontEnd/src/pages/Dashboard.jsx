@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import Header from '../components/Header';
 import Sidebar from '../components/Sidebar';
 import RecentLetters from '../components/RecentLetters';
-import Notifications from '../components/Notifications';
+import NotificationsWidget from '../components/NotificationsWidget';
 import NewLetterModal from '../components/NewLetterModal';
 import Footer from '../components/Footer';
 import ExcuseRequestForm from '../forms/ExcuseRequestForm';
@@ -230,7 +230,10 @@ function Dashboard() {
       <main className="main-content">
         <section className="top-widgets">
           {/* <ProgressTracker stages={approvalStages.map(s => s.name)} currentStage={currentStage} /> */}
-          <Notifications notifications={notifications} />
+          <NotificationsWidget 
+            notifications={notifications} 
+            onNotificationUpdate={fetchNotifications} 
+          />
         </section>
 
         <section className="bottom-widgets">

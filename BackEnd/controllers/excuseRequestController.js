@@ -2,7 +2,7 @@
 
 import ExcuseRequest from '../models/ExcuseRequest.js';
 import Notification from '../models/Notification.js';
-import User from '../models/User.js';
+import User from '../models/User.js'; // Make sure to import User model
 
 // --- APPROVAL STAGE DEFINITIONS ---
 const approvalStages = [
@@ -11,8 +11,7 @@ const approvalStages = [
   { name: "Pending HOD Approval", approverRole: "HOD" },
   { name: "Pending Dean Approval", approverRole: "Dean" },
   { name: "Pending VC Approval", approverRole: "VC" },
-  { name: "Approved", approverRole: null },
-  // { name: "Rejected", approverRole: null }
+  { name: "Approved", approverRole: null }
 ];
 
 // Maps student role to initial stage index
@@ -166,7 +165,7 @@ const getPendingExcuseApprovals = async (req, res) => {
   }
 };
 
-// --- APPROVE EXCUSE REQUEST (UPDATED FOR BETTER HISTORY TRACKING) ---
+// --- APPROVE EXCUSE REQUEST (UPDATED WITH USER LOOKUP) ---
 const approveExcuseRequest = async (req, res) => {
   try {
     const { id } = req.params;
@@ -180,6 +179,12 @@ const approveExcuseRequest = async (req, res) => {
       return res.status(403).json({ message: 'Not authorized to approve at this stage.' });
     }
 
+    // Get the approver user details from database
+    const approverUser = await User.findById(approverId);
+    if (!approverUser) {
+      return res.status(404).json({ message: 'Approver user not found.' });
+    }
+
     const nextStageIndex = request.currentStageIndex + 1;
     const nextStage = approvalStages[nextStageIndex];
 
@@ -189,6 +194,7 @@ const approveExcuseRequest = async (req, res) => {
       currentApproval.status = 'approved';
       currentApproval.approvedAt = new Date();
       currentApproval.approverId = approverId;
+      currentApproval.approverName = approverUser.name; // Use the user's name from database
       currentApproval.comment = comment || '';
     }
 
@@ -201,7 +207,7 @@ const approveExcuseRequest = async (req, res) => {
     // Notify requester
     await Notification.create({
       userId: request.studentId,
-      message: `Your excuse request for ${request.reason} has been approved by ${approverRole}. Current status: ${nextStage.name}.`,
+      message: `Your excuse request for ${request.reason} has been approved by ${approverUser.name}. Current status: ${nextStage.name}.`,
       type: 'info',
     });
 
@@ -230,7 +236,7 @@ const approveExcuseRequest = async (req, res) => {
   }
 };
 
-// --- REJECT EXCUSE REQUEST (UPDATED FOR BETTER HISTORY TRACKING) ---
+// --- REJECT EXCUSE REQUEST (UPDATED WITH USER LOOKUP) ---
 const rejectExcuseRequest = async (req, res) => {
   try {
     const { id } = req.params;
@@ -244,12 +250,19 @@ const rejectExcuseRequest = async (req, res) => {
       return res.status(403).json({ message: 'Not authorized to reject at this stage.' });
     }
 
+    // Get the approver user details from database
+    const approverUser = await User.findById(approverId);
+    if (!approverUser) {
+      return res.status(404).json({ message: 'Approver user not found.' });
+    }
+
     // Update the pending approval
     const currentApproval = request.approvals.find(a => a.status === 'pending' && a.approverRole === approverRole);
     if (currentApproval) {
       currentApproval.status = 'rejected';
       currentApproval.approvedAt = new Date();
       currentApproval.approverId = approverId;
+      currentApproval.approverName = approverUser.name; // Use the user's name from database
       currentApproval.comment = comment || 'Request rejected';
     }
 
@@ -260,7 +273,7 @@ const rejectExcuseRequest = async (req, res) => {
 
     await Notification.create({
       userId: request.studentId,
-      message: `Your excuse request for ${request.reason} has been REJECTED by ${approverRole}.${comment ? ` Reason: ${comment}` : ''}`,
+      message: `Your excuse request for ${request.reason} has been REJECTED by ${approverUser.name}.${comment ? ` Reason: ${comment}` : ''}`,
       type: 'error',
     });
 

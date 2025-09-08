@@ -1,109 +1,332 @@
-body {
-  background-color: #f4f4f4;
-  font-family: 'Segoe UI', sans-serif;
-}
+.excuse-form-container {
+          width: 80%;
+          margin: 2rem auto;
+          padding: 2rem;
+          background-color: var(--card-bg);
+          border-left: 6px solid var(--accent-color);
+          box-shadow: var(--card-shadow);
+          border-radius: 8px;
+          border: 1px solid var(--border-color);
+        }
 
-.form-container {
-  width: 1000px;
-  margin: 2rem auto;
-  padding: 2rem;
-  background-color: white;
-  border-left: 6px solid #006400;
-  box-shadow: 0 0 15px rgba(0,0,0,0.1);
-  border-radius: 5px;
-}
+        .form-title {
+          text-align: center;
+          color: var(--accent-color);
+          font-size: 1.8rem;
+          font-weight: bold;
+          margin-bottom: 0.5rem;
+        }
 
-.form-title {
-  text-align: center;
-  color: #006400;
-  font-size: 1.8rem;
-  font-weight: bold;
-}
+        .form-subtitle {
+          text-align: center;
+          margin-bottom: 1.5rem;
+          color: var(--text-secondary);
+          font-size: 1rem;
+        }
 
-.form-subtitle {
-  text-align: center;
-  margin-bottom: 1.5rem;
-  color: #333;
-  font-size: 1rem;
-}
+        /* Form Grid Layout for better organization */
+        .form-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 1.5rem;
+          margin-bottom: 1.5rem;
+        }
 
-input, textarea, select {
-  width: 100%;
-  padding: 10px;
-  margin-top: 0.25rem;
-  margin-bottom: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
+        .form-group {
+          margin-bottom: 1rem;
+        }
 
-textarea {
-  min-height: 60px;
-  resize: vertical;
-}
+        .form-group label {
+          display: block;
+          font-weight: 600;
+          margin-bottom: 0.5rem;
+          color: var(--text-primary);
+        }
 
-.form-row {
-  display: flex;
-  gap: 1rem;
-}
+        .form-group-full {
+          grid-column: 1 / -1;
+        }
 
-.form-row input {
-  flex: 1;
-}
+        /* Input Styles */
+        input, textarea, select {
+          width: 96%;
+          padding: 12px;
+          margin-top: 0.25rem;
+          border: 1px solid #ccc;
+          border-radius: 6px;
+          background-color: var(--input-bg);
+          color: var(--text-primary);
+          font-size: 1rem;
+          transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
 
-select {
-  width: 100%;
-  padding: 10px;
-  margin-top: 0.25rem;
-  margin-bottom: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
+        input:focus, textarea:focus, select:focus {
+          outline: none;
+          border-color: var(--accent-color);
+          box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
 
+        textarea {
+          min-height: 80px;
+          resize: vertical;
+        }
 
-.absence-section label {
-  font-weight: bold;
-  color: #006400;
-  margin-bottom: 0.5rem;
-  display: block;
-}
+        /* Absence Section */
+        .absence-section {
+          grid-column: 1 / -1;
+          padding: 1.5rem;
+          background-color: var(--bg-secondary);
+          border-radius: 8px;
+          border: 1px solid var(--border-light);
+        }
 
-.remove-btn {
-  background-color: #d9534f;
-  color: white;
-  border: none;
-  padding: 8px 10px;
-  margin: 8px;
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 0.9rem;
-}
+        .absence-section h3 {
+          color: var(--accent-color);
+          margin-bottom: 1rem;
+          font-size: 1.2rem;
+        }
 
-.remove-btn:hover {
-  background-color: #c9302c;
-}
+        .absence-item {
+          display: grid;
+          grid-template-columns: 1fr 1fr auto;
+          gap: 1rem;
+          align-items: end;
+          margin-bottom: 1rem;
+          padding: 1rem;
+          background-color: var(--card-bg);
+          border-radius: 6px;
+          border: 1px solid var(--border-light);
+        }
+        
+        /* Button Styles */
+        .remove-btn {
+          background-color: var(--error-color);
+          color: white;
+          border: none;
+          padding: 10px 15px;
+          border-radius: 6px;
+          cursor: pointer;
+          font-size: 0.9rem;
+          transition: background-color 0.3s ease;
+          height: fit-content;
+        }
 
+        .remove-btn:hover {
+          background-color: var(--error-hover);
+          transform: translateY(-1px);
+        }
 
-.add-btn {
-  color: #006400;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 0.9rem;
-  margin-top: -0.5rem;
-}
+        .add-btn {
+          background-color: var(--bg-primary);
+          color: white;
+          border: none;
+          padding: 10px 20px;
+          border-radius: 6px;
+          cursor: pointer;
+          font-size: 0.9rem;
+          margin-top: 1rem;
+          transition: background-color 0.3s ease;
+        }
+        
+        .add-btn:hover {
+          background-color: var(--success-hover);
+          transform: translateY(-1px);
+        }
 
-.submit-btn {
-  background-color: #006400;
-  color: white;
-  padding: 12px 20px;
-  border: none;
-  font-size: 1rem;
-  border-radius: 5px;
-  cursor: pointer;
-  width: 100%;
-  margin-top: 1rem;
-}
+        .submit-btn {
+          background-color: var(--accent-color);
+          color: white;
+          padding: 15px 25px;
+          border: none;
+          font-size: 1.1rem;
+          border-radius: 8px;
+          cursor: pointer;
+          width: 100%;
+          margin-top: 2rem;
+          transition: background-color 0.3s ease, transform 0.2s ease;
+        }
 
-.submit-btn:hover {
-  background-color: #004d00;
-}
+        .submit-btn:hover {
+          background-color: var(--accent-hover);
+          transform: translateY(-2px);
+        }
+
+        .submit-btn:active {
+          transform: translateY(0);
+        }
+
+        /* File Upload Styles */
+        .file-upload {
+          grid-column: 1 / -1;
+        }
+
+        .file-upload-label {
+          display: block;
+          padding: 12px;
+          background-color: var(--bg-secondary);
+          border: 2px dashed var(--border-color);
+          border-radius: 6px;
+          text-align: center;
+          cursor: pointer;
+          transition: border-color 0.3s ease;
+        }
+
+        .file-upload-label:hover {
+          border-color: var(--accent-color);
+        }
+
+        .file-upload-input {
+          display:flexbox;
+
+        }
+        .submit-btn-container {
+          grid-column: 1 / -1;
+          display: flex;
+          justify-content: center;
+          margin-top: 2rem;
+        }
+        
+        .submit-btn {
+          background-color: var(--accent-color);
+          color: white;
+          padding: 15px 40px;
+          border: none;
+          font-size: 1.1rem;
+          font-weight: 600;
+          border-radius: 8px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          min-width: 200px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+        
+        .submit-btn:hover {
+          background-color: var(--accent-hover);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .submit-btn:active {
+          transform: translateY(0);
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .submit-btn:disabled {
+          background-color: var(--text-muted);
+          cursor: not-allowed;
+          transform: none;
+          box-shadow: none;
+        }
+        
+        .submit-btn:disabled:hover {
+          transform: none;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+          .excuse-form-container {
+            width: 90%;
+            padding: 1.5rem;
+          }
+          
+          .form-grid {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .excuse-form-container {
+            width: 95%;
+            padding: 1rem;
+            margin: 1rem auto;
+            border-left: 4px solid var(--accent-color);
+          }
+          
+          .form-title {
+            font-size: 1.5rem;
+          }
+          
+          .form-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+          }
+          
+          .absence-item {
+            grid-template-columns: 1fr;
+            gap: 0.8rem;
+          }
+          
+          .remove-btn {
+            width: 100%;
+            margin-top: 0.5rem;
+          }
+          
+          input, textarea, select {
+            padding: 10px;
+          }
+          
+          .submit-btn-container {
+            margin-top: 1.5rem;
+          }
+          
+          .submit-btn {
+            padding: 12px 30px;
+            font-size: 1rem;
+            min-width: 180px;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .excuse-form-container {
+            width: 100%;
+            border-radius: 0;
+            border-left: none;
+            border-top: 4px solid var(--accent-color);
+            margin: 0;
+            padding: 1rem;
+          }
+          
+          .form-title {
+            font-size: 1.3rem;
+          }
+          
+          .form-subtitle {
+            font-size: 0.9rem;
+          }
+          
+          .absence-section {
+            padding: 1rem;
+          }
+          
+          .add-btn, .remove-btn {
+            font-size: 0.8rem;
+            padding: 8px 12px;
+          }
+          .submit-btn {
+            width: 100%;
+            max-width: 250px;
+            min-width: auto;
+            padding: 12px 20px;
+          }
+        }
+
+        /* Loading state */
+        .submit-btn:disabled {
+          background-color: var(--text-muted);
+          cursor: not-allowed;
+          transform: none;
+        }
+
+        .submit-btn:disabled:hover {
+          transform: none;
+        }
+
+        /* Error message styling */
+        .error-message {
+          color: var(--error-color);
+          font-size: 0.9rem;
+          margin-top: 0.25rem;
+          display: block;
+        }

@@ -225,147 +225,147 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="admin-dashboard">
+    <div className="admin-view-container">
       <Header user={user} />
-      <h2>Admin Dashboard</h2>
-
-      <section className="admin-section">
-        <h3>📥 Pending Registrations ({pendingRegistrations.length})</h3>
-        {pendingRegistrations.length === 0 ? (
-          <p>No new registration requests pending approval.</p>
-        ) : (
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Submitted At</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pendingRegistrations.map(reg => (
-                <tr key={reg._id}>
-                  <td>{reg.name}</td>
-                  <td>{reg.email}</td>
-                  <td>{reg.role}</td>
-                  <td>{new Date(reg.submittedAt).toLocaleDateString()}</td>
-                  <td>
-                    <button onClick={() => openViewingModal(reg)} className="view-btn">View</button>
-                    <button onClick={() => openConfirmationModal(reg, 'approve')} className="approve-btn">Approve</button>
-                    <button onClick={() => openConfirmationModal(reg, 'reject')} className="reject-btn">Reject</button>
-                  </td>
+      <div className="admin-dashboard">
+        <section className="admin-section">
+          <h3>📥 Pending Registrations ({pendingRegistrations.length})</h3>
+          {pendingRegistrations.length === 0 ? (
+            <p>No new registration requests pending approval.</p>
+          ) : (
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Submitted At</th>
+                  <th>Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </section>
+              </thead>
+              <tbody>
+                {pendingRegistrations.map(reg => (
+                  <tr key={reg._id}>
+                    <td>{reg.name}</td>
+                    <td>{reg.email}</td>
+                    <td>{reg.role}</td>
+                    <td>{new Date(reg.submittedAt).toLocaleDateString()}</td>
+                    <td>
+                      <button onClick={() => openViewingModal(reg)} className="view-btn">View</button>
+                      <button onClick={() => openConfirmationModal(reg, 'approve')} className="approve-btn">Approve</button>
+                      <button onClick={() => openConfirmationModal(reg, 'reject')} className="reject-btn">Reject</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </section>
 
-      <section className="admin-section">
-        <h3>👥 Approved Users ({approvedUsers.length})</h3>
-        {approvedUsers.length === 0 ? (
-          <p>No approved users found.</p>
-        ) : (
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {approvedUsers.map(approvedUser => (
-                <tr key={approvedUser._id}>
-                  <td>{approvedUser.name}</td>
-                  <td>{approvedUser.email}</td>
-                  <td>{approvedUser.role}</td>
-                  <td>
-                    <button onClick={() => handleEditUser(approvedUser)} className="edit-btn">Edit</button>
-                    <button onClick={() => handleDeleteUser(approvedUser._id, approvedUser.name)} className="delete-btn">Delete</button>
-                    <button onClick={() => handleResetPassword(approvedUser._id, approvedUser.name)} className="reset-password-btn">Reset Password</button> {/* New Button */}
-                  </td>
+        <section className="admin-section">
+          <h3>👥 Approved Users ({approvedUsers.length})</h3>
+          {approvedUsers.length === 0 ? (
+            <p>No approved users found.</p>
+          ) : (
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </section>
+              </thead>
+              <tbody>
+                {approvedUsers.map(approvedUser => (
+                  <tr key={approvedUser._id}>
+                    <td>{approvedUser.name}</td>
+                    <td>{approvedUser.email}</td>
+                    <td>{approvedUser.role}</td>
+                    <td>
+                      <button onClick={() => handleEditUser(approvedUser)} className="edit-btn">Edit</button>
+                      <button onClick={() => handleDeleteUser(approvedUser._id, approvedUser.name)} className="delete-btn">Delete</button>
+                      <button onClick={() => handleResetPassword(approvedUser._id, approvedUser.name)} className="reset-password-btn">Reset Password</button> {/* New Button */}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </section>
 
-      <Footer />
+        <Footer />
 
-      {/* Viewing Registration Details Modal */}
-      {viewingRegistration && (
-        <div className="modal-backdrop">
-          <div className="modal">
-            <h3>Registration Request Details</h3>
-            <p><strong>Name:</strong> {viewingRegistration.name}</p>
-            <p><strong>Email:</strong> {viewingRegistration.email}</p>
-            <p><strong>NIC:</strong> {viewingRegistration.nic}</p>
-            <p><strong>Role:</strong> {viewingRegistration.role}</p>
-            <p><strong>Index Number:</strong> {viewingRegistration.indexNumber || 'N/A'}</p>
-            <p><strong>Department:</strong> {viewingRegistration.department || 'N/A'}</p>
-            <p><strong>Submitted At:</strong> {new Date(viewingRegistration.submittedAt).toLocaleString()}</p>
-            <div className="modal-buttons">
-              <button onClick={() => openConfirmationModal(viewingRegistration, 'approve')} className="approve-btn">Approve</button>
-              <button onClick={() => openConfirmationModal(viewingRegistration, 'reject')} className="reject-btn">Reject</button>
-              <button onClick={() => setViewingRegistration(null)} className="cancel-btn">Close</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Confirmation Modal for Approve/Reject */}
-      {confirmationRequest && (
-        <div className="modal-backdrop">
-          <div className="modal">
-            <h3>Confirm {confirmAction === 'approve' ? 'Approval' : 'Rejection'}</h3>
-            <p>
-              Are you sure you want to <strong>{confirmAction}</strong> the registration request for <strong>{confirmationRequest.name}</strong> ({confirmationRequest.email})?
-            </p>
-            {confirmAction === 'reject' && (
-              <div>
-                <label htmlFor="rejectionReason">Reason for Rejection (optional):</label>
-                <textarea
-                  id="rejectionReason"
-                  value={rejectionReason}
-                  onChange={(e) => setRejectionReason(e.target.value)}
-                  rows="3"
-                  className="modal-textarea"
-                />
+        {/* Viewing Registration Details Modal */}
+        {viewingRegistration && (
+          <div className="modal-backdrop">
+            <div className="modal">
+              <h3>Registration Request Details</h3>
+              <p><strong>Name:</strong> {viewingRegistration.name}</p>
+              <p><strong>Email:</strong> {viewingRegistration.email}</p>
+              <p><strong>NIC:</strong> {viewingRegistration.nic}</p>
+              <p><strong>Role:</strong> {viewingRegistration.role}</p>
+              <p><strong>Index Number:</strong> {viewingRegistration.indexNumber || 'N/A'}</p>
+              <p><strong>Department:</strong> {viewingRegistration.department || 'N/A'}</p>
+              <p><strong>Submitted At:</strong> {new Date(viewingRegistration.submittedAt).toLocaleString()}</p>
+              <div className="modal-buttons">
+                <button onClick={() => openConfirmationModal(viewingRegistration, 'approve')} className="approve-btn">Approve</button>
+                <button onClick={() => openConfirmationModal(viewingRegistration, 'reject')} className="reject-btn">Reject</button>
+                <button onClick={() => setViewingRegistration(null)} className="cancel-btn">Close</button>
               </div>
-            )}
-            <div className="modal-buttons">
-              <button
-                onClick={() => handleRegistrationAction(confirmationRequest._id, confirmAction, rejectionReason)}
-                className={confirmAction === 'approve' ? 'approve-btn' : 'reject-btn'}
-              >
-                Confirm
-              </button>
-              <button
-                onClick={() => {
-                  setConfirmationRequest(null);
-                  setConfirmAction(null);
-                  setRejectionReason('');
-                }}
-                className="cancel-btn"
-              >
-                Cancel
-              </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      <MessageModal
-        show={messageModal.show}
-        title={messageModal.title}
-        message={messageModal.message}
-        onConfirm={messageModal.onConfirm}
-      />
+        {/* Confirmation Modal for Approve/Reject */}
+        {confirmationRequest && (
+          <div className="modal-backdrop">
+            <div className="modal">
+              <h3>Confirm {confirmAction === 'approve' ? 'Approval' : 'Rejection'}</h3>
+              <p>
+                Are you sure you want to <strong>{confirmAction}</strong> the registration request for <strong>{confirmationRequest.name}</strong> ({confirmationRequest.email})?
+              </p>
+              {confirmAction === 'reject' && (
+                <div>
+                  <label htmlFor="rejectionReason">Reason for Rejection (optional):</label>
+                  <textarea
+                    id="rejectionReason"
+                    value={rejectionReason}
+                    onChange={(e) => setRejectionReason(e.target.value)}
+                    rows="3"
+                    className="modal-textarea"
+                  />
+                </div>
+              )}
+              <div className="modal-buttons">
+                <button
+                  onClick={() => handleRegistrationAction(confirmationRequest._id, confirmAction, rejectionReason)}
+                  className={confirmAction === 'approve' ? 'approve-btn' : 'reject-btn'}
+                >
+                  Confirm
+                </button>
+                <button
+                  onClick={() => {
+                    setConfirmationRequest(null);
+                    setConfirmAction(null);
+                    setRejectionReason('');
+                  }}
+                  className="cancel-btn"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <MessageModal
+          show={messageModal.show}
+          title={messageModal.title}
+          message={messageModal.message}
+          onConfirm={messageModal.onConfirm}
+        />
+        </div>
     </div>
   );
 }

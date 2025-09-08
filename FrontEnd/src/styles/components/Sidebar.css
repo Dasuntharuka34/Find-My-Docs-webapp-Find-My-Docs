@@ -1,7 +1,7 @@
 .sidebar {
     background-color: #f5f9ff; /* very light blue */
     border-right: 1px solid #c9d8f5;
-    /* height: 100%; */
+    height: 100%;
     padding-top: 20px;
     display: flex;
     flex-direction: column;
@@ -27,7 +27,7 @@
   padding: 15px 25px; /* Apply padding here */
   font-weight: 600;
   font-size: 1rem;
-  color: #3c5aa6; /* Link color */
+  color: var(--header-text);/* Link color */
   text-decoration: none; /* Remove underline */
   transition: background-color 0.3s ease;
 }

@@ -14,6 +14,7 @@
   grid-template-areas: "sidebar main";
   flex: 1;
   min-height: calc(100vh - var(--header-height, 80px) - var(--footer-height, 60px));
+  background-color: var(--bg-primary);
 }
 
 .sidebar {
@@ -28,12 +29,13 @@
   align-items: flex-start;
   overflow-y: auto;
   height: 100%;
+
 }
 
 
 /* Styling for the profile information card */
 .profile-card {
-  background-color: #ffffff;
+  background-color: var(--bg-secondary);
   border-radius: 10px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   padding: 40px;
@@ -43,7 +45,7 @@
 }
 
 .profile-card h2 {
-  color: #1a3e72;
+  color: var(--text-h2);
   margin-bottom: 30px;
   font-size: 2.2rem;
   text-align: center;
@@ -110,14 +112,14 @@
 }
 
 .profile-info-group strong {
-  color: #1a3e72;
+  color: var(--text-h2);
   flex: 1; /* Takes up proportional space */
   margin-right: 20px;
 }
 
 .profile-info-group span {
   flex: 2; /* Takes up more space for the value */
-  color: #555;
+  color: var(--text-primary);
   text-align: right;
 }
 
@@ -153,7 +155,7 @@
   display: block;
   font-weight: 600;
   margin-bottom: 5px;
-  color: #333;
+  color: var(--text-secondary);
 }
 
 .form-group input[type="text"],

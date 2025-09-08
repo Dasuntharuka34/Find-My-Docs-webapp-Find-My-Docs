@@ -1,5 +1,3 @@
-// models/ExcuseRequest.js
-
 import mongoose from 'mongoose';
 
 // Define the approval stage schema
@@ -12,6 +10,10 @@ const approvalStageSchema = mongoose.Schema({
   approverId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
+  },
+  approverName: {
+    type: String,
+    default: ''
   },
   status: {
     type: String,
