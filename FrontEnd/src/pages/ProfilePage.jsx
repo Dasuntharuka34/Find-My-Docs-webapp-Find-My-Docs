@@ -57,7 +57,7 @@ const ProfilePage = () => {
 
   const getFullImageUrl = (relativePath) => {
     if (!relativePath) return defaultProfilePic;
-    return `${process.env.REACT_APP_BACKEND_URL}${relativePath}?t=${new Date().getTime()}`;
+    return `${relativePath}?t=${new Date().getTime()}`;
   };
 
   useEffect(() => {

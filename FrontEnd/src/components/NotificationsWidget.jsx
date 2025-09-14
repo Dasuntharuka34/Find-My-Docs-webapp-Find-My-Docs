@@ -18,26 +18,23 @@ const alertTextColors = {
 };
 
 const NotificationsWidget = ({ notifications, onNotificationUpdate }) => {
-  const { user } = useContext(AuthContext);
   const [recentNotifications, setRecentNotifications] = useState([]);
 
-  // Function to get recent notifications (latest 5)
-  const getRecentNotifications = () => {
-    if (!notifications || notifications.length === 0) return [];
-    
+  // Update recent notifications when notifications prop changes
+  useEffect(() => {
+    if (!notifications || notifications.length === 0) {
+      setRecentNotifications([]);
+      return;
+    }
+
     // Sort notifications by timestamp in descending order and take first 5
     const sorted = [...notifications].sort((a, b) => {
       const timeA = a.createdAt ? new Date(a.createdAt) : new Date(0);
       const timeB = b.createdAt ? new Date(b.createdAt) : new Date(0);
       return timeB - timeA;
     });
-    
-    return sorted.slice(0, 5);
-  };
 
-  // Update recent notifications when notifications prop changes
-  useEffect(() => {
-    setRecentNotifications(getRecentNotifications());
+    setRecentNotifications(sorted.slice(0, 5));
   }, [notifications]);
 
   // Mark a single notification as read

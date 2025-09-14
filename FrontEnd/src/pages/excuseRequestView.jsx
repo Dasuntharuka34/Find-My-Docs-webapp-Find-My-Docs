@@ -253,7 +253,7 @@ const ExcuseRequestView = () => {
                 <div className="info-item full-width">
                   <strong>Medical Form:</strong>{' '}
                   <a
-                    href={`${process.env.REACT_APP_BACKEND_URL}/${excuseRequest.attachments}`}
+                    href={`${excuseRequest.attachments}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
