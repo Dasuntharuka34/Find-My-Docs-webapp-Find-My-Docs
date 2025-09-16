@@ -5,37 +5,8 @@ import Footer from '../components/Footer';
 import Sidebar from '../components/Sidebar';
 import '../styles/pages/MyLettersPage.css';
 import { AuthContext } from '../context/AuthContext';
+import MessageModal from '../components/MessageModel';
 
-// Custom Message Modal Component (same as used in other dashboards)
-const MessageModal = ({ show, title, message, onConfirm, onCancel }) => {
-  if (!show) return null;
-
-  return (
-    <div className="modal-overlay">
-      <div className="modal">
-        <h3>{title}</h3>
-        <p>{message}</p>
-        <div className="modal-actions">
-          {onConfirm && (
-            <button onClick={onConfirm} className="submit-btn">
-              Okay
-            </button>
-          )}
-          {onCancel && (
-            <button onClick={onCancel} className="cancel-btn">
-              Cancel
-            </button>
-          )}
-          {(!onConfirm && !onCancel) && (
-            <button onClick={() => { /* Close logic handled by parent */ }} className="submit-btn">
-              Okay
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
 
 // Status colors consistent with RecentLetters component
 const statusColors = {
@@ -79,12 +50,15 @@ function MyLettersPage() {
         setLetters(lettersData);
         
         // Fetch Leave Requests
-        const leaveRequestsResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/leaverequests/byUser/${user._id}`);
-        if (!leaveRequestsResponse.ok) {
-          throw new Error(`Failed to fetch leave requests: HTTP status ${leaveRequestsResponse.status}`);
+        if (user.role !== 'Student') {
+          const leaveRequestsResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/leaverequests/byUser/${user._id}`);
+          if (!leaveRequestsResponse.ok) {
+            throw new Error(`Failed to fetch leave requests: HTTP status ${leaveRequestsResponse.status}`);
+          }
+          const leaveRequestsData = await leaveRequestsResponse.json();
+          setLeaveRequests(leaveRequestsData);
         }
-        const leaveRequestsData = await leaveRequestsResponse.json();
-        setLeaveRequests(leaveRequestsData);
+
 
         // Fetch Excuse Requests
         const excuseRequestsResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/excuserequests/byUser/${user._id}`);
@@ -158,48 +132,51 @@ function MyLettersPage() {
             </div>
 
             {/* --- Leave Requests Table --- */}
-            <div className="recent-letters" style={{ marginTop: '40px' }}>
-              <h2>My Submitted Leave Requests</h2>
-              {leaveRequests.length === 0 ? (
-                <p>You have not submitted any leave requests yet.</p>
-              ) : (
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Reason</th>
-                      <th>Submitted Date</th>
-                      <th>Start Date</th>
-                      <th>End Date</th>
-                      <th>Current Status</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {leaveRequests.map(request => (
-                      <tr key={request._id}>
-                        <td>{request.reason}</td>
-                        <td>{new Date(request.submittedDate).toLocaleDateString()}</td>
-                        <td>{new Date(request.startDate).toLocaleDateString()}</td>
-                        <td>{new Date(request.endDate).toLocaleDateString()}</td>
-                        <td>
-                          <span
-                            className="status-badge"
-                            style={{ backgroundColor: statusColors[request.status] || '#777' }}
-                          >
-                            {request.status}
-                          </span>
-                        </td>
-                        <td>
-                          <Link to={`/leave-request/${request._id}`} className="view-details-btn">
-                            View Details
-                          </Link>
-                        </td>
+            {user && user.role !== 'Student' && (
+              <div className="recent-letters" style={{ marginTop: '40px' }}>
+                <h2>My Submitted Leave Requests</h2>
+                {leaveRequests.length === 0 ? (
+                  <p>You have not submitted any leave requests yet.</p>
+                ) : (
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Reason</th>
+                        <th>Submitted Date</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Current Status</th>
+                        <th>Action</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
+                    </thead>
+                    <tbody>
+                      {leaveRequests.map(request => (
+                        <tr key={request._id}>
+                          <td>{request.reason}</td>
+                          <td>{new Date(request.submittedDate).toLocaleDateString()}</td>
+                          <td>{new Date(request.startDate).toLocaleDateString()}</td>
+                          <td>{new Date(request.endDate).toLocaleDateString()}</td>
+                          <td>
+                            <span
+                              className="status-badge"
+                              style={{ backgroundColor: statusColors[request.status] || '#777' }}
+                            >
+                              {request.status}
+                            </span>
+                          </td>
+                          <td>
+                            <Link to={`/leave-request/${request._id}`} className="view-details-btn">
+                              View Details
+                            </Link>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            )}
+
 
             {/* --- Excuse Requests Table --- */}
             <div className="recent-letters" style={{ marginTop: '40px' }}>
@@ -254,8 +231,8 @@ function MyLettersPage() {
         title={messageModal.title}
         message={messageModal.message}
         onConfirm={messageModal.onConfirm}
-        onCancel={messageModal.onCancel}
       />
+
     </div>
   );
 }

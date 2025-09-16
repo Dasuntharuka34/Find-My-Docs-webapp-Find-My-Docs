@@ -4,28 +4,15 @@ import Footer from '../components/Footer';
 import Sidebar from '../components/Sidebar';
 import { AuthContext } from '../context/AuthContext';
 import '../styles/pages/ProfilePage.css';
+import MessageModal from '../components/MessageModal';
+import { validateEmail, validateNic, validateMobile } from '../utils/validation';
+import { departments } from '../config/departments';
 
-// ----------------- Message Modal Component -----------------
-const MessageModal = ({ show, title, message, onConfirm }) => {
-  if (!show) return null;
-
-  return (
-    <div className="modal-overlay">
-      <div className="modal">
-        <h3>{title}</h3>
-        <p>{message}</p>
-        <div className="modal-actions">
-          <button onClick={onConfirm} className="modal-button">
-            Okay
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 // ----------------- ProfilePage Main Component -----------------
-const ProfilePage = () => {
+
+
+const ProfilePage = ({ isAdmin = false }) => {
   const { user, token, updateUser: updateUserInContext } = useContext(AuthContext);
 
   const [isEditing, setIsEditing] = useState(false);
@@ -60,7 +47,7 @@ const ProfilePage = () => {
     return `${relativePath}?t=${new Date().getTime()}`;
   };
 
-  useEffect(() => {
+  const resetFormState = () => {
     if (user) {
       setEditFormData({
         name: user.name || '',
@@ -73,7 +60,12 @@ const ProfilePage = () => {
       });
       setProfilePicturePreview(getFullImageUrl(user.profilePicture));
     }
+  };
+
+  useEffect(() => {
+    resetFormState();
   }, [user]);
+
 
   const closeMessageModal = () => {
     setMessageModal({ show: false, title: '', message: '', onConfirm: () => {} });
@@ -102,20 +94,10 @@ const ProfilePage = () => {
     setIsEditing(false);
     setShowPasswordChange(false);
     setError('');
-    if (user) {
-      setEditFormData({
-        name: user.name || '',
-        email: user.email || '',
-        nic: user.nic || '',
-        department: user.department || '',
-        indexNumber: user.indexNumber || '',
-        role: user.role || '',
-        mobile: user.mobile || '',
-      });
-      setProfilePicturePreview(getFullImageUrl(user.profilePicture));
-      setProfilePictureFile(null);
-    }
+    resetFormState();
+    setProfilePictureFile(null);
   };
+
 
   const handleEditFormChange = (e) => {
     const { name, value } = e.target;
@@ -141,23 +123,8 @@ const ProfilePage = () => {
     }
   };
 
-  const validateEmail = (email) => {
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailPattern.test(email);
-  };
-
-  const validateNic = (nic) => {
-    const oldNicPattern = /^\d{9}[vVxX]$/;
-    const newNicPattern = /^\d{12}$/;
-    return oldNicPattern.test(nic) || newNicPattern.test(nic);
-  };
-
-  const validateMobile = (mobile) => {
-    const mobilePattern = /^\d{10}$/;
-    return mobilePattern.test(mobile);
-  };
-
   // -------------- Save Profile Changes ----------------
+
   const handleSave = async (e) => {
     e.preventDefault();
 
@@ -260,150 +227,170 @@ const ProfilePage = () => {
   };
 
   // ----------------- UI Rendering -----------------
+  const profileContent = (
+    <div className="profile-card">
+      <h2>{user.name}</h2>
+      {/* Profile Picture */}
+      <div className="profile-picture-container">
+        <img src={profilePicturePreview} alt="Profile" className="profile-picture"
+          onError={(e) => { e.target.onerror = null; e.target.src = defaultProfilePic; }} />
+        {isEditing && (
+          <button type="button" className="change-photo-btn" onClick={() => fileInputRef.current.click()}>
+            Change Photo
+          </button>
+        )}
+        <input type="file" ref={fileInputRef} onChange={handleProfilePictureChange}
+          style={{ display: 'none' }} accept="image/*" />
+      </div>
+
+      {/* Display View */}
+      {!isEditing && !showPasswordChange ? (
+        <>
+          <div className="profile-info-group"><strong>Name:</strong><span>{user.name}</span></div>
+          <div className="profile-info-group"><strong>Email:</strong><span>{user.email}</span></div>
+          <div className="profile-info-group"><strong>NIC:</strong><span>{user.nic || 'N/A'}</span></div>
+          <div className="profile-info-group"><strong>Mobile:</strong><span>{user.mobile || 'N/A'}</span></div>
+          <div className="profile-info-group"><strong>Role:</strong><span>{user.role}</span></div>
+          <div className="profile-info-group"><strong>Department:</strong><span>{user.department || 'N/A'}</span></div>
+          {user.role === 'Student' && (
+            <div className="profile-info-group"><strong>Index Number:</strong><span>{user.indexNumber || 'N/A'}</span></div>
+          )}
+          <div className="profile-actions">
+            <button onClick={handleEditClick} className="edit-profile-btn">Edit Profile</button>
+            <button onClick={handlePasswordChangeClick} className="change-password-btn">Change Password</button>
+          </div>
+        </>
+      ) : null}
+
+      {/* Edit Profile Form */}
+      {isEditing && (
+        <form onSubmit={handleSave}>
+          <div className="form-group">
+            <label htmlFor="name">Name:</label>
+            <input type="text" id="name" name="name" value={editFormData.name} onChange={handleEditFormChange} required />
+          </div>
+          <div className="form-group">
+            <label htmlFor="email">Email:</label>
+            <input type="email" id="email" name="email" value={editFormData.email} onChange={handleEditFormChange} required />
+          </div>
+          <div className="form-group">
+            <label htmlFor="nic">NIC Number:</label>
+            <input type="text" id="nic" name="nic" value={editFormData.nic} onChange={handleEditFormChange} required />
+          </div>
+          <div className="form-group">
+            <label htmlFor="mobile">Mobile Number:</label>
+            <input type="text" id="mobile" name="mobile" value={editFormData.mobile} onChange={handleEditFormChange} required />
+          </div>
+          <div className="form-group">
+            <label htmlFor="role">Role:</label>
+            <input type="text" id="role" name="role" value={editFormData.role} disabled />
+          </div>
+          <div className="form-group">
+            <label htmlFor="department">Department:</label>
+            <select id="department" name="department" value={editFormData.department} onChange={handleEditFormChange} required>
+              <option value="">-- Select Department --</option>
+              {departments.map((dept) => (
+                <option key={dept} value={dept}>
+                  {dept}
+                </option>
+              ))}
+            </select>
+
+          </div>
+          {editFormData.role === 'Student' && (
+            <div className="form-group">
+              <label htmlFor="indexNumber">Index Number:</label>
+              <input type="text" id="indexNumber" name="indexNumber"
+                value={editFormData.indexNumber} onChange={handleEditFormChange} required />
+            </div>
+          )}
+          {error && <p className="profile-error">{error}</p>}
+          <div className="profile-actions">
+            <button type="submit" className="save-profile-btn">Save Changes</button>
+            <button type="button" onClick={handleCancelEdit} className="cancel-profile-btn">Cancel</button>
+          </div>
+        </form>
+      )}
+
+      {/* Change Password Form */}
+      {showPasswordChange && (
+        <form onSubmit={handleChangePassword}>
+          <div className="form-group">
+            <label htmlFor="currentPassword">Current Password:</label>
+            <input type="password" id="currentPassword" name="currentPassword"
+              value={passwordFormData.currentPassword} onChange={handlePasswordFormChange} required />
+          </div>
+          <div className="form-group">
+            <label htmlFor="newPassword">New Password:</label>
+            <input type="password" id="newPassword" name="newPassword"
+              value={passwordFormData.newPassword} onChange={handlePasswordFormChange} required />
+          </div>
+          <div className="form-group">
+            <label htmlFor="confirmNewPassword">Confirm New Password:</label>
+            <input type="password" id="confirmNewPassword" name="confirmNewPassword"
+              value={passwordFormData.confirmNewPassword} onChange={handlePasswordFormChange} required />
+          </div>
+          {error && <p className="profile-error">{error}</p>}
+          <div className="profile-actions">
+            <button type="submit" className="save-profile-btn">Save Password</button>
+            <button type="button" onClick={handleCancelEdit} className="cancel-profile-btn">Cancel</button>
+          </div>
+        </form>
+      )}
+    </div>
+  );
+
   if (!user) {
+    if (isAdmin) {
+      return <p style={{textAlign: 'center', marginTop: '50px', fontSize: '1.5rem'}}>Loading user profile...</p>;
+    } else {
+      return (
+        <div className="profile-container">
+          <Header user={null} />
+          <div className="profile-layout">
+            <Sidebar />
+            <main className="profile-content">
+              <p style={{textAlign: 'center', marginTop: '50px', fontSize: '1.5rem'}}>Loading user profile...</p>
+            </main>
+          </div>
+          <Footer />
+        </div>
+      );
+    }
+  }
+
+  if (isAdmin) {
+    return (
+      <div className="profile-content">
+        {profileContent}
+        <MessageModal
+          show={messageModal.show}
+          title={messageModal.title}
+          message={messageModal.message}
+          onConfirm={messageModal.onConfirm}
+        />
+      </div>
+    );
+  } else {
     return (
       <div className="profile-container">
-        <Header user={null} />
+        <Header user={user} />
         <div className="profile-layout">
           <Sidebar />
           <main className="profile-content">
-            <p style={{textAlign: 'center', marginTop: '50px', fontSize: '1.5rem'}}>Loading user profile...</p>
+            {profileContent}
           </main>
         </div>
         <Footer />
+        <MessageModal
+          show={messageModal.show}
+          title={messageModal.title}
+          message={messageModal.message}
+          onConfirm={messageModal.onConfirm}
+        />
       </div>
     );
   }
-
-  return (
-    <div className="profile-container">
-      <Header user={user} />
-      <div className="profile-layout">
-        <Sidebar />
-        <main className="profile-content">
-          <div className="profile-card">
-            <h2>{user.name}</h2>
-            {/* Profile Picture */}
-            <div className="profile-picture-container">
-              <img src={profilePicturePreview} alt="Profile" className="profile-picture"
-                onError={(e) => { e.target.onerror = null; e.target.src = defaultProfilePic; }} />
-              {isEditing && (
-                <button type="button" className="change-photo-btn" onClick={() => fileInputRef.current.click()}>
-                  Change Photo
-                </button>
-              )}
-              <input type="file" ref={fileInputRef} onChange={handleProfilePictureChange}
-                style={{ display: 'none' }} accept="image/*" />
-            </div>
-
-            {/* Display View */}
-            {!isEditing && !showPasswordChange ? (
-              <>
-                <div className="profile-info-group"><strong>Name:</strong><span>{user.name}</span></div>
-                <div className="profile-info-group"><strong>Email:</strong><span>{user.email}</span></div>
-                <div className="profile-info-group"><strong>NIC:</strong><span>{user.nic || 'N/A'}</span></div>
-                <div className="profile-info-group"><strong>Mobile:</strong><span>{user.mobile || 'N/A'}</span></div>
-                <div className="profile-info-group"><strong>Role:</strong><span>{user.role}</span></div>
-                <div className="profile-info-group"><strong>Department:</strong><span>{user.department || 'N/A'}</span></div>
-                {user.role === 'Student' && (
-                  <div className="profile-info-group"><strong>Index Number:</strong><span>{user.indexNumber || 'N/A'}</span></div>
-                )}
-                <div className="profile-actions">
-                  <button onClick={handleEditClick} className="edit-profile-btn">Edit Profile</button>
-                  <button onClick={handlePasswordChangeClick} className="change-password-btn">Change Password</button>
-                </div>
-              </>
-            ) : null}
-
-            {/* Edit Profile Form */}
-            {isEditing && (
-              <form onSubmit={handleSave}>
-                <div className="form-group">
-                  <label htmlFor="name">Name:</label>
-                  <input type="text" id="name" name="name" value={editFormData.name} onChange={handleEditFormChange} required />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="email">Email:</label>
-                  <input type="email" id="email" name="email" value={editFormData.email} onChange={handleEditFormChange} required />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="nic">NIC Number:</label>
-                  <input type="text" id="nic" name="nic" value={editFormData.nic} onChange={handleEditFormChange} required />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="mobile">Mobile Number:</label>
-                  <input type="text" id="mobile" name="mobile" value={editFormData.mobile} onChange={handleEditFormChange} required />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="role">Role:</label>
-                  <input type="text" id="role" name="role" value={editFormData.role} disabled />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="department">Department:</label>
-                  <select id="department" name="department" value={editFormData.department} onChange={handleEditFormChange} required>
-                    <option value="">-- Select Department --</option>
-                    <option value="Computer Science">Computer Science</option>
-                    <option value="Physics">Physics</option>
-                    <option value="Chemistry">Chemistry</option>
-                    <option value="Botany">Botany</option>
-                    <option value="Fisheries">Fisheries</option>
-                    <option value="Mathematics and Statistics">Mathematics and Statistics</option>
-                    <option value="Zoology">Zoology</option>
-                    <option value="General Administration">General Administration</option>
-                  </select>
-                </div>
-                {editFormData.role === 'Student' && (
-                  <div className="form-group">
-                    <label htmlFor="indexNumber">Index Number:</label>
-                    <input type="text" id="indexNumber" name="indexNumber"
-                      value={editFormData.indexNumber} onChange={handleEditFormChange} required />
-                  </div>
-                )}
-                {error && <p className="profile-error">{error}</p>}
-                <div className="profile-actions">
-                  <button type="submit" className="save-profile-btn">Save Changes</button>
-                  <button type="button" onClick={handleCancelEdit} className="cancel-profile-btn">Cancel</button>
-                </div>
-              </form>
-            )}
-
-            {/* Change Password Form */}
-            {showPasswordChange && (
-              <form onSubmit={handleChangePassword}>
-                <div className="form-group">
-                  <label htmlFor="currentPassword">Current Password:</label>
-                  <input type="password" id="currentPassword" name="currentPassword"
-                    value={passwordFormData.currentPassword} onChange={handlePasswordFormChange} required />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="newPassword">New Password:</label>
-                  <input type="password" id="newPassword" name="newPassword"
-                    value={passwordFormData.newPassword} onChange={handlePasswordFormChange} required />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="confirmNewPassword">Confirm New Password:</label>
-                  <input type="password" id="confirmNewPassword" name="confirmNewPassword"
-                    value={passwordFormData.confirmNewPassword} onChange={handlePasswordFormChange} required />
-                </div>
-                {error && <p className="profile-error">{error}</p>}
-                <div className="profile-actions">
-                  <button type="submit" className="save-profile-btn">Save Password</button>
-                  <button type="button" onClick={handleCancelEdit} className="cancel-profile-btn">Cancel</button>
-                </div>
-              </form>
-            )}
-          </div>
-        </main>
-      </div>
-      <Footer />
-      <MessageModal
-        show={messageModal.show}
-        title={messageModal.title}
-        message={messageModal.message}
-        onConfirm={messageModal.onConfirm}
-      />
-    </div>
-  );
 };
 
 export default ProfilePage;

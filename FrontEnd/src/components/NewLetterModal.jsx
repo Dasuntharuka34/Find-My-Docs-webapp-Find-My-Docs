@@ -2,23 +2,31 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; 
 import '../styles/components/NewLetterModal.css';
 
-const letterTypes = [
-  "Medical Certificate",
-  "Leave Request", // Added "Leave Request" as an option
-  "Transcript Request",
-  "Internship Letter",
-  "Other"
-];
+function NewLetterModal({ user, onClose, onSubmit }) {
+  const navigate = useNavigate();
 
-function NewLetterModal({ onClose, onSubmit }) {
-  const navigate = useNavigate(); 
+  const getLetterTypes = () => {
+    const allTypes = [
+      "Medical Certificate",
+      "Leave Request",
+      "Transcript Request",
+      "Internship Letter",
+      "Other",
+    ];
+    if (user && user.role === "Student") {
+      return allTypes.filter((type) => type !== "Leave Request");
+    }
+    return allTypes;
+  };
+
+  const letterTypes = getLetterTypes();
 
   const [formData, setFormData] = useState({
     type: letterTypes[0],
-    reason: '',
-    date: '',
-    attachments: null
-   });
+    reason: "",
+    date: "",
+    attachments: null,
+  });
 
    const handleChange = e => {
      const { name, value, files } = e.target;

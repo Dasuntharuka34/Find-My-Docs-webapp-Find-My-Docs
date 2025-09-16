@@ -4,6 +4,8 @@ import '../styles/forms/LeaveRequestForm.css';
 import { AuthContext } from '../context/AuthContext';
 
 
+
+
 // Custom Message Modal Component
 const MessageModal = ({ show, title, message, onConfirm, onCancel }) => {
   if (!show) return null;
@@ -93,7 +95,25 @@ const LeaveRequestForm = () => {
 
 
     try {
+      let attachmentUrl = '';
+      if (leaveForm) {
+        // Upload the file to Vercel Blob via our API route
+        const uploadResponse = await fetch(`/api/upload?filename=${leaveForm.name}`, {
+          method: 'POST',
+          body: leaveForm,
+        });
+
+        if (!uploadResponse.ok) {
+          const errorText = await uploadResponse.text();
+          throw new Error(`Failed to upload attachment: ${errorText}`);
+        }
+
+        const blob = await uploadResponse.json();
+        attachmentUrl = blob.url;
+      }
+
       const formDataToSend = new FormData();
+
       
       // Append all form data fields
       // NOTE: This now correctly iterates over the state to append all fields
@@ -101,9 +121,9 @@ const LeaveRequestForm = () => {
         formDataToSend.append(key, formData[key]);
       }
       
-      // Append leave form file
-      if (leaveForm) {
-        formDataToSend.append('leaveForm', leaveForm);
+      // Append attachment URL if it exists
+      if (attachmentUrl) {
+        formDataToSend.append('attachment', attachmentUrl);
       }
       
       // Append user details from AuthContext
@@ -115,6 +135,7 @@ const LeaveRequestForm = () => {
         method: 'POST',
         body: formDataToSend,
       });
+
 
       if (!response.ok) {
         const errorData = await response.json();

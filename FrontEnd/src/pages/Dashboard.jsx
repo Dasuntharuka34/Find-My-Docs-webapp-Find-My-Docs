@@ -16,37 +16,7 @@ import '../styles/components/Header.css';
 import '../styles/components/Footer.css';
 import '../styles/components/Sidebar.css';
 import { AuthContext } from '../context/AuthContext';
-
-// Custom Message Modal Component
-const MessageModal = ({ show, title, message, onConfirm, onCancel }) => {
-  if (!show) return null;
-
-  return (
-    <div className="modal-overlay">
-      <div className="modal">
-        <h3>{title}</h3>
-        <p>{message}</p>
-        <div className="modal-actions">
-          {onConfirm && (
-            <button onClick={onConfirm} className="submit-btn">
-              Yes
-            </button>
-          )}
-          {onCancel && (
-            <button onClick={onCancel} className="cancel-btn">
-              No
-            </button>
-          )}
-          {(!onConfirm && !onCancel) && (
-            <button onClick={() => { /* Close logic handled by parent */ }} className="submit-btn">
-              Okay
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
+import MessageModal from '../components/MessageModel';
 
 // --- NEW STAGE DEFINITIONS FOR SEQUENTIAL APPROVAL ---
 const approvalStages = [
@@ -249,7 +219,7 @@ function Dashboard() {
           </div>
         </section>
       </main>
-      {modalOpen && <NewLetterModal onClose={() => setModalOpen(false)} onSubmit={addLetter} onOpenExcuseRequestForm={openExcuseRequestFormModal} onOpenLeaveRequestForm={openLeaveRequestFormModal} />}
+      {modalOpen && <NewLetterModal user={user} onClose={() => setModalOpen(false)} onSubmit={addLetter} />}
       {showExcuseRequestModal && <ExcuseRequestForm onClose={closeExcuseRequestFormModal} />}
       {showLeaveRequestModal && <LeaveRequestForm onClose={closeLeaveRequestFormModal} />} {/* Render the Leave Request Form */}
       <Footer />
@@ -259,7 +229,6 @@ function Dashboard() {
         title={messageModal.title}
         message={messageModal.message}
         onConfirm={messageModal.onConfirm}
-        onCancel={messageModal.onCancel}
       />
     </div>
   );

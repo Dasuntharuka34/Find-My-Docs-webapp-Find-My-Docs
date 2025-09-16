@@ -8,10 +8,10 @@ module.exports = function(app) {
       changeOrigin: true,
       secure: true,
       onProxyReq: (proxyReq, req, res) => {
-        // Remove origin header to avoid CORS issues with some backends
-        proxyReq.removeHeader('origin');
+        proxyReq.setHeader('x-vercel-protection-bypass', 'UwGqUiAwzg4mSZZE1JSYlKelpJ3smcPM');
       },
       onError: (err, req, res) => {
+
         console.error('Proxy error:', err);
       }
     })

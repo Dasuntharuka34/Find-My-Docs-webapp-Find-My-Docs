@@ -3,25 +3,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import universityLogo from '../assets/uni-logo.png';
 import Footer from '../components/Footer';
 import '../styles/pages/RegisterPage.css';
+import MessageModal from '../components/MessageModal';
+import { departments } from "../config/departments";
+import { validateEmail, validateNic } from '../utils/validation';
 
-// Custom Message Modal Component
-const MessageModal = ({ show, title, message, onConfirm }) => {
-  if (!show) return null;
-
-  return (
-    <div className="modal-overlay">
-      <div className="modal">
-        <h3>{title}</h3>
-        <p>{message}</p>
-        <div className="modal-actions">
-          <button onClick={onConfirm} className="modal-button">
-            Okay
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -57,16 +42,7 @@ export default function RegisterPage() {
     return pattern.test(password);
   };
 
-  const validateEmail = (email) => {
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailPattern.test(email);
-  };
 
-  const validateNic = (nic) => {
-    const oldNicPattern = /^\d{9}[vVxX]$/;
-    const newNicPattern = /^\d{12}$/;
-    return oldNicPattern.test(nic) || newNicPattern.test(nic);
-  };
 
   const validateMobile = (mobile) => {
     // Sri Lankan mobile number validation
@@ -102,10 +78,15 @@ export default function RegisterPage() {
       setError("Student must provide an Index Number.");
       return;
     }
-    if (formData.department.trim() === "") {
+    if (
+      formData.accountType !== "Dean" &&
+      formData.accountType !== "VC" &&
+      formData.department.trim() === ""
+    ) {
       setError("Please select a department.");
       return;
     }
+
 
     try {
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/registrations`, {
@@ -120,8 +101,12 @@ export default function RegisterPage() {
           mobile: formData.mobile, // Send mobile to backend
           password: formData.password,
           role: formData.accountType,
-          department: formData.department,
+          department:
+            formData.accountType !== "Dean" && formData.accountType !== "VC"
+              ? formData.department
+              : "N/A",
           indexNumber: formData.accountType === "Student" ? formData.indexNumber : undefined,
+
         }),
       });
 
@@ -249,25 +234,30 @@ export default function RegisterPage() {
             </>
           )}
 
-          <label className="block font-semibold" htmlFor="department">
-            Department
-          </label>
-          <select
-            className="registration-select"
-            name="department"
-            value={formData.department}
-            onChange={handleChange}
-            required
-          >
-            <option value="">-- Select Department --</option>
-            <option value="Computer Science">Computer Science</option>
-            <option value="Physics">Physics</option>
-            <option value="Chemistry">Chemistry</option>
-            <option value="Botany">Botany</option>
-            <option value="Fisheries">Fisheries</option>
-            <option value="Mathematics and Statistics">Mathematics and Statistics</option>
-            <option value="Zoology">Zoology</option>
-          </select>
+          {formData.accountType !== "Dean" && formData.accountType !== "VC" && (
+            <>
+              <label className="block font-semibold" htmlFor="department">
+                Department
+              </label>
+              <select
+                className="registration-select"
+                name="department"
+                value={formData.department}
+                onChange={handleChange}
+                required={
+                  formData.accountType !== "Dean" && formData.accountType !== "VC"
+                }
+              >
+                <option value="">-- Select Department --</option>
+                {departments.map((dept) => (
+                  <option key={dept} value={dept}>
+                    {dept}
+                  </option>
+                ))}
+              </select>
+            </>
+          )}
+
 
           <label className="block font-semibold" htmlFor="password">
             Password

@@ -140,7 +140,7 @@ const ExcuseRequestForm = () => {
       });
       
       if (medicalForm) {
-        formDataToSend.append('medicalForm', medicalForm);
+        formDataToSend.append('medicalCertificate', medicalForm);
       }
       
       formDataToSend.append('studentId', user._id);
@@ -363,6 +363,7 @@ const ExcuseRequestForm = () => {
           <div className="file-upload-label">
             <input 
               id="medical-form-upload"
+              name="medicalCertificate"
               type="file" 
               className="file-upload-input"
               onChange={handleMedicalFormUpload} 

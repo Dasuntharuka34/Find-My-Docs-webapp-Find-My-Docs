@@ -4,25 +4,8 @@ import universityLogo from '../assets/uni-logo.png'; // Make sure this path is c
 import Footer from "../components/Footer"; // Make sure this path is correct
 import '../styles/pages/LoginPage.css'; // You'll need to create or update this CSS file
 import { AuthContext } from '../context/AuthContext'; // AuthContext for login functionality
+import MessageModal from '../components/MessageModal';
 
-// Custom Message Modal Component
-const MessageModal = ({ show, title, message, onConfirm }) => {
-  if (!show) return null;
-
-  return (
-    <div className="modal-overlay">
-      <div className="modal">
-        <h3>{title}</h3>
-        <p>{message}</p>
-        <div className="modal-actions">
-          <button onClick={onConfirm} className="modal-button">
-            Okay
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({

@@ -21,9 +21,11 @@ function Sidebar() {
         <li className="sidebar-item">
           <Link to={getDashboardPath()} className="sidebar-link">Dashboard</Link>
         </li>
+        {user && user.role !== 'VC' && (
         <li className="sidebar-item">
           <Link to="/my-letters" className="sidebar-link">My Letters</Link>
         </li>
+        )}
         {user && (user.role === 'Lecturer' || user.role === 'HOD' || user.role === 'Dean' || user.role === 'VC' || user.role === 'Staff') && (
           <li className="sidebar-item">
             <Link to="/pending-approvals" className="sidebar-link">Pending Approvals</Link>
